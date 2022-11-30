@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { ComponentMetadata } from './component-metadata';
 
-export function collectMetadata(code: string): ComponentMetadata[] {
+export function parseFile(code: string): ComponentMetadata[] {
   const sourceFile = ts.createSourceFile(
     '',
     code,

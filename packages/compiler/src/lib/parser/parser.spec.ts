@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { collectMetadata } from './collector';
+import { parseFile } from './parser';
 
-describe('Metadata Collector', () => {
+describe('Parser', () => {
   it('should not return anything if no component is found', () => {
     const code = `
       class Button {}
     `;
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata).toEqual([]);
   });
 
@@ -20,7 +20,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata.length).toBe(1);
   });
 
@@ -33,7 +33,7 @@ describe('Metadata Collector', () => {
         }
       }`;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].name).toBe('Button');
   });
 
@@ -46,7 +46,7 @@ describe('Metadata Collector', () => {
         }
       }`;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Component class must have a name'
     );
   });
@@ -64,7 +64,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].props.length).toBe(2);
   });
 
@@ -81,7 +81,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].state.length).toBe(2);
   });
 
@@ -97,7 +97,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].providers.length).toBe(1);
   });
 
@@ -112,7 +112,7 @@ describe('Metadata Collector', () => {
         }
       }
     `;
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].dependencies.length).toBe(1);
   });
 
@@ -130,7 +130,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].computed.length).toBe(1);
   });
 
@@ -146,7 +146,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].events.length).toBe(1);
   });
 
@@ -162,7 +162,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].methods.length).toBe(1);
   });
 
@@ -178,7 +178,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].refs.length).toBe(1);
   });
 
@@ -196,7 +196,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Prop() on a getter. Use a property instead.'
     );
   });
@@ -215,7 +215,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Prop() on a setter. Use a property instead.'
     );
   });
@@ -234,7 +234,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @State() on a getter. Use a property instead.'
     );
   });
@@ -253,7 +253,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @State() on a setter. Use a property instead.'
     );
   });
@@ -272,7 +272,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Computed() on a setter, use a getter instead.'
     );
   });
@@ -289,7 +289,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Computed() on a property, use a getter instead.'
     );
   });
@@ -308,7 +308,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Event() on a getter. Use a property instead.'
     );
   });
@@ -327,7 +327,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Event() on a setter. Use a property instead.'
     );
   });
@@ -346,7 +346,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Ref() on a getter. Use a property instead.'
     );
   });
@@ -365,7 +365,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Cannot use @Ref() on a setter. Use a property instead.'
     );
   });
@@ -382,7 +382,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       `All properties and accessors must be decorated with @Prop(), @State(), @Event(), @Computed(), @Provider(), @Inject() or @Ref().`
     );
   });
@@ -401,7 +401,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'All properties and accessors must be decorated with @Prop(), @State(), @Event(), @Computed(), @Provider(), @Inject() or @Ref().'
     );
   });
@@ -420,7 +420,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'All properties and accessors must be decorated with @Prop(), @State(), @Event(), @Computed(), @Provider(), @Inject() or @Ref().'
     );
   });
@@ -435,7 +435,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].template).toBeDefined();
   });
 
@@ -449,7 +449,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].template).toBeDefined();
   });
 
@@ -465,7 +465,7 @@ describe('Metadata Collector', () => {
         }
       }
     `;
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].template).toBeDefined();
   });
 
@@ -479,7 +479,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].template).toBeDefined();
   });
 
@@ -489,7 +489,7 @@ describe('Metadata Collector', () => {
       export class Button {}
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Component class must have a render method'
     );
   });
@@ -504,7 +504,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Render method cannot have parameters'
     );
   });
@@ -520,7 +520,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Render method must only contain a return statement'
     );
   });
@@ -535,7 +535,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Render method must return a JSX element'
     );
   });
@@ -550,7 +550,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Render method must return a JSX element'
     );
   });
@@ -565,7 +565,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Render method must return a JSX element'
     );
   });
@@ -582,7 +582,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Static properties are not supported'
     );
   });
@@ -601,7 +601,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Static methods are not supported'
     );
   });
@@ -618,7 +618,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Prop "label" cannot be private'
     );
   });
@@ -635,7 +635,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Prop "label" cannot be protected'
     );
   });
@@ -652,7 +652,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Event "click" cannot be private'
     );
   });
@@ -669,7 +669,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Event "click" cannot be protected'
     );
   });
@@ -686,9 +686,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
-      'Prop "label" must be readonly'
-    );
+    expect(() => parseFile(code)).toThrowError('Prop "label" must be readonly');
   });
 
   it('should throw if an @Event() is not readonly', () => {
@@ -703,7 +701,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Event "click" must be readonly'
     );
   });
@@ -720,7 +718,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Provider "service" must be readonly'
     );
   });
@@ -739,7 +737,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    const metadata = collectMetadata(code);
+    const metadata = parseFile(code);
     expect(metadata[0].imports.length).toBe(1);
   });
 
@@ -755,7 +753,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Provider "service" must be initialized'
     );
   });
@@ -772,7 +770,7 @@ describe('Metadata Collector', () => {
       }
     `;
 
-    expect(() => collectMetadata(code)).toThrowError(
+    expect(() => parseFile(code)).toThrowError(
       'Dependency "service" must be readonly'
     );
   });

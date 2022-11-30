@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@emblazon/compiler": ["packages/compiler/src/index.ts"],
-      "@emblazon/core": ["packages/core/src/index.ts"]
+      "@emblazon/core": ["packages/core/src/index.ts"],
+      "@emlazon/react": ["packages/react/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
