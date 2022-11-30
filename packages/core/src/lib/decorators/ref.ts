@@ -1,4 +1,3 @@
-export const Ref: PropertyDecorator = (
-  target: Object,
-  propertyKey: string | symbol
-): void => {};
+export function Ref(): PropertyDecorator {
+  return (target: Object, propertyKey: string | symbol): void => {};
+}

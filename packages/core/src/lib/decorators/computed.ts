@@ -1,4 +1,3 @@
-export const Computed: PropertyDecorator = (
-  target: Object,
-  propertyKey: string | symbol
-): void => {};
+export function Computed(): PropertyDecorator {
+  return (target: Object, propertyKey: string | symbol): void => {};
+}

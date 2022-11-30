@@ -3,27 +3,29 @@ import {
   Computed,
   Event,
   Prop,
-  Provide,
+  Provider,
   Ref,
   State,
 } from './decorators';
 import { EventEmitter } from './types';
 
-@Component
+const MyServiceToken = Symbol('MyService');
+
+@Component()
 export class Button {
-  @Prop public type: string;
+  @Prop() public type: string;
 
-  @State private isDisabled = false;
+  @State() private isDisabled = false;
 
-  @Ref private button: HTMLButtonElement;
+  @Ref() private button: HTMLButtonElement;
 
-  @Computed get isPrimary() {
+  @Computed() get isPrimary() {
     return this.type === 'primary';
   }
 
-  @Event public onClick = new EventEmitter();
+  @Event() public onClick = new EventEmitter();
 
-  @Provide service = new SomeService();
+  @Provider(MyServiceToken) readonly service = new SomeService();
 
   render() {
     return (

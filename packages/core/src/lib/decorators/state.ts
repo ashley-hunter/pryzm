@@ -1,4 +1,3 @@
-export const State: PropertyDecorator = (
-  target: Object,
-  propertyKey: string | symbol
-): void => {};
+export function State(): PropertyDecorator {
+  return (target: Object, propertyKey: string | symbol): void => {};
+}

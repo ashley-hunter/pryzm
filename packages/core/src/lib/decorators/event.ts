@@ -1,4 +1,3 @@
-export const Event: PropertyDecorator = (
-  target: Object,
-  propertyKey: string | symbol
-): void => {};
+export function Event(): PropertyDecorator {
+  return (target: Object, propertyKey: string | symbol): void => {};
+}

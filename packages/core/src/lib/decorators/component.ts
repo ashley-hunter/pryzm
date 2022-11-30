@@ -1,3 +1,5 @@
-export const Component: ClassDecorator = <T>(target: T) => {
-  return target;
-};
+export function Component(): ClassDecorator {
+  return <T>(target: T) => {
+    return target;
+  };
+}
