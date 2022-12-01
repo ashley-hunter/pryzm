@@ -50,7 +50,7 @@ function collectComponentMetadata(
     events: getPropertiesWithDecorator(component, 'Event'),
     refs: getPropertiesWithDecorator(component, 'Ref'),
     providers: getPropertiesWithDecorator(component, 'Provider'),
-    dependencies: getPropertiesWithDecorator(component, 'Inject'),
+    injects: getPropertiesWithDecorator(component, 'Inject'),
     methods: getMethods(component),
     template: getTemplate(component),
   };
@@ -389,7 +389,7 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
   });
 
   // ensure that dependencies are readonly
-  metadata.dependencies.forEach((dependency) => {
+  metadata.injects.forEach((dependency) => {
     if (
       !dependency.modifiers?.some(
         (m) => m.kind === ts.SyntaxKind.ReadonlyKeyword

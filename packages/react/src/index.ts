@@ -1,1 +1,2 @@
-export * from './lib/react';
+export * from './lib/generator';
+export * from './lib/transformer';

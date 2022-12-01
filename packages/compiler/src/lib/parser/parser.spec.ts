@@ -113,7 +113,7 @@ describe('Parser', () => {
       }
     `;
     const metadata = parseFile(code);
-    expect(metadata[0].dependencies.length).toBe(1);
+    expect(metadata[0].injects.length).toBe(1);
   });
 
   it('should collect metadata for a computed', () => {

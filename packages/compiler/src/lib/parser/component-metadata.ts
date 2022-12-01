@@ -9,7 +9,7 @@ export interface ComponentMetadata {
   methods: ts.MethodDeclaration[];
   refs: ts.PropertyDeclaration[];
   providers: ts.PropertyDeclaration[];
-  dependencies: ts.PropertyDeclaration[];
+  injects: ts.PropertyDeclaration[];
   template: ts.JsxElement | ts.JsxFragment | ts.JsxSelfClosingElement;
   imports: ts.ImportDeclaration[];
 }
