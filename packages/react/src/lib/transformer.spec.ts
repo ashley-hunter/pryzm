@@ -365,10 +365,7 @@ describe('React Transformer', () => {
       expect(printNode(computed.statement)).toMatchInlineSnapshot(`
         "const test = useMemo(() => {
             return \`\${firstName} \${lastName}\`;
-        }, [
-            firstName,
-            lastName
-        ]);"
+        }, [firstName, lastName]);"
       `);
     });
   });
@@ -415,7 +412,186 @@ describe('React Transformer', () => {
       const ref = component.refs[0];
 
       expect(ref.name).toBe('test');
-      expect(printNode(ref.statement)).toMatchInlineSnapshot('"const test = useRef<HTMLElement>(null);"');
+      expect(printNode(ref.statement)).toMatchInlineSnapshot(
+        '"const test = useRef<HTMLElement>(null);"'
+      );
+    });
+  });
+
+  describe('Method', () => {
+    it('should transform method into a useCallback function', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        test() {
+          return 'test';
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer)[0];
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            return \\"test\\";
+        }, []);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with dependencies', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() firstName: string = 'John';
+        @State() lastName: string = 'Doe';
+
+        test() {
+          return \`\${this.firstName} \${this.lastName}\`;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer)[0];
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            return \`\${firstName} \${lastName}\`;
+        }, [firstName, lastName]);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a parameter', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        test(value: string) {
+          return value;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer)[0];
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback((value: string) => {
+            return value;
+        }, []);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a parameter and dependencies', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() firstName: string = 'John';
+        @State() lastName: string = 'Doe';
+
+        test(value: string) {
+          return \`\${this.firstName} \${this.lastName} \${value}\`;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer)[0];
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback((value: string) => {
+            return \`\${firstName} \${lastName} \${value}\`;
+        }, [firstName, lastName]);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a dependency on another method', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() firstName: string = 'John';
+        @State() lastName: string = 'Doe';
+
+        test() {
+          return this.calculate();
+        }
+
+        calculate() {
+          return \`\${this.firstName} \${this.lastName}\`;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            return calculate();
+        }, [calculate]);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a dependency on a setter', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() name: string = 'John';
+
+        test() {
+          this.name = 'Doe';
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            setName(\\"Doe\\");
+        }, [setName]);"
+      `);
     });
   });
 

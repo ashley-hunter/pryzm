@@ -1,6 +1,7 @@
 import { Transformer } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
+import { transformAssignment } from './utils/assignment';
 import { addComment, extractComment } from './utils/comment';
 import { findDependencies } from './utils/find-dependencies';
 import { stripThis } from './utils/strip-this';
@@ -19,10 +20,16 @@ export interface ReactTransformer extends Transformer {
   };
   Computed(computed: ts.GetAccessorDeclaration): {
     name: string;
+    dependencies: string[];
     statement: ts.VariableStatement;
   };
   Ref(ref: ts.PropertyDeclaration): {
     name: string;
+    statement: ts.VariableStatement;
+  };
+  Method(method: ts.MethodDeclaration): {
+    name: string;
+    dependencies: string[];
     statement: ts.VariableStatement;
   };
 }
@@ -59,7 +66,7 @@ export const transformer: ReactTransformer = {
                 // add the dependencies array
                 factory.createArrayLiteralExpression(
                   dependencies.map((dep) => factory.createIdentifier(dep)),
-                  true
+                  false
                 ),
               ]
             )
@@ -69,7 +76,7 @@ export const transformer: ReactTransformer = {
       )
     );
 
-    return { name, statement };
+    return { name, statement, dependencies };
   },
   Prop(prop) {
     // get the name of the prop
@@ -158,9 +165,6 @@ export const transformer: ReactTransformer = {
   Inject(value) {
     return value;
   },
-  Method(value) {
-    return value;
-  },
   Provider(value) {
     return value;
   },
@@ -197,5 +201,48 @@ export const transformer: ReactTransformer = {
     );
 
     return { name, statement };
+  },
+  Method(method) {
+    const name = method.name.getText();
+
+    // scan the body for any dependencies
+    const dependencies = findDependencies(method.body!);
+
+    // convert a method to a useCallback hook
+    // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
+    const statement = factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(name),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier('useCallback'),
+              undefined,
+              [
+                factory.createArrowFunction(
+                  undefined,
+                  undefined,
+                  method.parameters,
+                  undefined,
+                  undefined,
+                  stripThis(transformAssignment(method.body!))!
+                ),
+                // add the dependencies array
+                factory.createArrayLiteralExpression(
+                  dependencies.map((dep) => factory.createIdentifier(dep)),
+                  false
+                ),
+              ]
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+
+    return { name, statement, dependencies };
   },
 };
