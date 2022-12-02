@@ -1,4 +1,4 @@
-import { Transformer, TransformerResult } from '@emblazon/compiler';
+import { Transformer } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { addComment, extractComment } from './utils/comment';
@@ -21,9 +21,6 @@ export interface ReactTransformer extends Transformer {
     name: string;
     statement: ts.VariableStatement;
   };
-  PostTransform(
-    metadata: TransformerResult<ReactTransformer>
-  ): TransformerResult<ReactTransformer>;
 }
 
 export const transformer: ReactTransformer = {
@@ -165,11 +162,5 @@ export const transformer: ReactTransformer = {
   },
   Ref(value) {
     return value;
-  },
-
-  PostTransform(
-    metadata: TransformerResult<ReactTransformer>
-  ): TransformerResult<ReactTransformer> {
-    return metadata;
   },
 };
