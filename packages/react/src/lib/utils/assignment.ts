@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { setterName } from './names';
 import { stripThis } from './strip-this';
+import { isThisExpression } from './type-coercion';
 
 /**
  * Any assignments to state variables must be converted to a setState call.
@@ -292,10 +293,6 @@ function convertAssignmentTransformer<
 
     return (root) => ts.visitNode(root, visitor);
   };
-}
-
-function isThisExpression(node: ts.Node): node is ts.ThisExpression {
-  return node.kind === ts.SyntaxKind.ThisKeyword;
 }
 
 function isMutableArrayCallExpression(

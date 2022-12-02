@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { isThisExpression } from './type-coercion';
 
 export function stripThis<T extends ts.Node, R extends ts.Node = T>(
   node: T | undefined
@@ -54,8 +55,4 @@ function stripThisTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
 
     return (root) => ts.visitNode(root, visitor);
   };
-}
-
-function isThisExpression(node: ts.Node): node is ts.ThisExpression {
-  return node.kind === ts.SyntaxKind.ThisKeyword;
 }
