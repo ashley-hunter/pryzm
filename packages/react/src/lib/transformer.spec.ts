@@ -19,11 +19,12 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
         '"const [test, setTest] = useState<string>();"'
       );
     });
@@ -40,11 +41,12 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
         '"const [test, setTest] = useState<string>(\\"test\\");"'
       );
     });
@@ -61,12 +63,13 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(
-        '"const [test, setTest] = useState(\\"test\\");"'
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
+        '"const [test, setTest] = useState<string>(\\"test\\");"'
       );
     });
 
@@ -75,19 +78,21 @@ describe('React Transformer', () => {
       import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
-        @State() test: string = () => 'test';
+        @State() test = () => 'test';
 
         render() {
           return <div />;
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(
-        '"const [test, setTest] = useState<string>(() => \\"test\\");"'
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
+
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
+        '"const [test, setTest] = useState<() => any>(() => \\"test\\");"'
       );
     });
 
@@ -103,11 +108,12 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
         '"const [test, setTest] = useState<number>(1);"'
       );
     });
@@ -124,11 +130,12 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
         '"const [test, setTest] = useState<boolean>(true);"'
       );
     });
@@ -145,11 +152,12 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
         '"const [test, setTest] = useState<string[]>([\\"test\\"]);"'
       );
     });
@@ -166,15 +174,92 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const components = transform(source, transformer);
-      const result = components[0];
-      const props = result.states as ts.VariableStatement[];
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
 
-      expect(printNode(props[0])).toMatchInlineSnapshot(`
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(`
         "const [test, setTest] = useState<{
             test: string;
         }>({ test: \\"test\\" });"
       `);
+    });
+  });
+
+  describe('Prop', () => {
+    it('should transform prop into a property', () => {
+      const source = `
+      import { Component, Prop } from '@emblazon/core';
+      @Component()
+      export class Test {
+        /** Define the value of the test prop */
+        @Prop() readonly test: string;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const prop = component.props[0];
+
+      expect(prop.name).toBe('test');
+      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot(`
+        "/* Define the value of the test prop */
+        test: string;"
+      `);
+      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
+        '"test"'
+      );
+    });
+
+    it('should transform prop into a property with a default value', () => {
+      const source = `
+      import { Component, Prop } from '@emblazon/core';
+      @Component()
+      export class Test {
+        @Prop() readonly test: string = 'test';
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const prop = component.props[0];
+
+      expect(prop.name).toBe('test');
+      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot(
+        '"test: string;"'
+      );
+      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
+        '"test = \\"test\\""'
+      );
+    });
+
+    it('should transform prop into a property with a default value from a function', () => {
+      const source = `
+      import { Component, Prop } from '@emblazon/core';
+      @Component()
+      export class Test {
+        @Prop() readonly test = () => 'test';
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const prop = component.props[0];
+
+      expect(prop.name).toBe('test');
+      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot(
+        '"test: () => any;"'
+      );
+      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
+        '"test = () => \\"test\\""'
+      );
     });
   });
 

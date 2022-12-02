@@ -1,29 +1,71 @@
 import { Transformer } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
+import { addComment, extractComment } from './utils/comment';
+import { inferType } from './utils/type-inference';
 
 export interface ReactTransformer extends Transformer {
-  State?: (value: ts.PropertyDeclaration) => ts.VariableStatement;
+  State(state: ts.PropertyDeclaration): {
+    getter: string;
+    setter: string;
+    statement: ts.VariableStatement;
+  };
+  Prop(prop: ts.PropertyDeclaration): {
+    name: string;
+    interfaceProperty: ts.PropertySignature;
+    destructuredProperty: ts.BindingElement;
+  };
 }
 
 export const transformer: ReactTransformer = {
-  State: (state) => {
-    // get the name of the state
-    const getterName = state.name.getText();
+  Prop(prop) {
+    // get the name of the prop
+    const name = prop.name.getText();
 
-    // create a new name for the prop setter
-    const setterName = `set${getterName[0].toUpperCase()}${getterName.slice(
-      1
-    )}`;
+    // get the default value of the prop if it exists
+    const initializer = prop.initializer;
 
     // get the type of the prop if it exists
-    const type = state.type;
+    const type = prop.type ?? inferType(initializer, true);
+
+    const comment = extractComment(prop);
+
+    // create the interface property with the type attached
+    const interfaceProperty = factory.createPropertySignature(
+      undefined,
+      name,
+      undefined,
+      type
+    );
+
+    // attach the comment to the interface property
+    addComment(interfaceProperty, comment);
+
+    // create the destructured property with the default value attached
+    const destructuredProperty = factory.createBindingElement(
+      undefined,
+      undefined,
+      name,
+      initializer
+    );
+
+    return { name, interfaceProperty, destructuredProperty };
+  },
+  State(state) {
+    // get the name of the state
+    const getter = state.name.getText();
+
+    // create a new name for the prop setter
+    const setter = `set${getter[0].toUpperCase()}${getter.slice(1)}`;
 
     // get the initializer of the prop if it exists
     const initializer = state.initializer;
 
+    // get the type of the prop if it exists
+    const type = state.type ?? inferType(initializer, false);
+
     // convert the property to a useState hook
-    return factory.createVariableStatement(
+    const statement = factory.createVariableStatement(
       undefined,
       factory.createVariableDeclarationList(
         [
@@ -32,13 +74,13 @@ export const transformer: ReactTransformer = {
               factory.createBindingElement(
                 undefined,
                 undefined,
-                factory.createIdentifier(getterName),
+                factory.createIdentifier(getter),
                 undefined
               ),
               factory.createBindingElement(
                 undefined,
                 undefined,
-                factory.createIdentifier(setterName),
+                factory.createIdentifier(setter),
                 undefined
               ),
             ]),
@@ -54,5 +96,7 @@ export const transformer: ReactTransformer = {
         ts.NodeFlags.Const
       )
     );
+
+    return { getter, setter, statement };
   },
 };
