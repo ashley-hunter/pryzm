@@ -32,6 +32,11 @@ export interface ReactTransformer extends Transformer {
     dependencies: string[];
     statement: ts.VariableStatement;
   };
+  Event(event: ts.PropertyDeclaration): {
+    name: string;
+    interfaceProperty: ts.PropertySignature;
+    destructuredProperty: ts.BindingElement;
+  };
 }
 
 export const transformer: ReactTransformer = {
@@ -160,7 +165,60 @@ export const transformer: ReactTransformer = {
     return { getter, setter, statement };
   },
   Event(value) {
-    return value;
+    // get the name of the prop
+    const name = value.name.getText();
+
+    // get the default value of the prop if it exists
+    const initializer = value.initializer;
+
+    // the event initializer will always be EventEmitter, but we need to get the type from the EventEmitter generic
+    if (!initializer || !ts.isNewExpression(initializer)) {
+      throw new Error('Event initializers must be an EventEmitter');
+    }
+
+    // get the type of the event
+    const eventType = initializer.typeArguments?.[0];
+
+    // create the type of the prop which is a function with a parameter of the event type
+    const type = factory.createFunctionTypeNode(
+      undefined,
+      eventType
+        ? [
+            factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              factory.createIdentifier('event'),
+              undefined,
+              eventType,
+              undefined
+            ),
+          ]
+        : [],
+      factory.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword)
+    );
+
+    const comment = extractComment(value);
+
+    // create the interface property with the type attached
+    const interfaceProperty = factory.createPropertySignature(
+      undefined,
+      name,
+      undefined,
+      type
+    );
+
+    // attach the comment to the interface property
+    addComment(interfaceProperty, comment);
+
+    // create the destructured property with the default value attached
+    const destructuredProperty = factory.createBindingElement(
+      undefined,
+      undefined,
+      name,
+      initializer
+    );
+
+    return { name, interfaceProperty, destructuredProperty };
   },
   Inject(value) {
     return value;
@@ -203,7 +261,7 @@ export const transformer: ReactTransformer = {
     return { name, statement };
   },
   Method(method) {
-    const name = method.name.getText();
+    let name = method.name.getText();
 
     // scan the body for any dependencies
     const dependencies = findDependencies(method.body!);

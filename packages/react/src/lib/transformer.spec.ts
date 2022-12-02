@@ -595,6 +595,60 @@ describe('React Transformer', () => {
     });
   });
 
+  describe('Event', () => {
+    it('should transform event into a property', () => {
+      const source = `
+      import { Component, Event, EventEmitter } from '@emblazon/core';
+      @Component()
+      export class Test {
+        /** Define the test event emitter */
+        @Event() readonly test = new EventEmitter<string>();
+
+        render() {
+          return <div onClick={this.test.emit('')} />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const event = component.events[0];
+
+      expect(event.name).toBe('test');
+      expect(printNode(event.interfaceProperty)).toMatchInlineSnapshot(`
+        "/* Define the test event emitter */
+        test: (event: string) => void;"
+      `);
+      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
+        '"test = new EventEmitter<string>()"'
+      );
+    });
+
+    it('should transform event into a property with no type', () => {
+      const source = `
+      import { Component, Event, EventEmitter } from '@emblazon/core';
+      @Component()
+      export class Test {
+        /** Define the test event emitter */
+        @Event() readonly test = new EventEmitter();
+
+        render() {
+          return <div onClick={this.test.emit()} />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const event = component.events[0];
+
+      expect(event.name).toBe('test');
+      expect(printNode(event.interfaceProperty)).toMatchInlineSnapshot(`
+        "/* Define the test event emitter */
+        test: () => void;"
+      `);
+      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
+        '"test = new EventEmitter()"'
+      );
+    });
+  });
+
   function printNode(node: ts.Node) {
     return printer.printNode(ts.EmitHint.Unspecified, node, null as any);
   }
