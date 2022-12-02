@@ -17,9 +17,16 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
     }
 
     // find any assignments that use "this"
-    if (ts.isBinaryExpression(node) && isThisExpression(node.left)) {
+    if (
+      ts.isBinaryExpression(node) &&
+      ts.isPropertyAccessExpression(node.left) &&
+      isThisExpression(node.left.expression)
+    ) {
       // add the property name to the dependencies array
-      dependencies.add(setterName(node.left.getText()));
+      dependencies.add(setterName(node.left.name.getText()));
+
+      ts.forEachChild(node.right, visitor);
+      return;
     }
 
     ts.forEachChild(node, visitor);

@@ -12,7 +12,7 @@ export function inferType(
   initializer: ts.Expression | undefined,
   defaultToAny?: boolean
 ): ts.TypeNode | undefined {
-  defaultToAny ??= true;
+  defaultToAny = defaultToAny ?? true;
 
   if (!initializer) {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
