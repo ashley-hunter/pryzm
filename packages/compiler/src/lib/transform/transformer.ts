@@ -28,6 +28,8 @@ export interface Transformer {
   Inject?: (value: ts.PropertyDeclaration) => any;
 }
 
+const noop = <T>(value: T) => value;
+
 export function transform<T extends Transformer>(
   source: string,
   transformer: T
@@ -35,25 +37,24 @@ export function transform<T extends Transformer>(
   const components = parseFile(source);
 
   return components.map<TranformerResult<T>>((metadata) => {
-    const result: TranformerResult<T> = {
-      props: transformer.Prop ? metadata.props.map(transformer.Prop) : [],
-      states: transformer.State ? metadata.state.map(transformer.State) : [],
-      computed: transformer.Computed
-        ? metadata.computed.map(transformer.Computed)
-        : [],
-      events: transformer.Event ? metadata.events.map(transformer.Event) : [],
-      methods: transformer.Method
-        ? metadata.methods.map(transformer.Method)
-        : [],
-      refs: transformer.Ref ? metadata.refs.map(transformer.Ref) : [],
-      providers: transformer.Provider
-        ? metadata.providers.map(transformer.Provider)
-        : [],
-      injects: transformer.Inject
-        ? metadata.injects.map(transformer.Inject)
-        : [],
-    };
+    const props = metadata.props.map(transformer.Prop ?? noop);
+    const states = metadata.state.map(transformer.State ?? noop);
+    const computed = metadata.computed.map(transformer.Computed ?? noop);
+    const events = metadata.events.map(transformer.Event ?? noop);
+    const methods = metadata.methods.map(transformer.Method ?? noop);
+    const refs = metadata.refs.map(transformer.Ref ?? noop);
+    const providers = metadata.providers.map(transformer.Provider ?? noop);
+    const injects = metadata.injects.map(transformer.Inject ?? noop);
 
-    return result;
+    return {
+      props,
+      states,
+      computed,
+      events,
+      methods,
+      refs,
+      providers,
+      injects,
+    };
   });
 }

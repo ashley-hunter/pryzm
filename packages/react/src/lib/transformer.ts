@@ -16,9 +16,49 @@ export interface ReactTransformer extends Transformer {
     interfaceProperty: ts.PropertySignature;
     destructuredProperty: ts.BindingElement;
   };
+  Computed(computed: ts.GetAccessorDeclaration): {
+    name: string;
+    statement: ts.VariableStatement;
+  };
 }
 
 export const transformer: ReactTransformer = {
+  Computed(computed) {
+    const name = computed.name.getText();
+
+    // convert a getter to use memo
+    // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
+    const statement = factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(name),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier('useMemo'),
+              undefined,
+              [
+                factory.createArrowFunction(
+                  undefined,
+                  undefined,
+                  [],
+                  undefined,
+                  undefined,
+                  stripThis(computed.body)!
+                ),
+                factory.createArrayLiteralExpression(),
+              ]
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+
+    return { name, statement };
+  },
   Prop(prop) {
     // get the name of the prop
     const name = prop.name.getText();
@@ -99,5 +139,20 @@ export const transformer: ReactTransformer = {
     );
 
     return { getter, setter, statement };
+  },
+  Event(value) {
+    return value;
+  },
+  Inject(value) {
+    return value;
+  },
+  Method(value) {
+    return value;
+  },
+  Provider(value) {
+    return value;
+  },
+  Ref(value) {
+    return value;
   },
 };

@@ -312,6 +312,34 @@ describe('React Transformer', () => {
     });
   });
 
+  describe('Computed', () => {
+    it('should transform computed into a useMemo', () => {
+      const source = `
+      import { Component, Computed } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @Computed() get test() {
+          return 'test';
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const computed = component.computed[0];
+
+      expect(computed.name).toBe('test');
+      expect(printNode(computed.statement)).toMatchInlineSnapshot(`
+        "const test = useMemo(() => {
+            return \\"test\\";
+        }, []);"
+      `);
+    });
+  });
+
   function printNode(node: ts.Node) {
     return printer.printNode(ts.EmitHint.Unspecified, node, null as any);
   }
