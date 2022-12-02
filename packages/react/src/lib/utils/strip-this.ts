@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { isThisExpression } from './type-coercion';
+import { isThisExpression } from './typing';
 
 export function stripThis<T extends ts.Node, R extends ts.Node = T>(
   node: T | undefined
