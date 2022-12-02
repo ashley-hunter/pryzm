@@ -184,56 +184,57 @@ function convertAssignmentTransformer<
       // e.g. this.test.x = 'test'; => setTest(test => { ...test, x: 'test' });
       // this also needs to work with arbitrary depth of property access
       if (
-        ts.isBinaryExpression(node) &&
-        ts.isPropertyAccessExpression(node.left) &&
-        ts.isPropertyAccessExpression(node.left.expression) &&
-        isThisExpression(node.left.expression.expression)
+        ts.isExpressionStatement(node) &&
+        ts.isBinaryExpression(node.expression) &&
+        ts.isPropertyAccessExpression(node.expression.left) &&
+        ts.isPropertyAccessExpression(node.expression.left.expression) &&
+        isThisExpression(node.expression.left.expression.expression)
       ) {
         // determine the setter name
-        const setter = setterName(node.left.expression.name.getText());
+        const setter = setterName(
+          node.expression.left.expression.name.getText()
+        );
 
         // determine the property name
-        const property = node.left.name.getText();
+        const property = node.expression.left.name.getText();
 
-        return ts.factory.createCallExpression(
-          ts.factory.createIdentifier(setter),
-          undefined,
-          [
-            ts.factory.createArrowFunction(
-              undefined,
-              undefined,
-              [
-                ts.factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  node.left.expression.name.getText()
-                ),
-              ],
-              undefined,
-              undefined,
-              ts.factory.createObjectLiteralExpression([
-                ts.factory.createPropertyAssignment(
-                  property,
-                  stripThis(node.right)!
-                ),
-              ])
-            ),
-          ]
+        // convert to the setter that is a function that takes the current value and spreads the existing properties and adds the new property
+        return ts.factory.createExpressionStatement(
+          ts.factory.createCallExpression(
+            ts.factory.createIdentifier(setter),
+            undefined,
+            [
+              ts.factory.createArrowFunction(
+                undefined,
+                undefined,
+                [
+                  ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    node.expression.left.expression.name.getText()
+                  ),
+                ],
+                undefined,
+                undefined,
+                ts.factory.createObjectLiteralExpression(
+                  [
+                    ts.factory.createSpreadAssignment(
+                      ts.factory.createIdentifier(
+                        node.expression.left.expression.name.getText()
+                      )
+                    ),
+                    ts.factory.createPropertyAssignment(
+                      property,
+                      stripThis(node.expression.right)!
+                    ),
+                  ],
+                  true
+                )
+              ),
+            ]
+          )
         );
       }
-
-      // if we are modifying a property of a state variable then throw an error informing the user
-      // that they must reassign the entire state variable
-      // if (
-      //   ts.isBinaryExpression(node) &&
-      //   ts.isPropertyAccessExpression(node.left) &&
-      //   ts.isPropertyAccessExpression(node.left.expression) &&
-      //   isThisExpression(node.left.expression.expression)
-      // ) {
-      //   throw new Error(
-      //     `Cannot modify a property of a state variable. Please reassign the entire state variable.`
-      //   );
-      // }
 
       return ts.visitEachChild(node, visitor, context);
     };

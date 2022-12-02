@@ -242,7 +242,10 @@ describe('Assignment', () => {
           @State()
           test = { test: 'old };,
               update() {
-                  setTest(test => ({ test: 'new' }));
+                  setTest(test => ({
+                      ...test,
+                      test: 'new'
+                  }));
               },
               render() {
                   return <div />;
