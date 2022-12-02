@@ -21,6 +21,10 @@ export interface ReactTransformer extends Transformer {
     name: string;
     statement: ts.VariableStatement;
   };
+  Ref(ref: ts.PropertyDeclaration): {
+    name: string;
+    statement: ts.VariableStatement;
+  };
 }
 
 export const transformer: ReactTransformer = {
@@ -161,6 +165,37 @@ export const transformer: ReactTransformer = {
     return value;
   },
   Ref(value) {
-    return value;
+    // get the name of the ref
+    const name = value.name.getText();
+
+    // get the type of the ref if it exists
+    const type =
+      value.type ??
+      factory.createTypeReferenceNode(
+        factory.createIdentifier('HTMLElement'),
+        undefined
+      );
+
+    // convert the property to a useRef hook
+    const statement = factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(name),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier('useRef'),
+              [type],
+              [factory.createNull()]
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+
+    return { name, statement };
   },
 };

@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { setterName } from './names';
 import { isThisExpression } from './typing';
 
 export function findDependencies<T extends ts.Block>(node: T): string[] {
@@ -13,6 +14,12 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
     ) {
       // add the property name to the dependencies array
       dependencies.add(node.name.getText());
+    }
+
+    // find any assignments that use "this"
+    if (ts.isBinaryExpression(node) && isThisExpression(node.left)) {
+      // add the property name to the dependencies array
+      dependencies.add(setterName(node.left.getText()));
     }
 
     ts.forEachChild(node, visitor);

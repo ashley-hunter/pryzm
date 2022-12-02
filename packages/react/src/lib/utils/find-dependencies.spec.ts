@@ -52,4 +52,28 @@ describe('Find Dependencies', () => {
 
     expect(dependencies).toEqual(['calculate']);
   });
+
+  it('should find a setter dependency', () => {
+    const source = `
+      @Component()
+      export class Test {
+
+        @State() test: string = 'test';
+
+        calculate() {
+          this.test = 'test';
+        }
+      }
+    `;
+    const ast = tsquery.ast(source);
+    // find the get accessor
+    const getAccessor = tsquery<ts.MethodDeclaration>(
+      ast,
+      'MethodDeclaration:has(Identifier[name="calculate"])'
+    )[0];
+    // find the dependencies
+    const dependencies = findDependencies(getAccessor.body!);
+
+    expect(dependencies).toEqual(['setTest']);
+  });
 });

@@ -373,6 +373,52 @@ describe('React Transformer', () => {
     });
   });
 
+  describe('Ref', () => {
+    it('should transform ref into a useRef', () => {
+      const source = `
+      import { Component, Ref } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @Ref() test: HTMLDivElement;
+
+        render() {
+          return <div ref={this.test} />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer)[0];
+      const ref = component.refs[0];
+
+      expect(ref.name).toBe('test');
+      expect(printNode(ref.statement)).toMatchInlineSnapshot(
+        '"const test = useRef<HTMLDivElement>(null);"'
+      );
+    });
+
+    it('should transform ref into a useRef with no type', () => {
+      const source = `
+      import { Component, Ref } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @Ref() test;
+
+        render() {
+          return <div ref={this.test} />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer)[0];
+      const ref = component.refs[0];
+
+      expect(ref.name).toBe('test');
+      expect(printNode(ref.statement)).toMatchInlineSnapshot('"const test = useRef<HTMLElement>(null);"');
+    });
+  });
+
   function printNode(node: ts.Node) {
     return printer.printNode(ts.EmitHint.Unspecified, node, null as any);
   }
