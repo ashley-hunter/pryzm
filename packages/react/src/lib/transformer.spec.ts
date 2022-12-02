@@ -185,6 +185,55 @@ describe('React Transformer', () => {
         }>({ test: \\"test\\" });"
       `);
     });
+
+    it('should transform state into a useState hook resolving `this` in property accesses', () => {
+      const source = `
+      import { Component, State, Prop } from '@emblazon/core';
+      @Component()
+      export class Test {
+        @Prop() readonly name: string;
+        @State() test: string = this.name;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
+
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
+        '"const [test, setTest] = useState<string>(name);"'
+      );
+    });
+
+    it('should transform state into a useState hook resolving `this` in call expressions', () => {
+      const source = `
+      import { Component, State, Prop } from '@emblazon/core';
+      @Component()
+      export class Test {
+        @State() test: string = this.name();
+
+        name() {
+          return 'test';
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const state = component.states[0];
+
+      expect(state.getter).toBe('test');
+      expect(state.setter).toBe('setTest');
+      expect(printNode(state.statement)).toMatchInlineSnapshot(
+        '"const [test, setTest] = useState<string>(name());"'
+      );
+    });
   });
 
   describe('Prop', () => {

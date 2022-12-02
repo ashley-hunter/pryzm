@@ -2,6 +2,7 @@ import { Transformer } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { addComment, extractComment } from './utils/comment';
+import { stripThis } from './utils/strip-this';
 import { inferType } from './utils/type-inference';
 
 export interface ReactTransformer extends Transformer {
@@ -23,7 +24,7 @@ export const transformer: ReactTransformer = {
     const name = prop.name.getText();
 
     // get the default value of the prop if it exists
-    const initializer = prop.initializer;
+    const initializer = stripThis(prop.initializer);
 
     // get the type of the prop if it exists
     const type = prop.type ?? inferType(initializer, true);
@@ -59,7 +60,7 @@ export const transformer: ReactTransformer = {
     const setter = `set${getter[0].toUpperCase()}${getter.slice(1)}`;
 
     // get the initializer of the prop if it exists
-    const initializer = state.initializer;
+    const initializer = stripThis(state.initializer);
 
     // get the type of the prop if it exists
     const type = state.type ?? inferType(initializer, false);

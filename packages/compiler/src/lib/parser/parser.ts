@@ -9,6 +9,7 @@ export function parseFile(code: string): ComponentMetadata[] {
     true,
     ts.ScriptKind.TSX
   );
+
   const components = getComponents(sourceFile);
 
   return components.map((component) =>
