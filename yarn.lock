@@ -821,6 +821,13 @@
   dependencies:
     esquery "^1.0.1"
 
+"@phenomnomnominal/tsquery@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@phenomnomnominal/tsquery/-/tsquery-5.0.0.tgz#5e99f4a073740e10ee6945cebb477ccf9de74482"
+  integrity sha512-1k9H74MJJrlZbUuM6rG0Kwifu/ZoshH+Qs1QXJ2P2RD6MRE/D49uSzXosOXIpIrRQNtij3bnkukexIZhgM/Q8g==
+  dependencies:
+    esquery "^1.4.0"
+
 "@polka/url@^1.0.0-next.20":
   version "1.0.0-next.21"
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"

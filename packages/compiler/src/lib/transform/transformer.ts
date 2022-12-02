@@ -6,7 +6,7 @@ type TransformerFn<
   K extends keyof Transformer
 > = T[K] extends (...args: any) => any ? ReturnType<T[K]> : any;
 
-export type TranformerResult<T extends Transformer> = {
+export type TransformerResult<T extends Transformer> = {
   props: TransformerFn<T, 'Prop'>[];
   states: TransformerFn<T, 'State'>[];
   computed: TransformerFn<T, 'Computed'>[];
@@ -26,6 +26,9 @@ export interface Transformer {
   Computed?: (value: ts.GetAccessorDeclaration) => any;
   Provider?: (value: ts.PropertyDeclaration) => any;
   Inject?: (value: ts.PropertyDeclaration) => any;
+  PostTransform?: <T extends Transformer>(
+    metadata: TransformerResult<T>
+  ) => TransformerResult<T>;
 }
 
 const noop = <T>(value: T) => value;
@@ -33,10 +36,10 @@ const noop = <T>(value: T) => value;
 export function transform<T extends Transformer>(
   source: string,
   transformer: T
-): TranformerResult<T>[] {
+): TransformerResult<T>[] {
   const components = parseFile(source);
 
-  return components.map<TranformerResult<T>>((metadata) => {
+  return components.map<TransformerResult<T>>((metadata) => {
     const props = metadata.props.map(transformer.Prop ?? noop);
     const states = metadata.state.map(transformer.State ?? noop);
     const computed = metadata.computed.map(transformer.Computed ?? noop);
@@ -46,7 +49,7 @@ export function transform<T extends Transformer>(
     const providers = metadata.providers.map(transformer.Provider ?? noop);
     const injects = metadata.injects.map(transformer.Inject ?? noop);
 
-    return {
+    const result: TransformerResult<T> = {
       props,
       states,
       computed,
@@ -56,5 +59,9 @@ export function transform<T extends Transformer>(
       providers,
       injects,
     };
+
+    return transformer.PostTransform
+      ? transformer.PostTransform(result)
+      : result;
   });
 }

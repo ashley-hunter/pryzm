@@ -338,6 +338,39 @@ describe('React Transformer', () => {
         }, []);"
       `);
     });
+
+    it('should transform computed into a useMemo with dependencies', () => {
+      const source = `
+      import { Component, Computed } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+
+        @State() firstName: string = 'John';
+        @State() lastName: string = 'Doe';
+
+        @Computed() get test() {
+          return \`\${this.firstName} \${this.lastName}\`;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const computed = component.computed[0];
+
+      expect(computed.name).toBe('test');
+      expect(printNode(computed.statement)).toMatchInlineSnapshot(`
+        "const test = useMemo(() => {
+            return \`\${firstName} \${lastName}\`;
+        }, [
+            firstName,
+            lastName
+        ]);"
+      `);
+    });
   });
 
   function printNode(node: ts.Node) {

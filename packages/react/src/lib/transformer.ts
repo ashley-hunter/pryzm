@@ -1,7 +1,8 @@
-import { Transformer } from '@emblazon/compiler';
+import { Transformer, TransformerResult } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { addComment, extractComment } from './utils/comment';
+import { findDependencies } from './utils/find-dependencies';
 import { stripThis } from './utils/strip-this';
 import { inferType } from './utils/type-inference';
 
@@ -20,11 +21,17 @@ export interface ReactTransformer extends Transformer {
     name: string;
     statement: ts.VariableStatement;
   };
+  PostTransform(
+    metadata: TransformerResult<ReactTransformer>
+  ): TransformerResult<ReactTransformer>;
 }
 
 export const transformer: ReactTransformer = {
   Computed(computed) {
     const name = computed.name.getText();
+
+    // scan the body for any dependencies
+    const dependencies = findDependencies(computed.body!);
 
     // convert a getter to use memo
     // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
@@ -48,7 +55,11 @@ export const transformer: ReactTransformer = {
                   undefined,
                   stripThis(computed.body)!
                 ),
-                factory.createArrayLiteralExpression(),
+                // add the dependencies array
+                factory.createArrayLiteralExpression(
+                  dependencies.map((dep) => factory.createIdentifier(dep)),
+                  true
+                ),
               ]
             )
           ),
@@ -154,5 +165,11 @@ export const transformer: ReactTransformer = {
   },
   Ref(value) {
     return value;
+  },
+
+  PostTransform(
+    metadata: TransformerResult<ReactTransformer>
+  ): TransformerResult<ReactTransformer> {
+    return metadata;
   },
 };
