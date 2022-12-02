@@ -612,13 +612,13 @@ describe('React Transformer', () => {
       const component = transform(source, transformer)[0];
       const event = component.events[0];
 
-      expect(event.name).toBe('test');
+      expect(event.name).toBe('onTest');
       expect(printNode(event.interfaceProperty)).toMatchInlineSnapshot(`
         "/* Define the test event emitter */
-        test: (event: string) => void;"
+        onTest: (event: string) => void;"
       `);
       expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
-        '"test = new EventEmitter<string>()"'
+        '"onTest"'
       );
     });
 
@@ -638,13 +638,13 @@ describe('React Transformer', () => {
       const component = transform(source, transformer)[0];
       const event = component.events[0];
 
-      expect(event.name).toBe('test');
+      expect(event.name).toBe('onTest');
       expect(printNode(event.interfaceProperty)).toMatchInlineSnapshot(`
         "/* Define the test event emitter */
-        test: () => void;"
+        onTest: () => void;"
       `);
       expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
-        '"test = new EventEmitter()"'
+        '"onTest"'
       );
     });
   });

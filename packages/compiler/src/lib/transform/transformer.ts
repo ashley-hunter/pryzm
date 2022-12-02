@@ -26,6 +26,9 @@ export interface Transformer {
   Computed?: (value: ts.GetAccessorDeclaration) => any;
   Provider?: (value: ts.PropertyDeclaration) => any;
   Inject?: (value: ts.PropertyDeclaration) => any;
+  PostTransform?: (
+    metadata: TransformerResult<Transformer>
+  ) => TransformerResult<Transformer>;
 }
 
 const noop = <T>(value: T) => value;
@@ -46,7 +49,7 @@ export function transform<T extends Transformer>(
     const providers = metadata.providers.map(transformer.Provider ?? noop);
     const injects = metadata.injects.map(transformer.Inject ?? noop);
 
-    return {
+    const result: TransformerResult<Transformer> = {
       props,
       states,
       computed,
@@ -56,5 +59,9 @@ export function transform<T extends Transformer>(
       providers,
       injects,
     };
+
+    return transformer.PostTransform
+      ? transformer.PostTransform(result)
+      : result;
   });
 }

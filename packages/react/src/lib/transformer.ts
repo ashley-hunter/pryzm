@@ -1,9 +1,11 @@
-import { Transformer } from '@emblazon/compiler';
+import { Transformer, TransformerResult } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { transformAssignment } from './utils/assignment';
 import { addComment, extractComment } from './utils/comment';
 import { findDependencies } from './utils/find-dependencies';
+import { eventName } from './utils/names';
+import { renameIdentifierOccurences } from './utils/rename';
 import { stripThis } from './utils/strip-this';
 import { inferType } from './utils/type-inference';
 
@@ -37,6 +39,10 @@ export interface ReactTransformer extends Transformer {
     interfaceProperty: ts.PropertySignature;
     destructuredProperty: ts.BindingElement;
   };
+
+  PostTransform: (
+    metadata: TransformerResult<ReactTransformer>
+  ) => TransformerResult<ReactTransformer>;
 }
 
 export const transformer: ReactTransformer = {
@@ -215,7 +221,7 @@ export const transformer: ReactTransformer = {
       undefined,
       undefined,
       name,
-      initializer
+      undefined
     );
 
     return { name, interfaceProperty, destructuredProperty };
@@ -302,5 +308,18 @@ export const transformer: ReactTransformer = {
     );
 
     return { name, statement, dependencies };
+  },
+  PostTransform(metadata) {
+    // find all events and rename to include the on prefix
+    const eventsToRename = metadata.events.filter(
+      (event) => event.name !== eventName(event.name)
+    );
+
+    // rename all events
+    eventsToRename.forEach((event) =>
+      renameIdentifierOccurences(metadata, event.name, eventName(event.name))
+    );
+
+    return metadata;
   },
 };
