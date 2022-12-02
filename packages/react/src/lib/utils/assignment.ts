@@ -20,19 +20,18 @@ function convertAssignmentTransformer<
       // e.g. this.test = 'test'; => setTest('test');
       // e.g. this.test += 'test'; => setTest(test => test + 'test');
       if (
-        ts.isExpressionStatement(node) &&
-        ts.isBinaryExpression(node.expression) &&
-        ts.isPropertyAccessExpression(node.expression.left) &&
-        isThisExpression(node.expression.left.expression)
+        ts.isBinaryExpression(node) &&
+        ts.isPropertyAccessExpression(node.left) &&
+        isThisExpression(node.left.expression)
       ) {
         // determine the setter name
-        const getter = node.expression.left.name.getText();
+        const getter = node.left.name.getText();
         const setter = setterName(getter);
 
         // determine the operator
         let operator: ts.BinaryOperator;
 
-        switch (node.expression.operatorToken.kind) {
+        switch (node.operatorToken.kind) {
           case ts.SyntaxKind.EqualsToken:
             operator = ts.SyntaxKind.EqualsToken;
             break;
@@ -87,64 +86,59 @@ function convertAssignmentTransformer<
 
           default:
             throw new Error(
-              `Unknown operator: ${node.expression.operatorToken.getText()}`
+              `Unknown operator: ${node.operatorToken.getText()}`
             );
         }
 
         // if the operator is an equals, then just call the setter
         if (operator === ts.SyntaxKind.EqualsToken) {
-          return ts.factory.createExpressionStatement(
-            ts.factory.createCallExpression(
-              ts.factory.createIdentifier(setter),
-              undefined,
-              [stripThis(node.expression.right)!]
-            )
+          return ts.factory.createCallExpression(
+            ts.factory.createIdentifier(setter),
+            undefined,
+            [stripThis(node.right)!]
           );
         }
 
-        return ts.factory.createExpressionStatement(
-          ts.factory.createCallExpression(
-            ts.factory.createIdentifier(setter),
-            undefined,
-            [
-              ts.factory.createArrowFunction(
-                undefined,
-                undefined,
-                [
-                  ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    getter
-                  ),
-                ],
-                undefined,
-                undefined,
-                ts.factory.createBinaryExpression(
-                  ts.factory.createIdentifier(getter),
-                  operator,
-                  stripThis(node.expression.right)!
-                )
-              ),
-            ]
-          )
+        return ts.factory.createCallExpression(
+          ts.factory.createIdentifier(setter),
+          undefined,
+          [
+            ts.factory.createArrowFunction(
+              undefined,
+              undefined,
+              [
+                ts.factory.createParameterDeclaration(
+                  undefined,
+                  undefined,
+                  getter
+                ),
+              ],
+              undefined,
+              undefined,
+              ts.factory.createBinaryExpression(
+                ts.factory.createIdentifier(getter),
+                operator,
+                stripThis(node.right)!
+              )
+            ),
+          ]
         );
       }
 
       // e.g. this.test++; => setTest(test => test + 1);
       if (
-        ts.isExpressionStatement(node) &&
-        ts.isPostfixUnaryExpression(node.expression) &&
-        ts.isPropertyAccessExpression(node.expression.operand) &&
-        isThisExpression(node.expression.operand.expression)
+        ts.isPostfixUnaryExpression(node) &&
+        ts.isPropertyAccessExpression(node.operand) &&
+        isThisExpression(node.operand.expression)
       ) {
         // determine the setter name
-        const getter = node.expression.operand.name.getText();
+        const getter = node.operand.name.getText();
         const setter = setterName(getter);
 
         // determine the operator
         let operator: ts.BinaryOperator;
 
-        switch (node.expression.operator) {
+        switch (node.operator) {
           case ts.SyntaxKind.PlusPlusToken:
             operator = ts.SyntaxKind.PlusToken;
             break;
@@ -154,86 +148,79 @@ function convertAssignmentTransformer<
             break;
         }
 
-        return ts.factory.createExpressionStatement(
-          ts.factory.createCallExpression(
-            ts.factory.createIdentifier(setter),
-            undefined,
-            [
-              ts.factory.createArrowFunction(
-                undefined,
-                undefined,
-                [
-                  ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    getter
-                  ),
-                ],
-                undefined,
-                undefined,
-                ts.factory.createBinaryExpression(
-                  ts.factory.createIdentifier(getter),
-                  operator,
-                  ts.factory.createNumericLiteral(1)
-                )
-              ),
-            ]
-          )
+        return ts.factory.createCallExpression(
+          ts.factory.createIdentifier(setter),
+          undefined,
+          [
+            ts.factory.createArrowFunction(
+              undefined,
+              undefined,
+              [
+                ts.factory.createParameterDeclaration(
+                  undefined,
+                  undefined,
+                  getter
+                ),
+              ],
+              undefined,
+              undefined,
+              ts.factory.createBinaryExpression(
+                ts.factory.createIdentifier(getter),
+                operator,
+                ts.factory.createNumericLiteral(1)
+              )
+            ),
+          ]
         );
       }
 
       // e.g. this.test.x = 'test'; => setTest(test => { ...test, x: 'test' });
       // this also needs to work with arbitrary depth of property access
       if (
-        ts.isExpressionStatement(node) &&
-        ts.isBinaryExpression(node.expression) &&
-        ts.isPropertyAccessExpression(node.expression.left) &&
-        ts.isPropertyAccessExpression(node.expression.left.expression) &&
-        isThisExpression(node.expression.left.expression.expression)
+        ts.isBinaryExpression(node) &&
+        ts.isPropertyAccessExpression(node.left) &&
+        ts.isPropertyAccessExpression(node.left.expression) &&
+        isThisExpression(node.left.expression.expression)
       ) {
         // determine the setter name
-        const setter = setterName(
-          node.expression.left.expression.name.getText()
-        );
+        const setter = setterName(node.left.expression.name.getText());
 
         // determine the property name
-        const property = node.expression.left.name.getText();
+        const property = node.left.name.getText();
 
         // convert to the setter that is a function that takes the current value and spreads the existing properties and adds the new property
-        return ts.factory.createExpressionStatement(
-          ts.factory.createCallExpression(
-            ts.factory.createIdentifier(setter),
-            undefined,
-            [
-              ts.factory.createArrowFunction(
-                undefined,
-                undefined,
+        return ts.factory.createCallExpression(
+          ts.factory.createIdentifier(setter),
+          undefined,
+          [
+            ts.factory.createArrowFunction(
+              undefined,
+              undefined,
+              [
+                ts.factory.createParameterDeclaration(
+                  undefined,
+                  undefined,
+                  node.left.expression.name.getText()
+                ),
+              ],
+              undefined,
+              undefined,
+              ts.factory.createObjectLiteralExpression(
                 [
-                  ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    node.expression.left.expression.name.getText()
+                  ts.factory.createSpreadAssignment(
+                    ts.factory.createIdentifier(
+                      node.left.expression.name.getText()
+                    )
+                  ),
+                  ts.factory.createPropertyAssignment(
+                    property,
+                    stripThis(node.right)!
                   ),
                 ],
-                undefined,
-                undefined,
-                ts.factory.createObjectLiteralExpression(
-                  [
-                    ts.factory.createSpreadAssignment(
-                      ts.factory.createIdentifier(
-                        node.expression.left.expression.name.getText()
-                      )
-                    ),
-                    ts.factory.createPropertyAssignment(
-                      property,
-                      stripThis(node.expression.right)!
-                    ),
-                  ],
-                  true
-                )
-              ),
-            ]
-          )
+                true
+              )
+            ),
+          ]
         );
       }
 
