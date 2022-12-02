@@ -1,13 +1,14 @@
 import * as ts from 'typescript';
 
-export function stripThis<T extends ts.Node>(
+export function stripThis<T extends ts.Node, R extends ts.Node = T>(
   node: T | undefined
-): T | undefined {
+): R | undefined {
   if (!node) {
     return node;
   }
   // run the ts transformer
-  return ts.transform(node, [stripThisTransformer()]).transformed[0];
+  return ts.transform(node, [stripThisTransformer()])
+    .transformed[0] as unknown as R;
 }
 
 // create a ts transformer factory
@@ -33,6 +34,18 @@ function stripThisTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
           node.expression.name,
           undefined,
           node.arguments
+        );
+      }
+
+      // e.g. @State() test: string = this.person.name;
+      if (
+        ts.isPropertyAccessExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        isThisExpression(node.expression.expression)
+      ) {
+        return ts.factory.createPropertyAccessExpression(
+          node.expression.name,
+          node.name
         );
       }
 

@@ -3,254 +3,99 @@ import { transformAssignment } from './assignment';
 
 describe('Assignment', () => {
   it('should convert a simple assignment', () => {
-    const source = `
-      import { Component, State } from '@emblazon/core';
-
-      @Component()
-      export class Test {
-        @State() test: string = 'test';
-
-        update() {
-          this.test = 'test';
-        }
-
-        render() {
-          return <div />;
-        }
-      }
-    `;
+    const source = `this.test = 'test';`;
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "import { Component, State } from '@emblazon/core';
-      @Component()
-      export class Test {
-          @State()
-          test: string = 'test';
-          update() {
-              setTest('test');
-          }
-          render() {
-              return <div />;
-          }
-      }
+      "setTest('test');
       "
     `);
   });
 
   it('should convert a simple assignment with a spread', () => {
-    const source = `
-      import { Component, State } from '@emblazon/core';
-
-      @Component()
-      export class Test {
-        @State() test = { test: 'old };
-
-        update() {
-          this.test = { ...this.test, test: 'new' };
-        }
-
-        render() {
-          return <div />;
-        }
-      }
-    `;
+    const source = `this.test = { ...this.test, test: 'new' };`;
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "import { Component, State } from '@emblazon/core';
-      @Component()
-      export class Test {
-          @State()
-          test = { test: 'old };,
-              update() {
-                  setTest({ ...test, test: 'new' });
-              },
-              render() {
-                  return <div />;
-              } };
-      }
+      "setTest({ ...test, test: 'new' });
       "
     `);
   });
 
   it('should convert a simple assignment of an array', () => {
-    const source = `
-      import { Component, State } from '@emblazon/core';
-
-      @Component()
-      export class Test {
-        @State() test = ['old'];
-
-        update() {
-          this.test = ['new'];
-        }
-
-        render() {
-          return <div />;
-        }
-      }
-    `;
+    const source = `this.test = ['new'];`;
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "import { Component, State } from '@emblazon/core';
-      @Component()
-      export class Test {
-          @State()
-          test = ['old'];
-          update() {
-              setTest(['new']);
-          }
-          render() {
-              return <div />;
-          }
-      }
+      "setTest(['new']);
       "
     `);
   });
 
   it('should convert a simple assignment of an array with a spread', () => {
-    const source = `
-      import { Component, State } from '@emblazon/core';
-
-      @Component()
-      export class Test {
-        @State() test = ['old'];
-
-        update() {
-          this.test = [...this.test, 'new'];
-        }
-
-        render() {
-          return <div />;
-        }
-      }
-    `;
+    const source = `this.test = [...this.test, 'new'];`;
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "import { Component, State } from '@emblazon/core';
-      @Component()
-      export class Test {
-          @State()
-          test = ['old'];
-          update() {
-              setTest([...test, 'new']);
-          }
-          render() {
-              return <div />;
-          }
-      }
+      "setTest([...test, 'new']);
       "
     `);
   });
 
   it('should convert an assignment using +=', () => {
-    const source = `
-      import { Component, State } from '@emblazon/core';
-
-      @Component()
-      export class Test {
-        @State() test = 0;
-
-        update() {
-          this.test += 1;
-        }
-
-        render() {
-          return <div />;
-        }
-      }
-    `;
+    const source = `this.test += 1;`;
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "import { Component, State } from '@emblazon/core';
-      @Component()
-      export class Test {
-          @State()
-          test = 0;
-          update() {
-              setTest(test => test + 1);
-          }
-          render() {
-              return <div />;
-          }
-      }
+      "setTest(test => test + 1);
       "
     `);
   });
 
   it('should convert an assignment using ++', () => {
-    const source = `
-      import { Component, State } from '@emblazon/core';
-
-      @Component()
-      export class Test {
-        @State() test = 0;
-
-        update() {
-          this.test++;
-        }
-
-        render() {
-          return <div />;
-        }
-      }
-    `;
+    const source = `this.test++;`;
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "import { Component, State } from '@emblazon/core';
-      @Component()
-      export class Test {
-          @State()
-          test = 0;
-          update() {
-              setTest(test => test + 1);
-          }
-          render() {
-              return <div />;
-          }
-      }
+      "setTest(test => test + 1);
       "
     `);
   });
 
   it('should allow deep assignments', () => {
-    const source = `
-      import { Component, State } from '@emblazon/core';
-
-      @Component()
-      export class Test {
-        @State() test = { test: 'old };
-
-        update() {
-          this.test.test = 'new';
-        }
-
-        render() {
-          return <div />;
-        }
-      }`;
+    const source = `this.test.test = 'new';`;
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "import { Component, State } from '@emblazon/core';
-      @Component()
-      export class Test {
-          @State()
-          test = { test: 'old };,
-              update() {
-                  setTest(test => ({
-                      ...test,
-                      test: 'new'
-                  }));
-              },
-              render() {
-                  return <div />;
-              } };
-      }
+      "setTest(test => ({
+          ...test,
+          test: 'new'
+      }));
+      "
+    `);
+  });
+
+  it('should allow deep object assignments', () => {
+    const source = `this.test.test = {...this.test.test, new: 'value' };`;
+
+    const result = transform(source);
+    expect(result).toMatchInlineSnapshot(`
+      "setTest(test => ({
+          ...test,
+          test: { ...test.test, new: 'value' }
+      }));
+      "
+    `);
+  });
+
+  it('should allow array pushes', () => {
+    const source = `this.test.push('new');`;
+
+    const result = transform(source);
+    expect(result).toMatchInlineSnapshot(`
+      "setTest(test => {
+          test.push('new');
+          return test;
+      });
       "
     `);
   });

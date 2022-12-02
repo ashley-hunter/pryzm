@@ -236,6 +236,57 @@ function convertAssignmentTransformer<
         );
       }
 
+      // transform any mutable array methods
+      // e.g. this.test.push('test'); => setTest(test => { test.push('test'); return test; });
+      if (isMutableArrayCallExpression(node)) {
+        if (!ts.isPropertyAccessExpression(node.expression)) {
+          throw new Error('Expected property access expression');
+        }
+
+        // strip the this
+        const expression = stripThis(node)!;
+
+        // determine the array name
+        const arrayName = getPropertyName(
+          node.expression as ts.PropertyAccessExpression
+        );
+
+        // determine the setter name
+        const setter = setterName(arrayName);
+
+        // call the setter function with a function that gets the current value, calls the method, and returns the value
+        return ts.factory.createCallExpression(
+          ts.factory.createIdentifier(setter),
+          undefined,
+          [
+            ts.factory.createArrowFunction(
+              undefined,
+              undefined,
+              [
+                ts.factory.createParameterDeclaration(
+                  undefined,
+                  undefined,
+                  arrayName
+                ),
+              ],
+              undefined,
+              undefined,
+              ts.factory.createBlock(
+                [
+                  // insert the original expression stripped of the this
+                  ts.factory.createExpressionStatement(expression),
+
+                  ts.factory.createReturnStatement(
+                    ts.factory.createIdentifier(arrayName)
+                  ),
+                ],
+                true
+              )
+            ),
+          ]
+        );
+      }
+
       return ts.visitEachChild(node, visitor, context);
     };
 
@@ -245,4 +296,51 @@ function convertAssignmentTransformer<
 
 function isThisExpression(node: ts.Node): node is ts.ThisExpression {
   return node.kind === ts.SyntaxKind.ThisKeyword;
+}
+
+function isMutableArrayCallExpression(
+  node: ts.Node
+): node is ts.CallExpression {
+  const mutableArrayMethods = [
+    'push',
+    'pop',
+    'shift',
+    'unshift',
+    'splice',
+    'sort',
+    'reverse',
+  ];
+
+  if (
+    !ts.isCallExpression(node) ||
+    !ts.isPropertyAccessExpression(node.expression)
+  ) {
+    return false;
+  }
+
+  // check that the name of the root property access expression is an array method
+  if (!mutableArrayMethods.includes(node.expression.name.getText())) {
+    return false;
+  }
+
+  // there may be multiple levels of property access so we need to traverse down to the last one
+  let expression = node.expression;
+
+  while (ts.isPropertyAccessExpression(expression.expression)) {
+    expression = expression.expression;
+  }
+
+  // check that the root property access expression uses "this"
+  return isThisExpression(expression.expression);
+}
+
+function getPropertyName(node: ts.PropertyAccessExpression): string {
+  // there may be multiple levels of property access so we need to traverse down to the last one
+  let expression = node;
+
+  while (ts.isPropertyAccessExpression(expression.expression)) {
+    expression = expression.expression;
+  }
+
+  return expression.name.getText();
 }
