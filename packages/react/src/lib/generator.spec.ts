@@ -1,6 +1,10 @@
 import { transform } from '@emblazon/compiler';
 import * as ts from 'typescript';
-import { generatePropsInterface, generatePropsParameter } from './generator';
+import {
+  generateComponentFunction,
+  generatePropsInterface,
+  generatePropsParameter,
+} from './generator';
 import { transformer } from './transformer';
 
 describe('Generator', () => {
@@ -108,7 +112,36 @@ describe('Generator', () => {
       const result = transform(source, transformer);
       const output = generatePropsParameter(result);
 
-      expect(printNode(output)).toMatchInlineSnapshot('"{ firstName = \\"John\\", lastName = \\"Doe\\" }: TestProps"');
+      expect(printNode(output)).toMatchInlineSnapshot(
+        '"{ firstName = \\"John\\", lastName = \\"Doe\\" }: TestProps"'
+      );
+    });
+  });
+
+  describe('Component function', () => {
+    it('should generate a react function component', () => {
+      const source = `
+      @Component()
+      export class Test {
+        /** Users first name */
+        @Prop() readonly firstName: string;
+
+        /** Users last name */
+        @Prop() readonly lastName: string;
+
+        render() {
+          return <div>{this.firstName} {this.lastName}</div>;
+        }
+      }
+    `;
+      const result = transform(source, transformer);
+      const output = generateComponentFunction(result);
+
+      expect(printNode(output)).toMatchInlineSnapshot(`
+        "export const Test = ({ firstName, lastName }: TestProps) => {
+            return;
+        };"
+      `);
     });
   });
 
