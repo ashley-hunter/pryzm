@@ -2,9 +2,12 @@ import { getDecorator, getPropertyName } from '@emblazon/ast-utils';
 import { Transformer, TransformerResult } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
-import { useRef, useState } from './ast/hooks';
-import { transformAssignment } from './utils/assignment';
-import { addComment, extractComment } from './utils/comment';
+import { useCallback, useMemo, useRef, useState } from './ast/hooks';
+import {
+  createDestructuredProperty,
+  createFunctionTypeNode,
+  createInterfaceProperty,
+} from './ast/misc';
 import { findDependencies } from './utils/find-dependencies';
 import { eventName, setterName } from './utils/names';
 import { renameIdentifierOccurences } from './utils/rename';
@@ -60,38 +63,7 @@ export const transformer: ReactTransformer = {
 
     // convert a getter to use memo
     // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier('useMemo'),
-              undefined,
-              [
-                factory.createArrowFunction(
-                  undefined,
-                  undefined,
-                  [],
-                  undefined,
-                  undefined,
-                  stripThis(computed.body)!
-                ),
-                // add the dependencies array
-                factory.createArrayLiteralExpression(
-                  dependencies.map((dep) => factory.createIdentifier(dep)),
-                  false
-                ),
-              ]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
+    const statement = useMemo(name, computed.body!, dependencies);
 
     return { name, statement, dependencies };
   },
@@ -105,26 +77,11 @@ export const transformer: ReactTransformer = {
     // get the type of the prop if it exists
     const type = prop.type ?? inferType(initializer, true);
 
-    const comment = extractComment(prop);
-
     // create the interface property with the type attached
-    const interfaceProperty = factory.createPropertySignature(
-      undefined,
-      name,
-      undefined,
-      type
-    );
-
-    // attach the comment to the interface property
-    addComment(interfaceProperty, comment);
+    const interfaceProperty = createInterfaceProperty(name, type, prop);
 
     // create the destructured property with the default value attached
-    const destructuredProperty = factory.createBindingElement(
-      undefined,
-      undefined,
-      name,
-      initializer
-    );
+    const destructuredProperty = createDestructuredProperty(name, initializer);
 
     return { name, interfaceProperty, destructuredProperty };
   },
@@ -162,43 +119,13 @@ export const transformer: ReactTransformer = {
     const eventType = initializer.typeArguments?.[0];
 
     // create the type of the prop which is a function with a parameter of the event type
-    const type = factory.createFunctionTypeNode(
-      undefined,
-      eventType
-        ? [
-            factory.createParameterDeclaration(
-              undefined,
-              undefined,
-              factory.createIdentifier('event'),
-              undefined,
-              eventType,
-              undefined
-            ),
-          ]
-        : [],
-      factory.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword)
-    );
-
-    const comment = extractComment(event);
+    const type = createFunctionTypeNode(eventType);
 
     // create the interface property with the type attached
-    const interfaceProperty = factory.createPropertySignature(
-      undefined,
-      name,
-      undefined,
-      type
-    );
-
-    // attach the comment to the interface property
-    addComment(interfaceProperty, comment);
+    const interfaceProperty = createInterfaceProperty(name, type, event);
 
     // create the destructured property with the default value attached
-    const destructuredProperty = factory.createBindingElement(
-      undefined,
-      undefined,
-      name,
-      undefined
-    );
+    const destructuredProperty = createDestructuredProperty(name);
 
     return { name, interfaceProperty, destructuredProperty };
   },
@@ -240,24 +167,7 @@ export const transformer: ReactTransformer = {
       );
 
     // convert the property to a useRef hook
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier('useRef'),
-              [type],
-              [factory.createNull()]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
+    const statement = useRef(name, factory.createNull(), type);
 
     return { name, statement };
   },
@@ -269,37 +179,11 @@ export const transformer: ReactTransformer = {
 
     // convert a method to a useCallback hook
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier('useCallback'),
-              undefined,
-              [
-                factory.createArrowFunction(
-                  undefined,
-                  undefined,
-                  method.parameters,
-                  undefined,
-                  undefined,
-                  stripThis(transformAssignment(method.body!))!
-                ),
-                // add the dependencies array
-                factory.createArrayLiteralExpression(
-                  dependencies.map((dep) => factory.createIdentifier(dep)),
-                  false
-                ),
-              ]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
+    const statement = useCallback(
+      name,
+      method.parameters,
+      method.body!,
+      dependencies
     );
 
     return { name, statement, dependencies };
