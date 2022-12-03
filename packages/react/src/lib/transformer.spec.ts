@@ -649,6 +649,31 @@ describe('React Transformer', () => {
     });
   });
 
+  describe('Providers', () => {
+    it.only('should transform provider into a property', () => {
+      const source = `
+      import { Component, Provider } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @Provider(SomeToken) readonly test = new Service();
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer)[0];
+      const provider = component.providers[0];
+
+      expect(provider.name).toBe('test');
+      expect(provider.token.text).toBe('SomeToken');
+      expect(printNode(provider.statement)).toMatchInlineSnapshot(
+        '"const test = useRef(new Service());"'
+      );
+    });
+  });
+
   function printNode(node: ts.Node) {
     return printer.printNode(ts.EmitHint.Unspecified, node, null as any);
   }

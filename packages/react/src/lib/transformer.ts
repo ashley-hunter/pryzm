@@ -39,7 +39,11 @@ export interface ReactTransformer extends Transformer {
     interfaceProperty: ts.PropertySignature;
     destructuredProperty: ts.BindingElement;
   };
-
+  Provider(provider: ts.PropertyDeclaration): {
+    name: string;
+    token: ts.Identifier;
+    statement: ts.VariableStatement;
+  };
   PostTransform: (
     metadata: TransformerResult<ReactTransformer>
   ) => TransformerResult<ReactTransformer>;
@@ -230,7 +234,64 @@ export const transformer: ReactTransformer = {
     return value;
   },
   Provider(value) {
-    return value;
+    // get the name of the prop
+    const name = value.name.getText();
+
+    // the token is the first argument of the Provider decorator
+    // e.g. @Provider(Example) => Example
+    // first we need to get the decorator called Provider
+    const providerDecorator = value.modifiers?.find((modifier) => {
+      if (
+        ts.isDecorator(modifier) &&
+        ts.isCallExpression(modifier.expression)
+      ) {
+        // get the expression of the decorator and check if it is @Provider
+        const expression = modifier.expression.expression;
+
+        if (ts.isIdentifier(expression)) {
+          return expression.text === 'Provider';
+        }
+      }
+
+      return ts.isDecorator(modifier);
+    });
+
+    if (!providerDecorator || !ts.isDecorator(providerDecorator)) {
+      throw new Error('Provider decorators must be used');
+    }
+
+    if (!ts.isCallExpression(providerDecorator.expression)) {
+      throw new Error('Provider must have a token');
+    }
+
+    // then we need to get the first argument of the decorator
+    const token = providerDecorator?.expression.arguments[0];
+
+    if (!token || !ts.isIdentifier(token)) {
+      throw new Error('Provider must have a token');
+    }
+
+    // wrap the initializer in a useRef hook
+    const statement = factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(name),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier('useRef'),
+              undefined,
+              [stripThis(value.initializer)!]
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
+
+    return { name, statement, token };
   },
   Ref(value) {
     // get the name of the ref

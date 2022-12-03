@@ -130,5 +130,15 @@ export function renameIdentifierOccurences(
     return ref;
   });
 
+  metadata.providers = metadata.providers.map((provider) => {
+    if (provider.name === oldName) {
+      provider.name = newName;
+    }
+
+    provider.statement = renameIdentifier(provider.statement, oldName, newName);
+
+    return provider;
+  });
+
   return metadata;
 }
