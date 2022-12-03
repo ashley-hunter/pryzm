@@ -650,7 +650,7 @@ describe('React Transformer', () => {
   });
 
   describe('Providers', () => {
-    it.only('should transform provider into a property', () => {
+    it('should transform provider into a property', () => {
       const source = `
       import { Component, Provider } from '@emblazon/core';
 
