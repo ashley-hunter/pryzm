@@ -9,3 +9,8 @@ export function eventName(name: string): string {
 
   return `on${name[0].toUpperCase()}${name.slice(1)}`;
 }
+
+export function propsName(name: string): string {
+  // upper camel case the name
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)}Props`;
+}
