@@ -1,3 +1,4 @@
+import { getDecorator, getPropertyName } from '@emblazon/ast-utils';
 import { Transformer, TransformerResult } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
@@ -51,7 +52,7 @@ export interface ReactTransformer extends Transformer {
 
 export const transformer: ReactTransformer = {
   Computed(computed) {
-    const name = computed.name.getText();
+    const name = getPropertyName(computed);
 
     // scan the body for any dependencies
     const dependencies = findDependencies(computed.body!);
@@ -95,7 +96,7 @@ export const transformer: ReactTransformer = {
   },
   Prop(prop) {
     // get the name of the prop
-    const name = prop.name.getText();
+    const name = getPropertyName(prop);
 
     // get the default value of the prop if it exists
     const initializer = stripThis(prop.initializer);
@@ -128,7 +129,7 @@ export const transformer: ReactTransformer = {
   },
   State(state) {
     // get the name of the state
-    const getter = state.name.getText();
+    const getter = getPropertyName(state);
 
     // create a new name for the prop setter
     const setter = `set${getter[0].toUpperCase()}${getter.slice(1)}`;
@@ -174,12 +175,12 @@ export const transformer: ReactTransformer = {
 
     return { getter, setter, statement };
   },
-  Event(value) {
+  Event(event) {
     // get the name of the prop
-    const name = value.name.getText();
+    const name = getPropertyName(event);
 
     // get the default value of the prop if it exists
-    const initializer = value.initializer;
+    const initializer = event.initializer;
 
     // the event initializer will always be EventEmitter, but we need to get the type from the EventEmitter generic
     if (!initializer || !ts.isNewExpression(initializer)) {
@@ -207,7 +208,7 @@ export const transformer: ReactTransformer = {
       factory.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword)
     );
 
-    const comment = extractComment(value);
+    const comment = extractComment(event);
 
     // create the interface property with the type attached
     const interfaceProperty = factory.createPropertySignature(
@@ -235,37 +236,16 @@ export const transformer: ReactTransformer = {
   },
   Provider(value) {
     // get the name of the prop
-    const name = value.name.getText();
+    const name = getPropertyName(value);
 
-    // the token is the first argument of the Provider decorator
-    // e.g. @Provider(Example) => Example
-    // first we need to get the decorator called Provider
-    const providerDecorator = value.modifiers?.find((modifier) => {
-      if (
-        ts.isDecorator(modifier) &&
-        ts.isCallExpression(modifier.expression)
-      ) {
-        // get the expression of the decorator and check if it is @Provider
-        const expression = modifier.expression.expression;
+    const decorator = getDecorator(value, 'Provider');
 
-        if (ts.isIdentifier(expression)) {
-          return expression.text === 'Provider';
-        }
-      }
-
-      return ts.isDecorator(modifier);
-    });
-
-    if (!providerDecorator || !ts.isDecorator(providerDecorator)) {
-      throw new Error('Provider decorators must be used');
-    }
-
-    if (!ts.isCallExpression(providerDecorator.expression)) {
+    if (!decorator || !ts.isCallExpression(decorator.expression)) {
       throw new Error('Provider must have a token');
     }
 
     // then we need to get the first argument of the decorator
-    const token = providerDecorator?.expression.arguments[0];
+    const token = decorator?.expression.arguments[0];
 
     if (!token || !ts.isIdentifier(token)) {
       throw new Error('Provider must have a token');
@@ -295,7 +275,7 @@ export const transformer: ReactTransformer = {
   },
   Ref(value) {
     // get the name of the ref
-    const name = value.name.getText();
+    const name = getPropertyName(value);
 
     // get the type of the ref if it exists
     const type =
@@ -328,7 +308,7 @@ export const transformer: ReactTransformer = {
     return { name, statement };
   },
   Method(method) {
-    let name = method.name.getText();
+    let name = getPropertyName(method);
 
     // scan the body for any dependencies
     const dependencies = findDependencies(method.body!);
