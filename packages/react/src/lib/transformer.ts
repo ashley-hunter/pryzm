@@ -2,10 +2,11 @@ import { getDecorator, getPropertyName } from '@emblazon/ast-utils';
 import { Transformer, TransformerResult } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
+import { useRef, useState } from './ast/hooks';
 import { transformAssignment } from './utils/assignment';
 import { addComment, extractComment } from './utils/comment';
 import { findDependencies } from './utils/find-dependencies';
-import { eventName } from './utils/names';
+import { eventName, setterName } from './utils/names';
 import { renameIdentifierOccurences } from './utils/rename';
 import { stripThis } from './utils/strip-this';
 import { inferType } from './utils/type-inference';
@@ -132,7 +133,7 @@ export const transformer: ReactTransformer = {
     const getter = getPropertyName(state);
 
     // create a new name for the prop setter
-    const setter = `set${getter[0].toUpperCase()}${getter.slice(1)}`;
+    const setter = setterName(getter);
 
     // get the initializer of the prop if it exists
     const initializer = stripThis(state.initializer);
@@ -141,37 +142,7 @@ export const transformer: ReactTransformer = {
     const type = state.type ?? inferType(initializer, false);
 
     // convert the property to a useState hook
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createArrayBindingPattern([
-              factory.createBindingElement(
-                undefined,
-                undefined,
-                factory.createIdentifier(getter),
-                undefined
-              ),
-              factory.createBindingElement(
-                undefined,
-                undefined,
-                factory.createIdentifier(setter),
-                undefined
-              ),
-            ]),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier('useState'),
-              type ? [type] : undefined,
-              initializer ? [initializer] : undefined
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
+    const statement = useState(getter, setter, initializer, type);
 
     return { getter, setter, statement };
   },
@@ -252,24 +223,7 @@ export const transformer: ReactTransformer = {
     }
 
     // wrap the initializer in a useRef hook
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier('useRef'),
-              undefined,
-              [stripThis(value.initializer)!]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
+    const statement = useRef(name, value.initializer!);
 
     return { name, statement, token };
   },
