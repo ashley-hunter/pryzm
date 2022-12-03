@@ -17,37 +17,13 @@ function stripThisTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
   return (context) => {
     const visitor = (node: ts.Node): ts.Node => {
       // e.g. @State() test: string = this.name;
+      // e.g. @State() test: string = this.getName();
+      // e.g. @State() test: string = this.person.name;
       if (
         ts.isPropertyAccessExpression(node) &&
         isThisExpression(node.expression)
       ) {
         return node.name;
-      }
-
-      // e.g. @State() test: string = this.getName();
-
-      if (
-        ts.isCallExpression(node) &&
-        ts.isPropertyAccessExpression(node.expression) &&
-        isThisExpression(node.expression.expression)
-      ) {
-        return ts.factory.createCallExpression(
-          node.expression.name,
-          undefined,
-          node.arguments
-        );
-      }
-
-      // e.g. @State() test: string = this.person.name;
-      if (
-        ts.isPropertyAccessExpression(node) &&
-        ts.isPropertyAccessExpression(node.expression) &&
-        isThisExpression(node.expression.expression)
-      ) {
-        return ts.factory.createPropertyAccessExpression(
-          node.expression.name,
-          node.name
-        );
       }
 
       return ts.visitEachChild(node, visitor, context);
