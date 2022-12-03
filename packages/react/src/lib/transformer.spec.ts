@@ -19,7 +19,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -41,7 +41,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -63,7 +63,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -86,7 +86,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -108,7 +108,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -130,7 +130,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -152,7 +152,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -174,7 +174,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -199,7 +199,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -225,7 +225,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -250,7 +250,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
@@ -275,7 +275,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
@@ -299,7 +299,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
@@ -328,7 +328,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const computed = component.computed[0];
 
       expect(computed.name).toBe('test');
@@ -358,7 +358,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const computed = component.computed[0];
 
       expect(computed.name).toBe('test');
@@ -385,7 +385,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const ref = component.refs[0];
 
       expect(ref.name).toBe('test');
@@ -408,7 +408,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const ref = component.refs[0];
 
       expect(ref.name).toBe('test');
@@ -435,7 +435,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const method = component.methods[0];
 
       expect(method.name).toBe('test');
@@ -465,7 +465,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const method = component.methods[0];
 
       expect(method.name).toBe('test');
@@ -492,7 +492,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const method = component.methods[0];
 
       expect(method.name).toBe('test');
@@ -522,7 +522,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const method = component.methods[0];
 
       expect(method.name).toBe('test');
@@ -555,7 +555,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const method = component.methods[0];
 
       expect(method.name).toBe('test');
@@ -583,7 +583,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const method = component.methods[0];
 
       expect(method.name).toBe('test');
@@ -609,7 +609,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const event = component.events[0];
 
       expect(event.name).toBe('onTest');
@@ -635,7 +635,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const event = component.events[0];
 
       expect(event.name).toBe('onTest');
@@ -663,7 +663,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const provider = component.providers[0];
 
       expect(provider.name).toBe('test');
@@ -689,7 +689,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const inject = component.injects[0];
 
       expect(inject.name).toBe('test');
