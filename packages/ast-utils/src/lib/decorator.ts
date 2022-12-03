@@ -37,3 +37,14 @@ export function getDecorator(
     );
   });
 }
+
+export function getDecoratorArgument(
+  decorator: ts.Decorator,
+  name: string
+): ts.Expression | undefined {
+  if (!ts.isCallExpression(decorator.expression)) {
+    return undefined;
+  }
+
+  return decorator.expression.arguments[0];
+}

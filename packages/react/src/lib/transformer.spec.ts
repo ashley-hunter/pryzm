@@ -674,6 +674,30 @@ describe('React Transformer', () => {
     });
   });
 
+  describe('Inject', () => {
+    it('should extract the inject name, token and type', () => {
+      const source = `
+      import { Component, Inject } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @Inject(SomeToken) test: Service;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer)[0];
+      const inject = component.injects[0];
+
+      expect(inject.name).toBe('test');
+      expect(printNode(inject.token)).toBe('SomeToken');
+      expect(printNode(inject.type!)).toBe('Service');
+    });
+  });
+
   function printNode(node: ts.Node) {
     return printer.printNode(ts.EmitHint.Unspecified, node, null as any);
   }

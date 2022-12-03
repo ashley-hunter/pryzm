@@ -1,4 +1,8 @@
-import { getDecorator, getPropertyName } from '@emblazon/ast-utils';
+import {
+  getDecorator,
+  getDecoratorArgument,
+  getPropertyName,
+} from '@emblazon/ast-utils';
 import { Transformer, TransformerResult } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
@@ -48,6 +52,11 @@ export interface ReactTransformer extends Transformer {
     name: string;
     token: ts.Identifier;
     statement: ts.VariableStatement;
+  };
+  Inject(inject: ts.PropertyDeclaration): {
+    name: string;
+    token: ts.Identifier;
+    type: ts.TypeNode | undefined;
   };
   PostTransform: (
     metadata: TransformerResult<ReactTransformer>
@@ -130,20 +139,28 @@ export const transformer: ReactTransformer = {
     return { name, interfaceProperty, destructuredProperty };
   },
   Inject(value) {
-    return value;
-  },
-  Provider(value) {
-    // get the name of the prop
+    // get the name of the inject
     const name = getPropertyName(value);
 
-    const decorator = getDecorator(value, 'Provider');
+    // get the type
+    const type = value.type;
 
-    if (!decorator || !ts.isCallExpression(decorator.expression)) {
-      throw new Error('Provider must have a token');
+    // get the token from the decorator
+    const decorator = getDecorator(value, 'Inject')!;
+    const token = getDecoratorArgument(decorator, 'Inject');
+
+    if (!token || !ts.isIdentifier(token)) {
+      throw new Error('Inject must have a token');
     }
 
-    // then we need to get the first argument of the decorator
-    const token = decorator?.expression.arguments[0];
+    return { name, token, type };
+  },
+  Provider(value) {
+    // get the name of the provider
+    const name = getPropertyName(value);
+
+    const decorator = getDecorator(value, 'Provider')!;
+    const token = getDecoratorArgument(decorator, 'Provider');
 
     if (!token || !ts.isIdentifier(token)) {
       throw new Error('Provider must have a token');

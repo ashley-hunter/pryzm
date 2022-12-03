@@ -388,17 +388,4 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
       throw new Error(`Provider "${provider.name.getText()}" must be readonly`);
     }
   });
-
-  // ensure that dependencies are readonly
-  metadata.injects.forEach((dependency) => {
-    if (
-      !dependency.modifiers?.some(
-        (m) => m.kind === ts.SyntaxKind.ReadonlyKeyword
-      )
-    ) {
-      throw new Error(
-        `Dependency "${dependency.name.getText()}" must be readonly`
-      );
-    }
-  });
 }
