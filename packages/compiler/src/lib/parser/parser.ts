@@ -10,6 +10,12 @@ export function parseFile(code: string): ComponentMetadata[] {
     ts.ScriptKind.TSX
   );
 
+  return parseSourceFile(sourceFile);
+}
+
+export function parseSourceFile(
+  sourceFile: ts.SourceFile
+): ComponentMetadata[] {
   const components = getComponents(sourceFile);
 
   return components.map((component) =>
@@ -386,6 +392,19 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
       !provider.modifiers?.some((m) => m.kind === ts.SyntaxKind.ReadonlyKeyword)
     ) {
       throw new Error(`Provider "${provider.name.getText()}" must be readonly`);
+    }
+  });
+
+  // ensure the dependencies are readonly
+  metadata.injects.forEach((dependency) => {
+    if (
+      !dependency.modifiers?.some(
+        (m) => m.kind === ts.SyntaxKind.ReadonlyKeyword
+      )
+    ) {
+      throw new Error(
+        `Dependency "${dependency.name.getText()}" must be readonly`
+      );
     }
   });
 }

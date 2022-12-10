@@ -1,34 +1,31 @@
+import { join } from 'path';
 import * as ts from 'typescript';
+import { parseSourceFile } from '../parser/parser';
 
-/**
- * Create a typescript program given the path to the tsconfig file
- */
-export function createTypescriptContext(
-  tsConfigPath: string,
-  basePath: string,
-  compilerOptions: ts.CompilerOptions = {}
-) {
-  const { config, error } = ts.readConfigFile(tsConfigPath, ts.sys.readFile);
-  if (error) {
-    throw new Error(error.messageText.toString());
-  }
-  const parsedConfig = ts.parseJsonConfigFileContent(
+export function runCLI(tsconfig: string): void {
+  const path = join(__dirname, '../../../../example');
+  const tsconfigPath = join(path, 'tsconfig.lib.json');
+
+  // load tsconfig.json file
+  const { config } = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+
+  const { options, fileNames, errors } = ts.parseJsonConfigFileContent(
     config,
     ts.sys,
-    basePath,
-    compilerOptions
-  );
-  const program = ts.createProgram(
-    parsedConfig.fileNames,
-    parsedConfig.options
+    path
   );
 
-  // create type checker
-  const typeChecker = program.getTypeChecker();
+  const program = ts.createProgram({
+    options,
+    rootNames: fileNames,
+    configFileParsingDiagnostics: errors,
+  });
 
-  return {
-    program,
-    compilerOptions: parsedConfig.options,
-    typeChecker,
-  };
+  // get the source files
+  const sourceFiles = program.getSourceFiles();
+
+  // transform source files
+  sourceFiles.forEach((sourceFile) => {
+    parseSourceFile(sourceFile);
+  });
 }
