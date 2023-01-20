@@ -183,7 +183,7 @@ function getMethods(component: ts.ClassDeclaration): ts.MethodDeclaration[] {
 
 function getTemplate(
   component: ts.ClassDeclaration
-): ts.JsxElement | ts.JsxFragment | ts.JsxSelfClosingElement {
+): ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement {
   // find the render method
   let renderMethod: ts.MethodDeclaration | undefined;
 
@@ -231,8 +231,8 @@ function getTemplate(
   // the return value must be a JSX element or fragment or throw an error
   if (
     !ts.isJsxElement(returnValue) &&
-    !ts.isJsxFragment(returnValue) &&
-    !ts.isJsxSelfClosingElement(returnValue)
+    !ts.isJsxSelfClosingElement(returnValue) &&
+    !ts.isJsxFragment(returnValue)
   ) {
     throw new Error('Render method must return a JSX element or fragment');
   }

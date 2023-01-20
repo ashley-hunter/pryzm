@@ -15,6 +15,7 @@ export type TransformerResult<T extends Transformer> = {
   refs: TransformerFn<T, 'Ref'>[];
   providers: TransformerFn<T, 'Provider'>[];
   injects: TransformerFn<T, 'Inject'>[];
+  template: TransformerFn<T, 'Template'>;
   imports: ts.ImportDeclaration[];
   name: string;
 };
@@ -28,6 +29,9 @@ export interface Transformer {
   Computed?: (value: ts.GetAccessorDeclaration) => any;
   Provider?: (value: ts.PropertyDeclaration) => any;
   Inject?: (value: ts.PropertyDeclaration) => any;
+  Template?: (
+    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement
+  ) => any;
   PostTransform?: (
     metadata: TransformerResult<Transformer>
   ) => TransformerResult<Transformer>;
@@ -59,6 +63,9 @@ export function transform<T extends Transformer>(
   const refs = metadata.refs.map(transformer.Ref ?? noop);
   const providers = metadata.providers.map(transformer.Provider ?? noop);
   const injects = metadata.injects.map(transformer.Inject ?? noop);
+  const template = transformer.Template
+    ? transformer.Template(metadata.template)
+    : metadata.template;
 
   const result: TransformerResult<Transformer> = {
     ...metadata,
@@ -70,6 +77,7 @@ export function transform<T extends Transformer>(
     refs,
     providers,
     injects,
+    template,
   };
 
   return transformer.PostTransform ? transformer.PostTransform(result) : result;

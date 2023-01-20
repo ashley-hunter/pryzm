@@ -10,6 +10,6 @@ export interface ComponentMetadata {
   refs: ts.PropertyDeclaration[];
   providers: ts.PropertyDeclaration[];
   injects: ts.PropertyDeclaration[];
-  template: ts.JsxElement | ts.JsxFragment | ts.JsxSelfClosingElement;
+  template: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement;
   imports: ts.ImportDeclaration[];
 }

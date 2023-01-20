@@ -1,11 +1,8 @@
 import * as ts from 'typescript';
 
-export function stripParentNode<T extends ts.Node, R extends ts.Node = T>(
-  node: T
-): R {
+export function stripParentNode<T extends ts.Node>(node: T): T {
   // run the ts transformer
-  return ts.transform(node, [stripParentNodeTransformer()])
-    .transformed[0] as unknown as R;
+  return ts.transform(node, [stripParentNodeTransformer()]).transformed[0];
 }
 
 // create a ts transformer factory
