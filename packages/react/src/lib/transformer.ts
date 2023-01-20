@@ -189,7 +189,7 @@ export const transformer: ReactTransformer = {
     return { name, statement };
   },
   Method(method) {
-    let name = getPropertyName(method);
+    const name = getPropertyName(method);
 
     // scan the body for any dependencies
     const dependencies = findDependencies(method.body!);

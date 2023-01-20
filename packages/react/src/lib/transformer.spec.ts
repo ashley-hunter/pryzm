@@ -681,7 +681,7 @@ describe('React Transformer', () => {
 
       @Component()
       export class Test {
-        @Inject(SomeToken) test: Service;
+        @Inject(SomeToken) readonly test: Service;
 
         render() {
           return <div />;
@@ -695,6 +695,26 @@ describe('React Transformer', () => {
       expect(inject.name).toBe('test');
       expect(printNode(inject.token)).toBe('SomeToken');
       expect(printNode(inject.type!)).toBe('Service');
+    });
+
+    // should throw if not readonly
+    it('should throw if not readonly', () => {
+      const source = `
+      import { Component, Inject } from '@pryzm/core';
+
+      @Component()
+      export class Test {
+        @Inject(SomeToken) test: Service;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      expect(() =>
+        transform(source, transformer)
+      ).toThrowErrorMatchingInlineSnapshot('"Dependency \\"test\\" must be readonly"');
     });
   });
 

@@ -37,14 +37,6 @@
         }
       }
     },
-    "test": {
-      "executor": "@nrwl/vite:test",
-      "outputs": ["coverage/apps/playground"],
-      "options": {
-        "passWithNoTests": true,
-        "reportsDirectory": "../../coverage/apps/playground"
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

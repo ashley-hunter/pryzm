@@ -5,24 +5,32 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
 import { useMemo, useState } from 'react';
 import Editor from 'react-simple-code-editor';
-import ts from 'typescript';
-
-const printer = ts.createPrinter();
 
 export function App() {
   const [code, setCode] = useState(`function add(a, b) {\n  return a + b;\n}`);
-  const output = useMemo(() => {
-    debugger;
-    const transformed = transform(code, transformer)[0];
+  const [error, setError] = useState<Error | null>(null);
 
-    return transformed
-      ? printer.printNode(
-          ts.EmitHint.Unspecified,
-          transformed as any,
-          null as any
-        )
-      : '';
-  }, [code]);
+  const output = useMemo(() => {
+    try {
+      const metadata = transform(code, transformer);
+      setError(null);
+      return `
+import React from 'react';
+
+
+export const ${metadata.name} = ({${metadata.props
+        .map((prop) => prop.name)
+        .join(', ')}}: ${metadata.name}Props) => {
+  return (
+    <div>To be implemented</div>
+  );
+};
+      `;
+    } catch (e) {
+      setError(e as Error);
+      return '';
+    }
+  }, [code, setError]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -50,7 +58,7 @@ export function App() {
       </nav>
       <div className="flex flex-1">
         <Editor
-          className="flex-1 border-r h-full"
+          className="flex-1 border-r h-full outline-none"
           value={code}
           onValueChange={(code) => setCode(code)}
           highlight={(code) => highlight(code, languages.js)}
@@ -60,18 +68,28 @@ export function App() {
             fontSize: 12,
           }}
         />
-        <Editor
-          className="flex-1 h-full"
-          value={output}
-          onValueChange={(code) => {}}
-          highlight={(code) => highlight(code, languages.js)}
-          padding={10}
-          disabled
-          style={{
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 12,
-          }}
-        />
+
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 flex-1">
+            <p className="font-bold">Error</p>
+            <p>{error.message}</p>
+          </div>
+        )}
+
+        {!error && (
+          <Editor
+            className="flex-1 h-full"
+            value={output}
+            onValueChange={(code) => {}}
+            highlight={(code) => highlight(code, languages.js)}
+            padding={10}
+            disabled
+            style={{
+              fontFamily: '"Fira code", "Fira Mono", monospace',
+              fontSize: 12,
+            }}
+          />
+        )}
       </div>
     </div>
   );

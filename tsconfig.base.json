@@ -20,7 +20,7 @@
       "@pryzm/core": ["packages/core/src/index.ts"],
       "@pryzm/core/jsx-runtime": ["packages/core/src/jsx-runtime.d.ts"],
       "@pryzm/example": ["packages/example/src/index.ts"],
-      "@emlazon/react": ["packages/react/src/index.ts"]
+      "@pryzm/react": ["packages/react/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
