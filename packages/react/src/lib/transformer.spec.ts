@@ -714,7 +714,161 @@ describe('React Transformer', () => {
 
       expect(() =>
         transform(source, transformer)
-      ).toThrowErrorMatchingInlineSnapshot('"Dependency \\"test\\" must be readonly"');
+      ).toThrowErrorMatchingInlineSnapshot(
+        '"Dependency \\"test\\" must be readonly"'
+      );
+    });
+  });
+
+  describe('Imports', () => {
+    it('should remove any @pryzm/core imports', () => {
+      const source = `
+      import { Component, Inject, State } from '@pryzm/core';
+
+      @Component()
+      export class Test {
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+
+      expect(component.imports.length).toBe(0);
+    });
+
+    it('should import useState whenever @State is defined', () => {
+      const source = `
+      import { Component, State } from '@pryzm/core';
+
+      @Component()
+      export class Test {
+        @State() name: string = 'John';
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+
+      expect(component.imports.length).toBe(1);
+      expect(printNode(component.imports[0])).toBe(
+        'import { useState } from "react";'
+      );
+    });
+
+    it('should import useMemo whenever @Computed is defined', () => {
+      const source = `
+      import { Component, Computed } from '@pryzm/core';
+
+      @Component()
+      export class Test {
+        @Computed() get name() {
+          return 'John';
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+
+      expect(component.imports.length).toBe(1);
+      expect(printNode(component.imports[0])).toBe(
+        'import { useMemo } from "react";'
+      );
+    });
+
+    it('should import useCallback whenever @Method is defined', () => {
+      const source = `
+      import { Component, Method } from '@pryzm/core';
+
+      @Component()
+      export class Test {
+        @Method() test() {}
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+
+      expect(component.imports.length).toBe(1);
+      expect(printNode(component.imports[0])).toBe(
+        'import { useCallback } from "react";'
+      );
+    });
+
+    it('should import useRef whenever @Ref is defined', () => {
+      const source = `
+      import { Component, Ref } from '@pryzm/core';
+
+      @Component()
+      export class Test {
+        @Ref() test: HTMLDivElement;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+
+      expect(component.imports.length).toBe(1);
+      expect(printNode(component.imports[0])).toBe(
+        'import { useRef } from "react";'
+      );
+    });
+
+    it('should import useContext whenever @Inject is defined', () => {
+      const source = `
+      import { Component, Inject } from '@pryzm/core';
+
+      @Component()
+      export class Test {
+        @Inject(SomeToken) readonly test: Service;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+
+      expect(component.imports.length).toBe(1);
+      expect(printNode(component.imports[0])).toBe(
+        'import { useContext } from "react";'
+      );
+    });
+
+    it('should retain any other imports', () => {
+      const source = `
+      import { Component } from '@pryzm/core';
+      import { SomeOtherThing } from 'some-other-package';
+
+      @Component()
+      export class Test {
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+
+      expect(component.imports.length).toBe(1);
+      expect(printNode(component.imports[0])).toBe(
+        'import { SomeOtherThing } from "some-other-package";'
+      );
     });
   });
 

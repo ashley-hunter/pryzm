@@ -206,6 +206,55 @@ export const transformer: ReactTransformer = {
     return { name, statement, dependencies };
   },
   PostTransform(metadata) {
+    // remove any imports from @pryzm/core
+    metadata.imports = metadata.imports.filter(
+      (i) => !i.moduleSpecifier.getText().includes('@pryzm/core')
+    );
+
+    // insert the required React imports
+    const reactImports: ts.ImportSpecifier[] = [];
+
+    // add the useState import if there are any states
+    if (metadata.states.length) {
+      reactImports.push(createImportSpecifier('useState'));
+    }
+
+    // add the useMemo import if there are any computed properties
+    if (metadata.computed.length) {
+      reactImports.push(createImportSpecifier('useMemo'));
+    }
+
+    // add the useCallback import if there are any methods
+    if (metadata.methods.length) {
+      reactImports.push(createImportSpecifier('useCallback'));
+    }
+
+    // add the useRef import if there are any refs
+    if (metadata.refs.length) {
+      reactImports.push(createImportSpecifier('useRef'));
+    }
+
+    // add the useContext import if there are any injects
+    if (metadata.injects.length) {
+      reactImports.push(createImportSpecifier('useContext'));
+    }
+
+    // Todo: provider
+
+    if (reactImports.length) {
+      metadata.imports.push(
+        factory.createImportDeclaration(
+          undefined,
+          factory.createImportClause(
+            false,
+            undefined,
+            factory.createNamedImports(reactImports)
+          ),
+          factory.createStringLiteral('react')
+        )
+      );
+    }
+
     // find all events and rename to include the on prefix
     const eventsToRename = metadata.events.filter(
       (event) => event.name !== eventName(event.name)
@@ -219,3 +268,11 @@ export const transformer: ReactTransformer = {
     return metadata;
   },
 };
+
+function createImportSpecifier(name: string) {
+  return factory.createImportSpecifier(
+    false,
+    undefined,
+    factory.createIdentifier(name)
+  );
+}
