@@ -53,6 +53,8 @@ export function createComponent(metadata: TransformerResult<ReactTransformer>) {
                 factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
                 factory.createBlock(
                   [
+                    ...metadata.states.map((state) => state.statement),
+                    ...metadata.computed.map((computed) => computed.statement),
                     factory.createReturnStatement(
                       factory.createJsxSelfClosingElement(
                         factory.createIdentifier('div'),

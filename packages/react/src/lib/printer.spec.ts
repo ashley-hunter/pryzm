@@ -59,4 +59,66 @@ describe('React Printer', () => {
       "
     `);
   });
+
+  it('should print a component with states', () => {
+    const source = `
+      @Component()
+      export class MyComponent {
+        @State() name: string = 'John Doe';
+
+        render() {
+          return <div>Hello World</div>;
+        }
+      }
+    `;
+
+    const result = print(source);
+
+    expect(result).toMatchInlineSnapshot(`
+      "import { useState } from \\"react\\";
+      export interface MyComponentProps {
+      }
+      export const MyComponent = forwardRef<HTMLElement, MyComponentProps>(({}, ref) => {
+          const [name, setName] = useState<string>(\\"John Doe\\");
+          return <div />;
+      });
+      "
+    `);
+  });
+
+  it('should print a component with computed properties', () => {
+    const source = `
+      @Component()
+      export class MyComponent {
+        @State() firstName: string = 'John';
+
+        @State() lastName: string = 'Smith';
+
+        @Computed() get fullName() {
+          return this.firstName + ' ' + this.lastName;
+        };
+
+        render() {
+          return <div>Hello World</div>;
+        }
+      }
+    `;
+
+    const result = print(source);
+
+    expect(result).toMatchInlineSnapshot(`
+      "import { useState, useMemo } from \\"react\\";
+      export interface MyComponentProps {
+      }
+      export const MyComponent = forwardRef<HTMLElement, MyComponentProps>(({}, ref) => {
+          const [firstName, setFirstName] = useState<string>(\\"John\\");
+          const [lastName, setLastName] = useState<string>(\\"Smith\\");
+          const fullName = useMemo(() => {
+              return firstName + \\" \\" + lastName;
+          }, [firstName, lastName]);
+          return <div />;
+      });
+      "
+    `);
+  });
 });

@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { stripParentNode } from './strip-parent-node';
 import { isThisExpression } from './typing';
 
 export function stripThis<T extends ts.Node, R extends ts.Node = T>(
@@ -7,8 +8,9 @@ export function stripThis<T extends ts.Node, R extends ts.Node = T>(
   if (!node) {
     return node;
   }
+
   // run the ts transformer
-  return ts.transform(node, [stripThisTransformer()])
+  return ts.transform(stripParentNode(node), [stripThisTransformer()])
     .transformed[0] as unknown as R;
 }
 

@@ -12,6 +12,7 @@ import {
   createFunctionTypeNode,
   createInterfaceProperty,
 } from './ast/misc';
+import { addComment, extractComment } from './utils/comment';
 import { findDependencies } from './utils/find-dependencies';
 import { eventName, setterName } from './utils/names';
 import { renameIdentifierOccurences } from './utils/rename';
@@ -74,6 +75,9 @@ export const transformer: ReactTransformer = {
     // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
     const statement = useMemo(name, computed.body!, dependencies);
 
+    // add the comments back to the statement
+    addComment(statement, extractComment(computed));
+
     return { name, statement, dependencies };
   },
   Prop(prop) {
@@ -109,6 +113,9 @@ export const transformer: ReactTransformer = {
 
     // convert the property to a useState hook
     const statement = useState(getter, setter, initializer, type);
+
+    // add the comments back to the statement
+    addComment(statement, extractComment(state));
 
     return { getter, setter, statement };
   },

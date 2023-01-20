@@ -19,6 +19,9 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
     // find any assignments that use "this"
     if (
       ts.isBinaryExpression(node) &&
+      // and check that the operator is an assignment
+      ts.isToken(node.operatorToken) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
       ts.isPropertyAccessExpression(node.left) &&
       isThisExpression(node.left.expression)
     ) {

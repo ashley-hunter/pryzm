@@ -6,7 +6,7 @@ describe('Assignment', () => {
     const source = `this.test = 'test';`;
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "setTest('test');
+      "setTest(\\"test\\");
       "
     `);
   });
@@ -16,7 +16,7 @@ describe('Assignment', () => {
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "setTest({ ...test, test: 'new' });
+      "setTest({ ...test, test: \\"new\\" });
       "
     `);
   });
@@ -26,7 +26,7 @@ describe('Assignment', () => {
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "setTest(['new']);
+      "setTest([\\"new\\"]);
       "
     `);
   });
@@ -36,7 +36,7 @@ describe('Assignment', () => {
 
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
-      "setTest([...test, 'new']);
+      "setTest([...test, \\"new\\"]);
       "
     `);
   });
@@ -68,7 +68,7 @@ describe('Assignment', () => {
     expect(result).toMatchInlineSnapshot(`
       "setTest(test => ({
           ...test,
-          test: 'new'
+          test: \\"new\\"
       }));
       "
     `);
@@ -81,7 +81,7 @@ describe('Assignment', () => {
     expect(result).toMatchInlineSnapshot(`
       "setTest(test => ({
           ...test,
-          test: { ...test.test, new: 'value' }
+          test: { ...test.test, new: \\"value\\" }
       }));
       "
     `);
@@ -93,7 +93,7 @@ describe('Assignment', () => {
     const result = transform(source);
     expect(result).toMatchInlineSnapshot(`
       "setTest(test => {
-          test.push('new');
+          test.push(\\"new\\");
           return test;
       });
       "

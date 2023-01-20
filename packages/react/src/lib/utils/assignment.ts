@@ -290,5 +290,11 @@ function getPropertyName(node: ts.PropertyAccessExpression): string {
     expression = expression.expression;
   }
 
-  return expression.name.getText();
+  // print the node name
+  const printer = ts.createPrinter();
+  return printer.printNode(
+    ts.EmitHint.Unspecified,
+    expression.name,
+    null as any
+  );
 }
