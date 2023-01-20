@@ -1,4 +1,4 @@
-import { transform } from '@pryzm/compiler';
+import { transform } from '@emblazon/compiler';
 import * as ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { transformer } from './transformer';
@@ -9,7 +9,7 @@ describe('React Transformer', () => {
   describe('State', () => {
     it('should transform state into a useState hook', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test: string;
@@ -19,7 +19,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -31,7 +31,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default value', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test: string = 'test';
@@ -41,7 +41,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -53,7 +53,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default value without a type', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test = 'test';
@@ -63,7 +63,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -75,7 +75,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default value from a function', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test = () => 'test';
@@ -86,7 +86,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -98,7 +98,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default number value', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test: number = 1;
@@ -108,7 +108,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -120,7 +120,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default boolean value', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test: boolean = true;
@@ -130,7 +130,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -142,7 +142,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default array value', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test: string[] = ['test'];
@@ -152,7 +152,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -164,7 +164,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default object value', () => {
       const source = `
-      import { Component, State } from '@pryzm/core';
+      import { Component, State } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test: { test: string } = { test: 'test' };
@@ -174,7 +174,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -188,7 +188,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook resolving `this` in property accesses', () => {
       const source = `
-      import { Component, State, Prop } from '@pryzm/core';
+      import { Component, State, Prop } from '@emblazon/core';
       @Component()
       export class Test {
         @Prop() readonly name: string;
@@ -199,7 +199,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -211,7 +211,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook resolving `this` in call expressions', () => {
       const source = `
-      import { Component, State, Prop } from '@pryzm/core';
+      import { Component, State, Prop } from '@emblazon/core';
       @Component()
       export class Test {
         @State() test: string = this.name();
@@ -225,7 +225,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const state = component.states[0];
 
       expect(state.getter).toBe('test');
@@ -239,7 +239,7 @@ describe('React Transformer', () => {
   describe('Prop', () => {
     it('should transform prop into a property', () => {
       const source = `
-      import { Component, Prop } from '@pryzm/core';
+      import { Component, Prop } from '@emblazon/core';
       @Component()
       export class Test {
         /** Define the value of the test prop */
@@ -250,7 +250,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
@@ -265,7 +265,7 @@ describe('React Transformer', () => {
 
     it('should transform prop into a property with a default value', () => {
       const source = `
-      import { Component, Prop } from '@pryzm/core';
+      import { Component, Prop } from '@emblazon/core';
       @Component()
       export class Test {
         @Prop() readonly test: string = 'test';
@@ -275,7 +275,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
@@ -289,7 +289,7 @@ describe('React Transformer', () => {
 
     it('should transform prop into a property with a default value from a function', () => {
       const source = `
-      import { Component, Prop } from '@pryzm/core';
+      import { Component, Prop } from '@emblazon/core';
       @Component()
       export class Test {
         @Prop() readonly test = () => 'test';
@@ -299,7 +299,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
@@ -315,7 +315,7 @@ describe('React Transformer', () => {
   describe('Computed', () => {
     it('should transform computed into a useMemo', () => {
       const source = `
-      import { Component, Computed } from '@pryzm/core';
+      import { Component, Computed } from '@emblazon/core';
 
       @Component()
       export class Test {
@@ -328,7 +328,7 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const computed = component.computed[0];
 
       expect(computed.name).toBe('test');
@@ -341,7 +341,7 @@ describe('React Transformer', () => {
 
     it('should transform computed into a useMemo with dependencies', () => {
       const source = `
-      import { Component, Computed } from '@pryzm/core';
+      import { Component, Computed } from '@emblazon/core';
 
       @Component()
       export class Test {
@@ -358,17 +358,14 @@ describe('React Transformer', () => {
         }
       }
     `;
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const computed = component.computed[0];
 
       expect(computed.name).toBe('test');
       expect(printNode(computed.statement)).toMatchInlineSnapshot(`
         "const test = useMemo(() => {
             return \`\${firstName} \${lastName}\`;
-        }, [
-            firstName,
-            lastName
-        ]);"
+        }, [firstName, lastName]);"
       `);
     });
   });
@@ -376,7 +373,7 @@ describe('React Transformer', () => {
   describe('Ref', () => {
     it('should transform ref into a useRef', () => {
       const source = `
-      import { Component, Ref } from '@pryzm/core';
+      import { Component, Ref } from '@emblazon/core';
 
       @Component()
       export class Test {
@@ -388,7 +385,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const ref = component.refs[0];
 
       expect(ref.name).toBe('test');
@@ -399,7 +396,7 @@ describe('React Transformer', () => {
 
     it('should transform ref into a useRef with no type', () => {
       const source = `
-      import { Component, Ref } from '@pryzm/core';
+      import { Component, Ref } from '@emblazon/core';
 
       @Component()
       export class Test {
@@ -411,13 +408,293 @@ describe('React Transformer', () => {
       }
     `;
 
-      const component = transform(source, transformer)[0];
+      const component = transform(source, transformer);
       const ref = component.refs[0];
 
       expect(ref.name).toBe('test');
       expect(printNode(ref.statement)).toMatchInlineSnapshot(
         '"const test = useRef<HTMLElement>(null);"'
       );
+    });
+  });
+
+  describe('Method', () => {
+    it('should transform method into a useCallback function', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        test() {
+          return 'test';
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            return \\"test\\";
+        }, []);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with dependencies', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() firstName: string = 'John';
+        @State() lastName: string = 'Doe';
+
+        test() {
+          return \`\${this.firstName} \${this.lastName}\`;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            return \`\${firstName} \${lastName}\`;
+        }, [firstName, lastName]);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a parameter', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        test(value: string) {
+          return value;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback((value: string) => {
+            return value;
+        }, []);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a parameter and dependencies', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() firstName: string = 'John';
+        @State() lastName: string = 'Doe';
+
+        test(value: string) {
+          return \`\${this.firstName} \${this.lastName} \${value}\`;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback((value: string) => {
+            return \`\${firstName} \${lastName} \${value}\`;
+        }, [firstName, lastName]);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a dependency on another method', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() firstName: string = 'John';
+        @State() lastName: string = 'Doe';
+
+        test() {
+          return this.calculate();
+        }
+
+        calculate() {
+          return \`\${this.firstName} \${this.lastName}\`;
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer);
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            return calculate();
+        }, [calculate]);"
+      `);
+    });
+
+    it('should transform method into a useCallback function with a dependency on a setter', () => {
+      const source = `
+      import { Component } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @State() name: string = 'John';
+
+        test() {
+          this.name = 'Doe';
+        }
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer);
+      const method = component.methods[0];
+
+      expect(method.name).toBe('test');
+      expect(printNode(method.statement)).toMatchInlineSnapshot(`
+        "const test = useCallback(() => {
+            setName(\\"Doe\\");
+        }, [setName]);"
+      `);
+    });
+  });
+
+  describe('Event', () => {
+    it('should transform event into a property', () => {
+      const source = `
+      import { Component, Event, EventEmitter } from '@emblazon/core';
+      @Component()
+      export class Test {
+        /** Define the test event emitter */
+        @Event() readonly test = new EventEmitter<string>();
+
+        render() {
+          return <div onClick={this.test.emit('')} />;
+        }
+      }
+    `;
+      const component = transform(source, transformer);
+      const event = component.events[0];
+
+      expect(event.name).toBe('onTest');
+      expect(printNode(event.interfaceProperty)).toMatchInlineSnapshot(`
+        "/* Define the test event emitter */
+        onTest: (event: string) => void;"
+      `);
+      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
+        '"onTest"'
+      );
+    });
+
+    it('should transform event into a property with no type', () => {
+      const source = `
+      import { Component, Event, EventEmitter } from '@emblazon/core';
+      @Component()
+      export class Test {
+        /** Define the test event emitter */
+        @Event() readonly test = new EventEmitter();
+
+        render() {
+          return <div onClick={this.test.emit()} />;
+        }
+      }
+    `;
+      const component = transform(source, transformer);
+      const event = component.events[0];
+
+      expect(event.name).toBe('onTest');
+      expect(printNode(event.interfaceProperty)).toMatchInlineSnapshot(`
+        "/* Define the test event emitter */
+        onTest: () => void;"
+      `);
+      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
+        '"onTest"'
+      );
+    });
+  });
+
+  describe('Providers', () => {
+    it('should transform provider into a property', () => {
+      const source = `
+      import { Component, Provider } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @Provider(SomeToken) readonly test = new Service();
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+      const component = transform(source, transformer);
+      const provider = component.providers[0];
+
+      expect(provider.name).toBe('test');
+      expect(provider.token.text).toBe('SomeToken');
+      expect(printNode(provider.statement)).toMatchInlineSnapshot(
+        '"const test = useRef(new Service());"'
+      );
+    });
+  });
+
+  describe('Inject', () => {
+    it('should extract the inject name, token and type', () => {
+      const source = `
+      import { Component, Inject } from '@emblazon/core';
+
+      @Component()
+      export class Test {
+        @Inject(SomeToken) test: Service;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+      const inject = component.injects[0];
+
+      expect(inject.name).toBe('test');
+      expect(printNode(inject.token)).toBe('SomeToken');
+      expect(printNode(inject.type!)).toBe('Service');
     });
   });
 

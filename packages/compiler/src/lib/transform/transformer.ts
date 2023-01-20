@@ -15,6 +15,8 @@ export type TransformerResult<T extends Transformer> = {
   refs: TransformerFn<T, 'Ref'>[];
   providers: TransformerFn<T, 'Provider'>[];
   injects: TransformerFn<T, 'Inject'>[];
+  imports: ts.ImportDeclaration[];
+  name: string;
 };
 
 export interface Transformer {
@@ -26,6 +28,9 @@ export interface Transformer {
   Computed?: (value: ts.GetAccessorDeclaration) => any;
   Provider?: (value: ts.PropertyDeclaration) => any;
   Inject?: (value: ts.PropertyDeclaration) => any;
+  PostTransform?: (
+    metadata: TransformerResult<Transformer>
+  ) => TransformerResult<Transformer>;
 }
 
 const noop = <T>(value: T) => value;
@@ -33,28 +38,39 @@ const noop = <T>(value: T) => value;
 export function transform<T extends Transformer>(
   source: string,
   transformer: T
-): TransformerResult<T>[] {
+): TransformerResult<T> {
   const components = parseFile(source);
 
-  return components.map<TransformerResult<T>>((metadata) => {
-    const props = metadata.props.map(transformer.Prop ?? noop);
-    const states = metadata.state.map(transformer.State ?? noop);
-    const computed = metadata.computed.map(transformer.Computed ?? noop);
-    const events = metadata.events.map(transformer.Event ?? noop);
-    const methods = metadata.methods.map(transformer.Method ?? noop);
-    const refs = metadata.refs.map(transformer.Ref ?? noop);
-    const providers = metadata.providers.map(transformer.Provider ?? noop);
-    const injects = metadata.injects.map(transformer.Inject ?? noop);
+  if (components.length === 0) {
+    throw new Error('No components found');
+  }
 
-    return {
-      props,
-      states,
-      computed,
-      events,
-      methods,
-      refs,
-      providers,
-      injects,
-    };
-  });
+  if (components.length > 1) {
+    throw new Error('Multiple components found');
+  }
+
+  const metadata = components[0];
+
+  const props = metadata.props.map(transformer.Prop ?? noop);
+  const states = metadata.state.map(transformer.State ?? noop);
+  const computed = metadata.computed.map(transformer.Computed ?? noop);
+  const events = metadata.events.map(transformer.Event ?? noop);
+  const methods = metadata.methods.map(transformer.Method ?? noop);
+  const refs = metadata.refs.map(transformer.Ref ?? noop);
+  const providers = metadata.providers.map(transformer.Provider ?? noop);
+  const injects = metadata.injects.map(transformer.Inject ?? noop);
+
+  const result: TransformerResult<Transformer> = {
+    ...metadata,
+    props,
+    states,
+    computed,
+    events,
+    methods,
+    refs,
+    providers,
+    injects,
+  };
+
+  return transformer.PostTransform ? transformer.PostTransform(result) : result;
 }

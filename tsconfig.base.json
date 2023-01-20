@@ -15,9 +15,12 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@pryzm/compiler": ["packages/compiler/src/index.ts"],
-      "@pryzm/core": ["packages/core/src/index.ts"],
-      "@pryzm/react": ["packages/react/src/index.ts"]
+      "@emblazon/ast-utils": ["packages/ast-utils/src/index.ts"],
+      "@emblazon/compiler": ["packages/compiler/src/index.ts"],
+      "@emblazon/core": ["packages/core/src/index.ts"],
+      "@emblazon/core/jsx-runtime": ["packages/core/src/jsx-runtime.d.ts"],
+      "@emblazon/example": ["packages/example/src/index.ts"],
+      "@emlazon/react": ["packages/react/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

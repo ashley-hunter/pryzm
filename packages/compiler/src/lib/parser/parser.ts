@@ -10,6 +10,12 @@ export function parseFile(code: string): ComponentMetadata[] {
     ts.ScriptKind.TSX
   );
 
+  return parseSourceFile(sourceFile);
+}
+
+export function parseSourceFile(
+  sourceFile: ts.SourceFile
+): ComponentMetadata[] {
   const components = getComponents(sourceFile);
 
   return components.map((component) =>
@@ -389,7 +395,7 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
     }
   });
 
-  // ensure that dependencies are readonly
+  // ensure the dependencies are readonly
   metadata.injects.forEach((dependency) => {
     if (
       !dependency.modifiers?.some(

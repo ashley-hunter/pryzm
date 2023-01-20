@@ -1,0 +1,33 @@
+{
+  "name": "ast-utils",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ast-utils/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/ast-utils",
+        "main": "packages/ast-utils/src/index.ts",
+        "tsConfig": "packages/ast-utils/tsconfig.lib.json",
+        "assets": ["packages/ast-utils/*.md"]
+      }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/scripts/publish.mjs ast-utils {args.ver} {args.tag}"
+      },
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/ast-utils/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}
