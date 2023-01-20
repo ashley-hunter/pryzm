@@ -31,7 +31,7 @@ describe('React Printer', () => {
         @Prop() readonly name: string;
 
         /** Define the age of the user */
-        @Prop() readonly age: number;
+        @Prop() readonly age: number = 10;
 
         /** Define if the user is optional */
         @Prop() readonly optional?: boolean;
@@ -53,7 +53,7 @@ describe('React Printer', () => {
           /* Define if the user is optional */
           optional?: boolean;
       }
-      export const MyComponent = forwardRef<HTMLElement, MyComponentProps>(({ name, age, optional }, ref) => {
+      export const MyComponent = forwardRef<HTMLElement, MyComponentProps>(({ name, age = 10, optional }, ref) => {
           return <div />;
       });
       "

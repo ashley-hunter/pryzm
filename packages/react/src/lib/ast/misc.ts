@@ -33,6 +33,12 @@ export function createDestructuredProperty(
   name: string,
   initializer?: ts.Expression
 ): ts.BindingElement {
+  // if there is an initializer, then remove the parent from it as it causes issues
+  // when printing the source file
+  if (initializer) {
+    (initializer as Mutable<ts.Node>).parent = undefined as any;
+  }
+
   return ts.factory.createBindingElement(
     undefined,
     undefined,
@@ -59,3 +65,7 @@ export function createFunctionTypeNode(type?: ts.TypeNode) {
     ts.factory.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword)
   );
 }
+
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
