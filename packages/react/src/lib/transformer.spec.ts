@@ -263,6 +263,31 @@ describe('React Transformer', () => {
       );
     });
 
+    it('should transform an optional prop into a property', () => {
+      const source = `
+      import { Component, Prop } from '@pryzm/core';
+      @Component()
+      export class Test {
+        @Prop() readonly test?: string;
+
+        render() {
+          return <div />;
+        }
+      }
+    `;
+
+      const component = transform(source, transformer);
+      const prop = component.props[0];
+
+      expect(prop.name).toBe('test');
+      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot(
+        '"test?: string;"'
+      );
+      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
+        '"test"'
+      );
+    });
+
     it('should transform prop into a property with a default value', () => {
       const source = `
       import { Component, Prop } from '@pryzm/core';

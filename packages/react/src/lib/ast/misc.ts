@@ -4,12 +4,17 @@ import { addComment, extractComment } from '../utils/comment';
 export function createInterfaceProperty(
   name: string,
   type: ts.TypeNode | ts.FunctionTypeNode,
-  source: ts.Node
+  source: ts.PropertyDeclaration
 ): ts.PropertySignature {
+  // determine if the property is optional
+  const isOptional = source.questionToken !== undefined;
+
   const signature = ts.factory.createPropertySignature(
     undefined,
     name,
-    undefined,
+    isOptional
+      ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
+      : undefined,
     type
   );
 

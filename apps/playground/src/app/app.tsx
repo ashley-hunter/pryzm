@@ -1,5 +1,4 @@
-import { transform } from '@pryzm/compiler';
-import { transformer } from '@pryzm/react';
+import { print } from '@pryzm/react';
 import { highlight, languages } from 'prismjs';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
@@ -7,25 +6,13 @@ import { useMemo, useState } from 'react';
 import Editor from 'react-simple-code-editor';
 
 export function App() {
-  const [code, setCode] = useState(`function add(a, b) {\n  return a + b;\n}`);
+  const [code, setCode] = useState(`// Start typing here...`);
   const [error, setError] = useState<Error | null>(null);
 
   const output = useMemo(() => {
+    setError(null);
     try {
-      const metadata = transform(code, transformer);
-      setError(null);
-      return `
-import React from 'react';
-
-
-export const ${metadata.name} = ({${metadata.props
-        .map((prop) => prop.name)
-        .join(', ')}}: ${metadata.name}Props) => {
-  return (
-    <div>To be implemented</div>
-  );
-};
-      `;
+      return print(code);
     } catch (e) {
       setError(e as Error);
       return '';
