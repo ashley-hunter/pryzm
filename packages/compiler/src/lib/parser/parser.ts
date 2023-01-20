@@ -1,3 +1,4 @@
+import { getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { ComponentMetadata } from './component-metadata';
 
@@ -76,7 +77,7 @@ function getComponentName(component: ts.ClassDeclaration): string {
     throw new Error('Component class must have a name');
   }
 
-  return component.name.getText();
+  return getText(component.name);
 }
 
 function getImports(sourceFile: ts.SourceFile): ts.ImportDeclaration[] {
@@ -168,7 +169,7 @@ function getMethods(component: ts.ClassDeclaration): ts.MethodDeclaration[] {
   const visitor = (node: ts.Node) => {
     if (ts.isMethodDeclaration(node)) {
       // if the method name is `render` then skip it
-      if (node.name.getText() !== 'render') {
+      if (getText(node.name) !== 'render') {
         methods.push(node);
       }
     }
@@ -188,7 +189,7 @@ function getTemplate(
   let renderMethod: ts.MethodDeclaration | undefined;
 
   const visitor = (node: ts.Node) => {
-    if (ts.isMethodDeclaration(node) && node.name.getText() === 'render') {
+    if (ts.isMethodDeclaration(node) && getText(node.name) === 'render') {
       renderMethod = node;
     }
 
@@ -318,25 +319,25 @@ function ensureNoPrivateMembers(metadata: ComponentMetadata): void {
   // check that all props and events are public (i.e. not private or protected)
   metadata.props.forEach((prop) => {
     if (prop.modifiers?.some((m) => m.kind === ts.SyntaxKind.PrivateKeyword)) {
-      throw new Error(`Prop "${prop.name.getText()}" cannot be private`);
+      throw new Error(`Prop "${getText(prop.name)}" cannot be private`);
     }
 
     if (
       prop.modifiers?.some((m) => m.kind === ts.SyntaxKind.ProtectedKeyword)
     ) {
-      throw new Error(`Prop "${prop.name.getText()}" cannot be protected`);
+      throw new Error(`Prop "${getText(prop.name)}" cannot be protected`);
     }
   });
 
   metadata.events.forEach((event) => {
     if (event.modifiers?.some((m) => m.kind === ts.SyntaxKind.PrivateKeyword)) {
-      throw new Error(`Event "${event.name.getText()}" cannot be private`);
+      throw new Error(`Event "${getText(event.name)}" cannot be private`);
     }
 
     if (
       event.modifiers?.some((m) => m.kind === ts.SyntaxKind.ProtectedKeyword)
     ) {
-      throw new Error(`Event "${event.name.getText()}" cannot be protected`);
+      throw new Error(`Event "${getText(event.name)}" cannot be protected`);
     }
   });
 }
@@ -361,7 +362,7 @@ function ensureFieldsAreInitialized(metadata: ComponentMetadata): void {
   metadata.providers.forEach((provider) => {
     if (!provider.initializer) {
       throw new Error(
-        `Provider "${provider.name.getText()}" must be initialized`
+        `Provider "${getText(provider.name)}" must be initialized`
       );
     }
   });
@@ -373,7 +374,7 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
     if (
       !prop.modifiers?.some((m) => m.kind === ts.SyntaxKind.ReadonlyKeyword)
     ) {
-      throw new Error(`Prop "${prop.name.getText()}" must be readonly`);
+      throw new Error(`Prop "${getText(prop.name)}" must be readonly`);
     }
   });
 
@@ -382,7 +383,7 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
     if (
       !event.modifiers?.some((m) => m.kind === ts.SyntaxKind.ReadonlyKeyword)
     ) {
-      throw new Error(`Event "${event.name.getText()}" must be readonly`);
+      throw new Error(`Event "${getText(event.name)}" must be readonly`);
     }
   });
 
@@ -391,7 +392,7 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
     if (
       !provider.modifiers?.some((m) => m.kind === ts.SyntaxKind.ReadonlyKeyword)
     ) {
-      throw new Error(`Provider "${provider.name.getText()}" must be readonly`);
+      throw new Error(`Provider "${getText(provider.name)}" must be readonly`);
     }
   });
 
@@ -403,7 +404,7 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
       )
     ) {
       throw new Error(
-        `Dependency "${dependency.name.getText()}" must be readonly`
+        `Dependency "${getText(dependency.name)}" must be readonly`
       );
     }
   });

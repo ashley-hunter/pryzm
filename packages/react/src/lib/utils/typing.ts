@@ -1,3 +1,4 @@
+import { getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 
 export function isThisExpression(node: ts.Node): node is ts.ThisExpression {
@@ -25,7 +26,7 @@ export function isMutableArrayCallExpression(
   }
 
   // check that the name of the root property access expression is an array method
-  if (!mutableArrayMethods.includes(node.expression.name.getText())) {
+  if (!mutableArrayMethods.includes(getText(node.expression.name))) {
     return false;
   }
 

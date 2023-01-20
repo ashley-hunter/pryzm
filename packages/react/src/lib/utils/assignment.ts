@@ -1,3 +1,4 @@
+import { getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { setterName } from './names';
 import { stripThis } from './strip-this';
@@ -25,7 +26,7 @@ function convertAssignmentTransformer<
         isThisExpression(node.left.expression)
       ) {
         // determine the setter name
-        const getter = node.left.name.getText();
+        const getter = getText(node.left.name);
         const setter = setterName(getter);
 
         // determine the operator
@@ -85,9 +86,7 @@ function convertAssignmentTransformer<
             break;
 
           default:
-            throw new Error(
-              `Unknown operator: ${node.operatorToken.getText()}`
-            );
+            throw new Error(`Unknown operator: ${getText(node.operatorToken)}`);
         }
 
         // if the operator is an equals, then just call the setter
@@ -132,7 +131,7 @@ function convertAssignmentTransformer<
         isThisExpression(node.operand.expression)
       ) {
         // determine the setter name
-        const getter = node.operand.name.getText();
+        const getter = getText(node.operand.name);
         const setter = setterName(getter);
 
         // determine the operator
@@ -183,10 +182,10 @@ function convertAssignmentTransformer<
         isThisExpression(node.left.expression.expression)
       ) {
         // determine the setter name
-        const setter = setterName(node.left.expression.name.getText());
+        const setter = setterName(getText(node.left.expression.name));
 
         // determine the property name
-        const property = node.left.name.getText();
+        const property = getText(node.left.name);
 
         // convert to the setter that is a function that takes the current value and spreads the existing properties and adds the new property
         return ts.factory.createCallExpression(
@@ -200,7 +199,7 @@ function convertAssignmentTransformer<
                 ts.factory.createParameterDeclaration(
                   undefined,
                   undefined,
-                  node.left.expression.name.getText()
+                  getText(node.left.expression.name)
                 ),
               ],
               undefined,
@@ -209,7 +208,7 @@ function convertAssignmentTransformer<
                 [
                   ts.factory.createSpreadAssignment(
                     ts.factory.createIdentifier(
-                      node.left.expression.name.getText()
+                      getText(node.left.expression.name)
                     )
                   ),
                   ts.factory.createPropertyAssignment(

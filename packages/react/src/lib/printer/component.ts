@@ -55,13 +55,8 @@ export function createComponent(metadata: TransformerResult<ReactTransformer>) {
                   [
                     ...metadata.states.map((state) => state.statement),
                     ...metadata.computed.map((computed) => computed.statement),
-                    factory.createReturnStatement(
-                      factory.createJsxSelfClosingElement(
-                        factory.createIdentifier('div'),
-                        undefined,
-                        factory.createJsxAttributes([])
-                      )
-                    ),
+                    ...metadata.methods.map((method) => method.statement),
+                    factory.createReturnStatement(metadata.template),
                   ],
                   true
                 )

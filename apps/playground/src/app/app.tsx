@@ -52,7 +52,7 @@ export function App() {
           padding={10}
           style={{
             fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 12,
+            fontSize: 14,
           }}
         />
 
@@ -73,7 +73,7 @@ export function App() {
             disabled
             style={{
               fontFamily: '"Fira code", "Fira Mono", monospace',
-              fontSize: 12,
+              fontSize: 14,
             }}
           />
         )}

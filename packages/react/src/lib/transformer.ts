@@ -2,8 +2,13 @@ import {
   getDecorator,
   getDecoratorArgument,
   getPropertyName,
+  getText,
 } from '@pryzm/ast-utils';
-import { Transformer, TransformerResult } from '@pryzm/compiler';
+import {
+  Transformer,
+  TransformerResult,
+  transformTemplate,
+} from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { useCallback, useMemo, useRef, useState } from './ast/hooks';
@@ -12,6 +17,7 @@ import {
   createFunctionTypeNode,
   createInterfaceProperty,
 } from './ast/misc';
+import { templateTransformer } from './template-transformer';
 import { addComment, extractComment } from './utils/comment';
 import { findDependencies } from './utils/find-dependencies';
 import { eventName, setterName } from './utils/names';
@@ -59,6 +65,9 @@ export interface ReactTransformer extends Transformer {
     token: ts.Identifier;
     type: ts.TypeNode | undefined;
   };
+  Template?: (
+    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement
+  ) => ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement;
   PostTransform: (
     metadata: TransformerResult<ReactTransformer>
   ) => TransformerResult<ReactTransformer>;
@@ -212,10 +221,16 @@ export const transformer: ReactTransformer = {
 
     return { name, statement, dependencies };
   },
+  Template(value) {
+    return transformTemplate(value, templateTransformer) as
+      | ts.JsxFragment
+      | ts.JsxElement
+      | ts.JsxSelfClosingElement;
+  },
   PostTransform(metadata) {
     // remove any imports from @pryzm/core
     metadata.imports = metadata.imports.filter(
-      (i) => !i.moduleSpecifier.getText().includes('@pryzm/core')
+      (i) => !getText(i.moduleSpecifier).includes('@pryzm/core')
     );
 
     // insert the required React imports

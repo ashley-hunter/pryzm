@@ -1,3 +1,4 @@
+import { getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { setterName } from './names';
 import { isThisExpression } from './typing';
@@ -13,7 +14,7 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
       isThisExpression(node.expression)
     ) {
       // add the property name to the dependencies array
-      dependencies.add(node.name.getText());
+      dependencies.add(getText(node.name));
     }
 
     // find any assignments that use "this"
@@ -26,7 +27,7 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
       isThisExpression(node.left.expression)
     ) {
       // add the property name to the dependencies array
-      dependencies.add(setterName(node.left.name.getText()));
+      dependencies.add(setterName(getText(node.left.name)));
 
       ts.forEachChild(node.right, visitor);
       return;

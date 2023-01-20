@@ -1,3 +1,4 @@
+import { getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 
 export function inferType(
@@ -87,14 +88,14 @@ export function inferType(
             if (ts.isPropertyAssignment(property)) {
               return ts.factory.createPropertySignature(
                 undefined,
-                property.name.getText(),
+                getText(property.name),
                 undefined,
                 inferType(property.initializer, true)
               );
             }
             return ts.factory.createPropertySignature(
               undefined,
-              property.name!.getText(),
+              getText(property.name!),
               undefined,
               ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
             );
