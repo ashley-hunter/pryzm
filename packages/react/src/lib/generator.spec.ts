@@ -1,4 +1,4 @@
-import { transform } from '@emblazon/compiler';
+import { transform } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import {
   generateComponentFunction,

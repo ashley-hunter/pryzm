@@ -1,4 +1,4 @@
-import { TransformerResult } from '@emblazon/compiler';
+import { TransformerResult } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { ReactTransformer } from '../transformer';
 

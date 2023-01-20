@@ -1,4 +1,4 @@
-import { Component, Prop, Renderable } from '@emblazon/core';
+import { Component, Prop, Renderable } from '@pryzm/core';
 
 @Component()
 export class Button implements Renderable {

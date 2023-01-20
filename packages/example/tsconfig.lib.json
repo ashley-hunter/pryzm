@@ -6,7 +6,7 @@
     "types": ["node"],
     "jsx": "preserve",
     "jsxFactory": "h",
-    "jsxImportSource": "@emblazon/core"
+    "jsxImportSource": "@pryzm/core"
   },
   "include": ["src/**/*.ts", "src/lib/button.tsx"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]

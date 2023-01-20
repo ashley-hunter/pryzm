@@ -2,8 +2,8 @@ import {
   getDecorator,
   getDecoratorArgument,
   getPropertyName,
-} from '@emblazon/ast-utils';
-import { Transformer, TransformerResult } from '@emblazon/compiler';
+} from '@pryzm/ast-utils';
+import { Transformer, TransformerResult } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { useCallback, useMemo, useRef, useState } from './ast/hooks';
