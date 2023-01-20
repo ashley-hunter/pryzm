@@ -725,7 +725,7 @@ describe('Parser', () => {
 
   it('should collect imports', () => {
     const code = `
-      import { Component, Prop } from '@emblazon/core';
+      import { Component, Prop } from '@pryzm/core';
 
       @Component()
       export class Button {

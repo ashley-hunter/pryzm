@@ -1,4 +1,4 @@
-import { transform } from '@emblazon/compiler';
+import { transform } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { transformer } from './transformer';
@@ -9,7 +9,7 @@ describe('React Transformer', () => {
   describe('State', () => {
     it('should transform state into a useState hook', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test: string;
@@ -31,7 +31,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default value', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test: string = 'test';
@@ -53,7 +53,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default value without a type', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test = 'test';
@@ -75,7 +75,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default value from a function', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test = () => 'test';
@@ -98,7 +98,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default number value', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test: number = 1;
@@ -120,7 +120,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default boolean value', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test: boolean = true;
@@ -142,7 +142,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default array value', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test: string[] = ['test'];
@@ -164,7 +164,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook with a default object value', () => {
       const source = `
-      import { Component, State } from '@emblazon/core';
+      import { Component, State } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test: { test: string } = { test: 'test' };
@@ -188,7 +188,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook resolving `this` in property accesses', () => {
       const source = `
-      import { Component, State, Prop } from '@emblazon/core';
+      import { Component, State, Prop } from '@pryzm/core';
       @Component()
       export class Test {
         @Prop() readonly name: string;
@@ -211,7 +211,7 @@ describe('React Transformer', () => {
 
     it('should transform state into a useState hook resolving `this` in call expressions', () => {
       const source = `
-      import { Component, State, Prop } from '@emblazon/core';
+      import { Component, State, Prop } from '@pryzm/core';
       @Component()
       export class Test {
         @State() test: string = this.name();
@@ -239,7 +239,7 @@ describe('React Transformer', () => {
   describe('Prop', () => {
     it('should transform prop into a property', () => {
       const source = `
-      import { Component, Prop } from '@emblazon/core';
+      import { Component, Prop } from '@pryzm/core';
       @Component()
       export class Test {
         /** Define the value of the test prop */
@@ -265,7 +265,7 @@ describe('React Transformer', () => {
 
     it('should transform prop into a property with a default value', () => {
       const source = `
-      import { Component, Prop } from '@emblazon/core';
+      import { Component, Prop } from '@pryzm/core';
       @Component()
       export class Test {
         @Prop() readonly test: string = 'test';
@@ -289,7 +289,7 @@ describe('React Transformer', () => {
 
     it('should transform prop into a property with a default value from a function', () => {
       const source = `
-      import { Component, Prop } from '@emblazon/core';
+      import { Component, Prop } from '@pryzm/core';
       @Component()
       export class Test {
         @Prop() readonly test = () => 'test';
@@ -315,7 +315,7 @@ describe('React Transformer', () => {
   describe('Computed', () => {
     it('should transform computed into a useMemo', () => {
       const source = `
-      import { Component, Computed } from '@emblazon/core';
+      import { Component, Computed } from '@pryzm/core';
 
       @Component()
       export class Test {
@@ -341,7 +341,7 @@ describe('React Transformer', () => {
 
     it('should transform computed into a useMemo with dependencies', () => {
       const source = `
-      import { Component, Computed } from '@emblazon/core';
+      import { Component, Computed } from '@pryzm/core';
 
       @Component()
       export class Test {
@@ -376,7 +376,7 @@ describe('React Transformer', () => {
   describe('Ref', () => {
     it('should transform ref into a useRef', () => {
       const source = `
-      import { Component, Ref } from '@emblazon/core';
+      import { Component, Ref } from '@pryzm/core';
 
       @Component()
       export class Test {
@@ -399,7 +399,7 @@ describe('React Transformer', () => {
 
     it('should transform ref into a useRef with no type', () => {
       const source = `
-      import { Component, Ref } from '@emblazon/core';
+      import { Component, Ref } from '@pryzm/core';
 
       @Component()
       export class Test {
@@ -415,7 +415,9 @@ describe('React Transformer', () => {
       const ref = component.refs[0];
 
       expect(ref.name).toBe('test');
-      expect(printNode(ref.statement)).toMatchInlineSnapshot('"const test = useRef<HTMLElement>(null);"');
+      expect(printNode(ref.statement)).toMatchInlineSnapshot(
+        '"const test = useRef<HTMLElement>(null);"'
+      );
     });
   });
 

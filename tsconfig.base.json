@@ -15,9 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@emblazon/compiler": ["packages/compiler/src/index.ts"],
-      "@emblazon/core": ["packages/core/src/index.ts"],
-      "@emlazon/react": ["packages/react/src/index.ts"]
+      "@pryzm/compiler": ["packages/compiler/src/index.ts"],
+      "@pryzm/core": ["packages/core/src/index.ts"],
+      "@pryzm/react": ["packages/react/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

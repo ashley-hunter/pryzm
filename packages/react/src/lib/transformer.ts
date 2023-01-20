@@ -1,4 +1,4 @@
-import { Transformer } from '@emblazon/compiler';
+import { Transformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { addComment, extractComment } from './utils/comment';
