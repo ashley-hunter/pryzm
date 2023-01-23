@@ -5,14 +5,13 @@ export interface TemplateTransformer<
   TElement,
   TFragment,
   TAttribute,
-  TExpression,
   TText,
   TSelfClosing = TElement
 > {
   Element: (
     value: ts.JsxElement,
     attributes: TAttribute[],
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
+    children: (TElement | TFragment | TSelfClosing | TText)[]
   ) => TElement;
   SelfClosingElement: (
     value: ts.JsxSelfClosingElement,
@@ -20,10 +19,9 @@ export interface TemplateTransformer<
   ) => TSelfClosing;
   Fragment: (
     value: ts.JsxFragment,
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
+    children: (TElement | TFragment | TSelfClosing | TText)[]
   ) => TFragment;
   Attribute: (value: ts.JsxAttribute) => TAttribute;
-  Expression: (value: ts.JsxExpression) => TExpression;
   Text: (value: ts.JsxText) => TText;
 }
 
@@ -31,7 +29,6 @@ export function transformTemplate<
   TElement,
   TFragment,
   TAttribute,
-  TExpression,
   TText,
   TSelfClosing = TElement
 >(
@@ -40,7 +37,6 @@ export function transformTemplate<
     TElement,
     TFragment,
     TAttribute,
-    TExpression,
     TText,
     TSelfClosing
   >
@@ -54,7 +50,6 @@ export class TemplateVisitor<
   TElement,
   TFragment,
   TAttribute,
-  TExpression,
   TText,
   TSelfClosing = TElement
 > {
@@ -63,21 +58,14 @@ export class TemplateVisitor<
       TElement,
       TFragment,
       TAttribute,
-      TExpression,
       TText,
       TSelfClosing
     >
   ) {}
 
-  visit(
-    value: JsxNode
-  ): TText | TExpression | TElement | TFragment | TSelfClosing {
+  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing {
     if (ts.isJsxText(value)) {
       return this.visitText(value);
-    }
-
-    if (ts.isJsxExpression(value)) {
-      return this.visitInterpolation(value);
     }
 
     if (ts.isJsxElement(value)) {
@@ -97,10 +85,6 @@ export class TemplateVisitor<
 
   visitText(value: ts.JsxText) {
     return this.transformer.Text(value);
-  }
-
-  visitInterpolation(value: ts.JsxExpression) {
-    return this.transformer.Expression(value);
   }
 
   visitElement(value: ts.JsxElement) {

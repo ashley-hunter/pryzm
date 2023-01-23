@@ -1,11 +1,11 @@
 import { TemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
+import { stripThis } from './utils/strip-this';
 
 export const templateTransformer: TemplateTransformer<
   ts.JsxElement,
   ts.JsxFragment,
   ts.JsxAttribute,
-  ts.JsxExpression,
   ts.JsxText,
   ts.JsxSelfClosingElement
 > = {
@@ -31,14 +31,42 @@ export const templateTransformer: TemplateTransformer<
   Attribute: (value) => {
     // if the attribute is called "class", we need to rename it to "className"
     if (ts.isIdentifier(value.name) && value.name.escapedText === 'class') {
+      // if the attribute value is an object then we want to wrap it in a call to the "clsx" function
+      if (
+        value.initializer &&
+        ts.isJsxExpression(value.initializer) &&
+        value.initializer.expression &&
+        ts.isObjectLiteralExpression(value.initializer.expression)
+      ) {
+        return ts.factory.createJsxAttribute(
+          ts.factory.createIdentifier('className'),
+          ts.factory.createJsxExpression(
+            undefined,
+            ts.factory.createCallExpression(
+              ts.factory.createIdentifier('clsx'),
+              undefined,
+              [stripThis(value.initializer.expression)!]
+            )
+          )
+        );
+      }
+
+      // otherwise simply rename the attribute
       return ts.factory.createJsxAttribute(
         ts.factory.createIdentifier('className'),
-        value.initializer
+        stripThis(value.initializer)
+      );
+    }
+
+    // otherwise if the attribute value is an expression, we need to strip the "this" keyword
+    if (value.initializer && ts.isJsxExpression(value.initializer)) {
+      return ts.factory.createJsxAttribute(
+        value.name,
+        stripThis(value.initializer)
       );
     }
 
     return value;
   },
-  Expression: (value) => value,
   Text: (value) => value,
 };

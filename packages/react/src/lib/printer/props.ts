@@ -12,6 +12,9 @@ export function createPropsInterface(
     factory.createIdentifier(propsName(metadata.name)),
     undefined,
     undefined,
-    metadata.props.map((prop) => prop.interfaceProperty)
+    [
+      ...metadata.props.map((prop) => prop.interfaceProperty),
+      ...metadata.events.map((event) => event.interfaceProperty),
+    ]
   );
 }
