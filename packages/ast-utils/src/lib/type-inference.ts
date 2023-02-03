@@ -1,5 +1,5 @@
-import { getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
+import { getText } from './name';
 
 export function inferType(
   initializer: ts.Expression | undefined,

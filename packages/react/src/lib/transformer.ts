@@ -1,8 +1,12 @@
 import {
+  addComment,
+  extractComment,
   getDecorator,
   getDecoratorArgument,
   getPropertyName,
   getText,
+  inferType,
+  stripThis,
 } from '@pryzm/ast-utils';
 import {
   Transformer,
@@ -18,12 +22,9 @@ import {
   createInterfaceProperty,
 } from './ast/misc';
 import { templateTransformer } from './template-transformer';
-import { addComment, extractComment } from './utils/comment';
 import { findDependencies } from './utils/find-dependencies';
 import { eventName, setterName } from './utils/names';
 import { renameIdentifierOccurences } from './utils/rename';
-import { stripThis } from './utils/strip-this';
-import { inferType } from './utils/type-inference';
 
 export interface ReactTransformer extends Transformer {
   State(state: ts.PropertyDeclaration): {

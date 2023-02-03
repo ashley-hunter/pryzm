@@ -17,7 +17,7 @@ describe('React Printer', () => {
       "export interface MyComponentProps {
       }
       export const MyComponent = forwardRef<HTMLElement, MyComponentProps>(({}, ref) => {
-          return <div />;
+          return <div>Hello World</div>;
       });
       "
     `);
@@ -54,7 +54,7 @@ describe('React Printer', () => {
           optional?: boolean;
       }
       export const MyComponent = forwardRef<HTMLElement, MyComponentProps>(({ name, age = 10, optional }, ref) => {
-          return <div />;
+          return <div>Hello World</div>;
       });
       "
     `);
@@ -80,7 +80,7 @@ describe('React Printer', () => {
       }
       export const MyComponent = forwardRef<HTMLElement, MyComponentProps>(({}, ref) => {
           const [name, setName] = useState<string>(\\"John Doe\\");
-          return <div />;
+          return <div>Hello World</div>;
       });
       "
     `);
@@ -116,7 +116,7 @@ describe('React Printer', () => {
           const fullName = useMemo(() => {
               return firstName + \\" \\" + lastName;
           }, [firstName, lastName]);
-          return <div />;
+          return <div>Hello World</div>;
       });
       "
     `);

@@ -1,4 +1,4 @@
-import { stripParentNode } from '@pryzm/compiler';
+import { stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { isThisExpression } from './typing';
 

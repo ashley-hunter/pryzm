@@ -1,7 +1,6 @@
-import { getText } from '@pryzm/ast-utils';
+import { getText, isThisExpression } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { setterName } from './names';
-import { isThisExpression } from './typing';
 
 export function findDependencies<T extends ts.Block>(node: T): string[] {
   const dependencies = new Set<string>();

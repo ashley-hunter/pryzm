@@ -1,23 +1,61 @@
-import { print } from '@pryzm/react';
+import { print as reactPrint } from '@pryzm/react';
+import { print as sveltePrint } from '@pryzm/svelte';
+import { Buffer } from 'buffer';
+import { format } from 'prettier';
+import * as sveltePlugin from 'prettier-plugin-svelte';
+import * as parserHtml from 'prettier/parser-html';
+import * as parserCss from 'prettier/parser-postcss';
+import * as parserTypeScript from 'prettier/parser-typescript';
 import { highlight, languages } from 'prismjs';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
 import { useMemo, useState } from 'react';
 import Editor from 'react-simple-code-editor';
+import * as svelteCompiler from 'svelte/compiler';
+window.Buffer = Buffer;
+window.require = (name: string) => {
+  if (name === 'svelte/compiler') {
+    return svelteCompiler;
+  }
+};
 
 export function App() {
-  const [code, setCode] = useState(`// Start typing here...`);
+  const [code, setCode] = useState(`@Component()
+export class App {
+
+  @Prop() readonly firstName = "John";
+  @Prop() readonly lastName = "Smith";
+
+  @State() counter: number = 10;
+
+  @Computed() get fullName() {
+    return this.firstName + ' ' + this.lastName;
+  }
+
+  render() {
+    return <div>Something Here</div>
+  }
+
+}`);
   const [error, setError] = useState<Error | null>(null);
+  const [target, setTarget] = useState<'react' | 'svelte'>('react');
 
   const output = useMemo(() => {
     setError(null);
     try {
-      return print(code);
+      if (target === 'react') {
+        return reactPrint(code);
+      }
+
+      return format(sveltePrint(code), {
+        plugins: [sveltePlugin, parserCss, parserHtml, parserTypeScript],
+        parser: 'svelte',
+      });
     } catch (e) {
       setError(e as Error);
       return '';
     }
-  }, [code, setError]);
+  }, [code, target]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -39,6 +77,15 @@ export function App() {
                   v0.1
                 </small>
               </span>
+
+              <select
+                className="ml-auto inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100"
+                value={target}
+                onChange={(event) => setTarget(event.target.value as any)}
+              >
+                <option value="react">React</option>
+                <option value="svelte">Svelte</option>
+              </select>
             </div>
           </div>
         </div>

@@ -1,6 +1,5 @@
-import { stripParentNode } from '@pryzm/compiler';
+import { addComment, extractComment, stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
-import { addComment, extractComment } from '../utils/comment';
 
 export function createInterfaceProperty(
   name: string,

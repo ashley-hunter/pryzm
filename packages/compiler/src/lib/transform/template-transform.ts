@@ -1,17 +1,18 @@
+import { stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
-import { stripParentNode } from '../utils/strip-parent-node';
 
 export interface TemplateTransformer<
   TElement,
   TFragment,
   TAttribute,
   TText,
+  TExpression,
   TSelfClosing = TElement
 > {
   Element: (
     value: ts.JsxElement,
     attributes: TAttribute[],
-    children: (TElement | TFragment | TSelfClosing | TText)[]
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
   ) => TElement;
   SelfClosingElement: (
     value: ts.JsxSelfClosingElement,
@@ -19,10 +20,11 @@ export interface TemplateTransformer<
   ) => TSelfClosing;
   Fragment: (
     value: ts.JsxFragment,
-    children: (TElement | TFragment | TSelfClosing | TText)[]
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
   ) => TFragment;
   Attribute: (value: ts.JsxAttribute) => TAttribute;
   Text: (value: ts.JsxText) => TText;
+  Expression: (value: ts.JsxExpression) => TExpression;
 }
 
 export function transformTemplate<
@@ -30,6 +32,7 @@ export function transformTemplate<
   TFragment,
   TAttribute,
   TText,
+  TExpression,
   TSelfClosing = TElement
 >(
   value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
@@ -38,6 +41,7 @@ export function transformTemplate<
     TFragment,
     TAttribute,
     TText,
+    TExpression,
     TSelfClosing
   >
 ) {
@@ -51,6 +55,7 @@ export class TemplateVisitor<
   TFragment,
   TAttribute,
   TText,
+  TExpression,
   TSelfClosing = TElement
 > {
   constructor(
@@ -59,11 +64,14 @@ export class TemplateVisitor<
       TFragment,
       TAttribute,
       TText,
+      TExpression,
       TSelfClosing
     >
   ) {}
 
-  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing {
+  visit(
+    value: JsxNode
+  ): TText | TElement | TFragment | TSelfClosing | TExpression {
     if (ts.isJsxText(value)) {
       return this.visitText(value);
     }
@@ -78,6 +86,10 @@ export class TemplateVisitor<
 
     if (ts.isJsxFragment(value)) {
       return this.visitFragment(value);
+    }
+
+    if (ts.isJsxExpression(value)) {
+      return this.visitExpression(value);
     }
 
     throw new Error('Unknown node type');
@@ -123,6 +135,10 @@ export class TemplateVisitor<
 
   visitAttributes(value: ts.NodeArray<ts.JsxAttributeLike>) {
     return value.map(this.visitAttribute.bind(this));
+  }
+
+  visitExpression(value: ts.JsxExpression): TExpression {
+    return this.transformer.Expression(value);
   }
 }
 

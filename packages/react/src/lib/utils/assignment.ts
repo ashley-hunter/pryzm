@@ -1,8 +1,11 @@
-import { getText } from '@pryzm/ast-utils';
+import {
+  getText,
+  isMutableArrayCallExpression,
+  isThisExpression,
+  stripThis,
+} from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { setterName } from './names';
-import { stripThis } from './strip-this';
-import { isMutableArrayCallExpression, isThisExpression } from './typing';
 
 /**
  * Any assignments to state variables must be converted to a setState call.

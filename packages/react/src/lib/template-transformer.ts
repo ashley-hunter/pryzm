@@ -1,17 +1,22 @@
+import { stripThis } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
-import { stripThis } from './utils/strip-this';
 
 export const templateTransformer: TemplateTransformer<
   ts.JsxElement,
   ts.JsxFragment,
   ts.JsxAttribute,
   ts.JsxText,
+  ts.JsxExpression,
   ts.JsxSelfClosingElement
 > = {
   Element: (value, attributes, children) => {
     return ts.factory.createJsxElement(
-      value.openingElement,
+      ts.factory.createJsxOpeningElement(
+        value.openingElement.tagName,
+        value.openingElement.typeArguments,
+        ts.factory.createJsxAttributes(attributes)
+      ),
       children,
       value.closingElement
     );
@@ -68,5 +73,6 @@ export const templateTransformer: TemplateTransformer<
 
     return value;
   },
+  Expression: (value) => stripThis(value)!,
   Text: (value) => value,
 };

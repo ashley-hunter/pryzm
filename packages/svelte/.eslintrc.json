@@ -4,9 +4,7 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "rules": {
-        "no-case-declarations": "off"
-      }
+      "rules": {}
     },
     {
       "files": ["*.ts", "*.tsx"],
