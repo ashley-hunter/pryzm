@@ -8,11 +8,7 @@ import {
   inferType,
   stripThis,
 } from '@pryzm/ast-utils';
-import {
-  Transformer,
-  TransformerResult,
-  transformTemplate,
-} from '@pryzm/compiler';
+import { Transformer, TransformerResult, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { useCallback, useMemo, useRef, useState } from './ast/hooks';
@@ -195,10 +191,7 @@ export const transformer: ReactTransformer = {
     // get the type of the ref if it exists
     const type =
       value.type ??
-      factory.createTypeReferenceNode(
-        factory.createIdentifier('HTMLElement'),
-        undefined
-      );
+      factory.createTypeReferenceNode(factory.createIdentifier('HTMLElement'), undefined);
 
     // convert the property to a useRef hook
     const statement = useRef(name, factory.createNull(), type);
@@ -213,12 +206,7 @@ export const transformer: ReactTransformer = {
 
     // convert a method to a useCallback hook
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
-    const statement = useCallback(
-      name,
-      method.parameters,
-      method.body!,
-      dependencies
-    );
+    const statement = useCallback(name, method.parameters, method.body!, dependencies);
 
     return { name, statement, dependencies };
   },
@@ -231,7 +219,7 @@ export const transformer: ReactTransformer = {
   PostTransform(metadata) {
     // remove any imports from @pryzm/core
     metadata.imports = metadata.imports.filter(
-      (i) => !getText(i.moduleSpecifier).includes('@pryzm/core')
+      i => !getText(i.moduleSpecifier).includes('@pryzm/core')
     );
 
     // insert the required React imports
@@ -268,23 +256,17 @@ export const transformer: ReactTransformer = {
       metadata.imports.push(
         factory.createImportDeclaration(
           undefined,
-          factory.createImportClause(
-            false,
-            undefined,
-            factory.createNamedImports(reactImports)
-          ),
+          factory.createImportClause(false, undefined, factory.createNamedImports(reactImports)),
           factory.createStringLiteral('react')
         )
       );
     }
 
     // find all events and rename to include the on prefix
-    const eventsToRename = metadata.events.filter(
-      (event) => event.name !== eventName(event.name)
-    );
+    const eventsToRename = metadata.events.filter(event => event.name !== eventName(event.name));
 
     // rename all events
-    eventsToRename.forEach((event) =>
+    eventsToRename.forEach(event =>
       renameIdentifierOccurences(metadata, event.name, eventName(event.name))
     );
 
@@ -293,9 +275,5 @@ export const transformer: ReactTransformer = {
 };
 
 function createImportSpecifier(name: string) {
-  return factory.createImportSpecifier(
-    false,
-    undefined,
-    factory.createIdentifier(name)
-  );
+  return factory.createImportSpecifier(false, undefined, factory.createIdentifier(name));
 }

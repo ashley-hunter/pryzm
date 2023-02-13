@@ -43,10 +43,7 @@ describe('Find Dependencies', () => {
     `;
     const ast = tsquery.ast(source);
     // find the get accessor
-    const getAccessor = tsquery<ts.GetAccessorDeclaration>(
-      ast,
-      'GetAccessor'
-    )[0];
+    const getAccessor = tsquery<ts.GetAccessorDeclaration>(ast, 'GetAccessor')[0];
     // find the dependencies
     const dependencies = findDependencies(getAccessor.body!);
 

@@ -6,7 +6,7 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-      "no-case-declarations": "off",
+        "no-case-declarations": "off",
         "@nrwl/nx/enforce-module-boundaries": [
           "error",
           {

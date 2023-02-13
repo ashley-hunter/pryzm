@@ -16,10 +16,8 @@ export function transformAssignment<T extends ts.Node>(node: T): T {
 }
 
 // create a ts transformer factory
-function convertAssignmentTransformer<
-  T extends ts.Node
->(): ts.TransformerFactory<T> {
-  return (context) => {
+function convertAssignmentTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
+  return context => {
     const visitor = (node: ts.Node): ts.Node => {
       // e.g. this.test = 'test'; => setTest('test');
       // e.g. this.test += 'test'; => setTest(test => test + 'test');
@@ -94,37 +92,25 @@ function convertAssignmentTransformer<
 
         // if the operator is an equals, then just call the setter
         if (operator === ts.SyntaxKind.EqualsToken) {
-          return ts.factory.createCallExpression(
-            ts.factory.createIdentifier(setter),
-            undefined,
-            [stripThis(node.right)!]
-          );
+          return ts.factory.createCallExpression(ts.factory.createIdentifier(setter), undefined, [
+            stripThis(node.right)!,
+          ]);
         }
 
-        return ts.factory.createCallExpression(
-          ts.factory.createIdentifier(setter),
-          undefined,
-          [
-            ts.factory.createArrowFunction(
-              undefined,
-              undefined,
-              [
-                ts.factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  getter
-                ),
-              ],
-              undefined,
-              undefined,
-              ts.factory.createBinaryExpression(
-                ts.factory.createIdentifier(getter),
-                operator,
-                stripThis(node.right)!
-              )
-            ),
-          ]
-        );
+        return ts.factory.createCallExpression(ts.factory.createIdentifier(setter), undefined, [
+          ts.factory.createArrowFunction(
+            undefined,
+            undefined,
+            [ts.factory.createParameterDeclaration(undefined, undefined, getter)],
+            undefined,
+            undefined,
+            ts.factory.createBinaryExpression(
+              ts.factory.createIdentifier(getter),
+              operator,
+              stripThis(node.right)!
+            )
+          ),
+        ]);
       }
 
       // e.g. this.test++; => setTest(test => test + 1);
@@ -150,30 +136,20 @@ function convertAssignmentTransformer<
             break;
         }
 
-        return ts.factory.createCallExpression(
-          ts.factory.createIdentifier(setter),
-          undefined,
-          [
-            ts.factory.createArrowFunction(
-              undefined,
-              undefined,
-              [
-                ts.factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  getter
-                ),
-              ],
-              undefined,
-              undefined,
-              ts.factory.createBinaryExpression(
-                ts.factory.createIdentifier(getter),
-                operator,
-                ts.factory.createNumericLiteral(1)
-              )
-            ),
-          ]
-        );
+        return ts.factory.createCallExpression(ts.factory.createIdentifier(setter), undefined, [
+          ts.factory.createArrowFunction(
+            undefined,
+            undefined,
+            [ts.factory.createParameterDeclaration(undefined, undefined, getter)],
+            undefined,
+            undefined,
+            ts.factory.createBinaryExpression(
+              ts.factory.createIdentifier(getter),
+              operator,
+              ts.factory.createNumericLiteral(1)
+            )
+          ),
+        ]);
       }
 
       // e.g. this.test.x = 'test'; => setTest(test => { ...test, x: 'test' });
@@ -191,39 +167,30 @@ function convertAssignmentTransformer<
         const property = getText(node.left.name);
 
         // convert to the setter that is a function that takes the current value and spreads the existing properties and adds the new property
-        return ts.factory.createCallExpression(
-          ts.factory.createIdentifier(setter),
-          undefined,
-          [
-            ts.factory.createArrowFunction(
-              undefined,
-              undefined,
+        return ts.factory.createCallExpression(ts.factory.createIdentifier(setter), undefined, [
+          ts.factory.createArrowFunction(
+            undefined,
+            undefined,
+            [
+              ts.factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                getText(node.left.expression.name)
+              ),
+            ],
+            undefined,
+            undefined,
+            ts.factory.createObjectLiteralExpression(
               [
-                ts.factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  getText(node.left.expression.name)
+                ts.factory.createSpreadAssignment(
+                  ts.factory.createIdentifier(getText(node.left.expression.name))
                 ),
+                ts.factory.createPropertyAssignment(property, stripThis(node.right)!),
               ],
-              undefined,
-              undefined,
-              ts.factory.createObjectLiteralExpression(
-                [
-                  ts.factory.createSpreadAssignment(
-                    ts.factory.createIdentifier(
-                      getText(node.left.expression.name)
-                    )
-                  ),
-                  ts.factory.createPropertyAssignment(
-                    property,
-                    stripThis(node.right)!
-                  ),
-                ],
-                true
-              )
-            ),
-          ]
-        );
+              true
+            )
+          ),
+        ]);
       }
 
       // transform any mutable array methods
@@ -237,50 +204,36 @@ function convertAssignmentTransformer<
         const expression = stripThis(node)!;
 
         // determine the array name
-        const arrayName = getPropertyName(
-          node.expression as ts.PropertyAccessExpression
-        );
+        const arrayName = getPropertyName(node.expression as ts.PropertyAccessExpression);
 
         // determine the setter name
         const setter = setterName(arrayName);
 
         // call the setter function with a function that gets the current value, calls the method, and returns the value
-        return ts.factory.createCallExpression(
-          ts.factory.createIdentifier(setter),
-          undefined,
-          [
-            ts.factory.createArrowFunction(
-              undefined,
-              undefined,
+        return ts.factory.createCallExpression(ts.factory.createIdentifier(setter), undefined, [
+          ts.factory.createArrowFunction(
+            undefined,
+            undefined,
+            [ts.factory.createParameterDeclaration(undefined, undefined, arrayName)],
+            undefined,
+            undefined,
+            ts.factory.createBlock(
               [
-                ts.factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  arrayName
-                ),
-              ],
-              undefined,
-              undefined,
-              ts.factory.createBlock(
-                [
-                  // insert the original expression stripped of the this
-                  ts.factory.createExpressionStatement(expression),
+                // insert the original expression stripped of the this
+                ts.factory.createExpressionStatement(expression),
 
-                  ts.factory.createReturnStatement(
-                    ts.factory.createIdentifier(arrayName)
-                  ),
-                ],
-                true
-              )
-            ),
-          ]
-        );
+                ts.factory.createReturnStatement(ts.factory.createIdentifier(arrayName)),
+              ],
+              true
+            )
+          ),
+        ]);
       }
 
       return ts.visitEachChild(node, visitor, context);
     };
 
-    return (root) => ts.visitNode(root, visitor);
+    return root => ts.visitNode(root, visitor);
   };
 }
 
@@ -294,9 +247,5 @@ function getPropertyName(node: ts.PropertyAccessExpression): string {
 
   // print the node name
   const printer = ts.createPrinter();
-  return printer.printNode(
-    ts.EmitHint.Unspecified,
-    expression.name,
-    null as any
-  );
+  return printer.printNode(ts.EmitHint.Unspecified, expression.name, null as any);
 }

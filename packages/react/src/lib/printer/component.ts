@@ -16,10 +16,7 @@ export function createComponent(metadata: TransformerResult<ReactTransformer>) {
           factory.createCallExpression(
             factory.createIdentifier('forwardRef'),
             [
-              factory.createTypeReferenceNode(
-                factory.createIdentifier('HTMLElement'),
-                undefined
-              ),
+              factory.createTypeReferenceNode(factory.createIdentifier('HTMLElement'), undefined),
               factory.createTypeReferenceNode(
                 factory.createIdentifier(propsName(metadata.name)),
                 undefined
@@ -34,7 +31,7 @@ export function createComponent(metadata: TransformerResult<ReactTransformer>) {
                     undefined,
                     undefined,
                     factory.createObjectBindingPattern(
-                      metadata.props.map((prop) => prop.destructuredProperty)
+                      metadata.props.map(prop => prop.destructuredProperty)
                     ),
                     undefined,
                     undefined,
@@ -53,9 +50,9 @@ export function createComponent(metadata: TransformerResult<ReactTransformer>) {
                 factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
                 factory.createBlock(
                   [
-                    ...metadata.states.map((state) => state.statement),
-                    ...metadata.computed.map((computed) => computed.statement),
-                    ...metadata.methods.map((method) => method.statement),
+                    ...metadata.states.map(state => state.statement),
+                    ...metadata.computed.map(computed => computed.statement),
+                    ...metadata.methods.map(method => method.statement),
                     factory.createReturnStatement(metadata.template),
                   ],
                   true

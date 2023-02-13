@@ -2,14 +2,9 @@ import { TransformerResult } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { ReactTransformer } from '../transformer';
 
-export function renameIdentifier<T extends ts.Node>(
-  node: T,
-  oldName: string,
-  newName: string
-): T {
+export function renameIdentifier<T extends ts.Node>(node: T, oldName: string, newName: string): T {
   // run the ts transformer
-  return ts.transform(node, [renameIdentifierTransformer(oldName, newName)])
-    .transformed[0];
+  return ts.transform(node, [renameIdentifierTransformer(oldName, newName)]).transformed[0];
 }
 
 // create a ts transformer factory
@@ -17,7 +12,7 @@ function renameIdentifierTransformer<T extends ts.Node>(
   oldName: string,
   newName: string
 ): ts.TransformerFactory<T> {
-  return (context) => {
+  return context => {
     const visitor = (node: ts.Node): ts.Node => {
       if (ts.isIdentifier(node) && node.text === oldName) {
         return ts.factory.createIdentifier(newName);
@@ -26,7 +21,7 @@ function renameIdentifierTransformer<T extends ts.Node>(
       return ts.visitEachChild(node, visitor, context);
     };
 
-    return (root) => ts.visitNode(root, visitor);
+    return root => ts.visitNode(root, visitor);
   };
 }
 
@@ -35,25 +30,17 @@ export function renameIdentifierOccurences(
   oldName: string,
   newName: string
 ): TransformerResult<ReactTransformer> {
-  metadata.props = metadata.props.map((prop) => {
+  metadata.props = metadata.props.map(prop => {
     if (prop.name === oldName) {
       prop.name = newName;
-      prop.destructuredProperty = renameIdentifier(
-        prop.destructuredProperty,
-        oldName,
-        newName
-      );
-      prop.interfaceProperty = renameIdentifier(
-        prop.interfaceProperty,
-        oldName,
-        newName
-      );
+      prop.destructuredProperty = renameIdentifier(prop.destructuredProperty, oldName, newName);
+      prop.interfaceProperty = renameIdentifier(prop.interfaceProperty, oldName, newName);
     }
 
     return prop;
   });
 
-  metadata.states = metadata.states.map((state) => {
+  metadata.states = metadata.states.map(state => {
     if (state.getter === oldName) {
       state.getter = newName;
     }
@@ -67,13 +54,13 @@ export function renameIdentifierOccurences(
     return state;
   });
 
-  metadata.computed = metadata.computed.map((computed) => {
+  metadata.computed = metadata.computed.map(computed => {
     if (computed.name === oldName) {
       computed.name = newName;
     }
 
     computed.statement = renameIdentifier(computed.statement, oldName, newName);
-    computed.dependencies = computed.dependencies.map((dependency) => {
+    computed.dependencies = computed.dependencies.map(dependency => {
       if (dependency === oldName) {
         dependency = newName;
       }
@@ -84,32 +71,24 @@ export function renameIdentifierOccurences(
     return computed;
   });
 
-  metadata.events = metadata.events.map((event) => {
+  metadata.events = metadata.events.map(event => {
     if (event.name === oldName) {
       event.name = newName;
     }
 
-    event.destructuredProperty = renameIdentifier(
-      event.destructuredProperty,
-      oldName,
-      newName
-    );
-    event.interfaceProperty = renameIdentifier(
-      event.interfaceProperty,
-      oldName,
-      newName
-    );
+    event.destructuredProperty = renameIdentifier(event.destructuredProperty, oldName, newName);
+    event.interfaceProperty = renameIdentifier(event.interfaceProperty, oldName, newName);
 
     return event;
   });
 
-  metadata.methods = metadata.methods.map((method) => {
+  metadata.methods = metadata.methods.map(method => {
     if (method.name === oldName) {
       method.name = newName;
     }
 
     method.statement = renameIdentifier(method.statement, oldName, newName);
-    method.dependencies = method.dependencies.map((dependency) => {
+    method.dependencies = method.dependencies.map(dependency => {
       if (dependency === oldName) {
         dependency = newName;
       }
@@ -120,7 +99,7 @@ export function renameIdentifierOccurences(
     return method;
   });
 
-  metadata.refs = metadata.refs.map((ref) => {
+  metadata.refs = metadata.refs.map(ref => {
     if (ref.name === oldName) {
       ref.name = newName;
     }
@@ -130,7 +109,7 @@ export function renameIdentifierOccurences(
     return ref;
   });
 
-  metadata.providers = metadata.providers.map((provider) => {
+  metadata.providers = metadata.providers.map(provider => {
     if (provider.name === oldName) {
       provider.name = newName;
     }

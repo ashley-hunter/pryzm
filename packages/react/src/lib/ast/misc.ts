@@ -12,9 +12,7 @@ export function createInterfaceProperty(
   const signature = ts.factory.createPropertySignature(
     undefined,
     name,
-    isOptional
-      ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
-      : undefined,
+    isOptional ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
     type
   );
 

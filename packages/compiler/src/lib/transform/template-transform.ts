@@ -14,10 +14,7 @@ export interface TemplateTransformer<
     attributes: TAttribute[],
     children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
   ) => TElement;
-  SelfClosingElement: (
-    value: ts.JsxSelfClosingElement,
-    attributes: TAttribute[]
-  ) => TSelfClosing;
+  SelfClosingElement: (value: ts.JsxSelfClosingElement, attributes: TAttribute[]) => TSelfClosing;
   Fragment: (
     value: ts.JsxFragment,
     children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
@@ -69,9 +66,7 @@ export class TemplateVisitor<
     >
   ) {}
 
-  visit(
-    value: JsxNode
-  ): TText | TElement | TFragment | TSelfClosing | TExpression {
+  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing | TExpression {
     if (ts.isJsxText(value)) {
       return this.visitText(value);
     }
@@ -108,9 +103,7 @@ export class TemplateVisitor<
   }
 
   visitSelfClosingElement(value: ts.JsxSelfClosingElement) {
-    const attributes = value.attributes.properties.map(
-      this.visitAttribute.bind(this)
-    );
+    const attributes = value.attributes.properties.map(this.visitAttribute.bind(this));
     return this.transformer.SelfClosingElement(value, attributes);
   }
 
@@ -121,9 +114,7 @@ export class TemplateVisitor<
 
   visitAttribute(value: ts.JsxAttributeLike) {
     if (ts.isJsxSpreadAttribute(value)) {
-      throw new Error(
-        'Spread attributes are not supported as they cannot be statically analyzed'
-      );
+      throw new Error('Spread attributes are not supported as they cannot be statically analyzed');
     }
 
     return this.transformer.Attribute(value);

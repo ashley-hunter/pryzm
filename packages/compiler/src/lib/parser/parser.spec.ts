@@ -46,9 +46,7 @@ describe('Parser', () => {
         }
       }`;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Component class must have a name'
-    );
+    expect(() => parseFile(code)).toThrowError('Component class must have a name');
   });
 
   it('should collect metadata for a props', () => {
@@ -489,9 +487,7 @@ describe('Parser', () => {
       export class Button {}
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Component class must have a render method'
-    );
+    expect(() => parseFile(code)).toThrowError('Component class must have a render method');
   });
 
   it('should throw an error if the render method expects parameters', () => {
@@ -504,9 +500,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Render method cannot have parameters'
-    );
+    expect(() => parseFile(code)).toThrowError('Render method cannot have parameters');
   });
 
   it('should throw an error if the render method contains anything other than a return statement', () => {
@@ -535,9 +529,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Render method must return a JSX element'
-    );
+    expect(() => parseFile(code)).toThrowError('Render method must return a JSX element');
   });
 
   it('should throw an error if the render method contains a return statement with a non-JSX element', () => {
@@ -550,9 +542,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Render method must return a JSX element'
-    );
+    expect(() => parseFile(code)).toThrowError('Render method must return a JSX element');
   });
 
   it('should throw an error if the render method contains a return statement with a parenthesised non-JSX element', () => {
@@ -565,9 +555,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Render method must return a JSX element'
-    );
+    expect(() => parseFile(code)).toThrowError('Render method must return a JSX element');
   });
 
   it('should throw an error if component has any static properties', () => {
@@ -582,9 +570,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Static properties are not supported'
-    );
+    expect(() => parseFile(code)).toThrowError('Static properties are not supported');
   });
 
   it('should throw an error if component has any static methods', () => {
@@ -601,9 +587,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Static methods are not supported'
-    );
+    expect(() => parseFile(code)).toThrowError('Static methods are not supported');
   });
 
   it('should throw if a @Prop() is private', () => {
@@ -618,9 +602,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Prop "label" cannot be private'
-    );
+    expect(() => parseFile(code)).toThrowError('Prop "label" cannot be private');
   });
 
   it('should throw if a @Prop() is protected', () => {
@@ -635,9 +617,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Prop "label" cannot be protected'
-    );
+    expect(() => parseFile(code)).toThrowError('Prop "label" cannot be protected');
   });
 
   it('should throw if an @Event() is private', () => {
@@ -652,9 +632,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Event "click" cannot be private'
-    );
+    expect(() => parseFile(code)).toThrowError('Event "click" cannot be private');
   });
 
   it('should throw if an @Event() is protected', () => {
@@ -669,9 +647,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Event "click" cannot be protected'
-    );
+    expect(() => parseFile(code)).toThrowError('Event "click" cannot be protected');
   });
 
   it('should throw if a @Prop() is not readonly', () => {
@@ -701,9 +677,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Event "click" must be readonly'
-    );
+    expect(() => parseFile(code)).toThrowError('Event "click" must be readonly');
   });
 
   it('should throw if a @Provider() is not readonly', () => {
@@ -718,9 +692,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Provider "service" must be readonly'
-    );
+    expect(() => parseFile(code)).toThrowError('Provider "service" must be readonly');
   });
 
   it('should collect imports', () => {
@@ -753,9 +725,7 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Provider "service" must be initialized'
-    );
+    expect(() => parseFile(code)).toThrowError('Provider "service" must be initialized');
   });
 
   it('should throw an error if an @Inject() is not readonly', () => {
@@ -770,8 +740,6 @@ describe('Parser', () => {
       }
     `;
 
-    expect(() => parseFile(code)).toThrowError(
-      'Dependency "service" must be readonly'
-    );
+    expect(() => parseFile(code)).toThrowError('Dependency "service" must be readonly');
   });
 });

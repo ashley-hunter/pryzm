@@ -258,9 +258,7 @@ describe('React Transformer', () => {
         "/* Define the value of the test prop */
         test: string;"
       `);
-      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
-        '"test"'
-      );
+      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot('"test"');
     });
 
     it('should transform an optional prop into a property', () => {
@@ -280,12 +278,8 @@ describe('React Transformer', () => {
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
-      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot(
-        '"test?: string;"'
-      );
-      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
-        '"test"'
-      );
+      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot('"test?: string;"');
+      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot('"test"');
     });
 
     it('should transform prop into a property with a default value', () => {
@@ -304,12 +298,8 @@ describe('React Transformer', () => {
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
-      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot(
-        '"test: string;"'
-      );
-      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
-        '"test = \\"test\\""'
-      );
+      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot('"test: string;"');
+      expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot('"test = \\"test\\""');
     });
 
     it('should transform prop into a property with a default value from a function', () => {
@@ -328,9 +318,7 @@ describe('React Transformer', () => {
       const prop = component.props[0];
 
       expect(prop.name).toBe('test');
-      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot(
-        '"test: () => any;"'
-      );
+      expect(printNode(prop.interfaceProperty)).toMatchInlineSnapshot('"test: () => any;"');
       expect(printNode(prop.destructuredProperty)).toMatchInlineSnapshot(
         '"test = () => \\"test\\""'
       );
@@ -642,9 +630,7 @@ describe('React Transformer', () => {
         "/* Define the test event emitter */
         onTest: (event: string) => void;"
       `);
-      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
-        '"onTest"'
-      );
+      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot('"onTest"');
     });
 
     it('should transform event into a property with no type', () => {
@@ -668,9 +654,7 @@ describe('React Transformer', () => {
         "/* Define the test event emitter */
         onTest: () => void;"
       `);
-      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot(
-        '"onTest"'
-      );
+      expect(printNode(event.destructuredProperty)).toMatchInlineSnapshot('"onTest"');
     });
   });
 
@@ -737,9 +721,7 @@ describe('React Transformer', () => {
       }
     `;
 
-      expect(() =>
-        transform(source, transformer)
-      ).toThrowErrorMatchingInlineSnapshot(
+      expect(() => transform(source, transformer)).toThrowErrorMatchingInlineSnapshot(
         '"Dependency \\"test\\" must be readonly"'
       );
     });
@@ -780,9 +762,7 @@ describe('React Transformer', () => {
       const component = transform(source, transformer);
 
       expect(component.imports.length).toBe(1);
-      expect(printNode(component.imports[0])).toBe(
-        'import { useState } from "react";'
-      );
+      expect(printNode(component.imports[0])).toBe('import { useState } from "react";');
     });
 
     it('should import useMemo whenever @Computed is defined', () => {
@@ -804,9 +784,7 @@ describe('React Transformer', () => {
       const component = transform(source, transformer);
 
       expect(component.imports.length).toBe(1);
-      expect(printNode(component.imports[0])).toBe(
-        'import { useMemo } from "react";'
-      );
+      expect(printNode(component.imports[0])).toBe('import { useMemo } from "react";');
     });
 
     it('should import useCallback whenever @Method is defined', () => {
@@ -826,9 +804,7 @@ describe('React Transformer', () => {
       const component = transform(source, transformer);
 
       expect(component.imports.length).toBe(1);
-      expect(printNode(component.imports[0])).toBe(
-        'import { useCallback } from "react";'
-      );
+      expect(printNode(component.imports[0])).toBe('import { useCallback } from "react";');
     });
 
     it('should import useRef whenever @Ref is defined', () => {
@@ -848,9 +824,7 @@ describe('React Transformer', () => {
       const component = transform(source, transformer);
 
       expect(component.imports.length).toBe(1);
-      expect(printNode(component.imports[0])).toBe(
-        'import { useRef } from "react";'
-      );
+      expect(printNode(component.imports[0])).toBe('import { useRef } from "react";');
     });
 
     it('should import useContext whenever @Inject is defined', () => {
@@ -870,9 +844,7 @@ describe('React Transformer', () => {
       const component = transform(source, transformer);
 
       expect(component.imports.length).toBe(1);
-      expect(printNode(component.imports[0])).toBe(
-        'import { useContext } from "react";'
-      );
+      expect(printNode(component.imports[0])).toBe('import { useContext } from "react";');
     });
 
     it('should retain any other imports', () => {

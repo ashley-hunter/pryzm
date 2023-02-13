@@ -8,10 +8,7 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
   const visitor = (node: ts.Node) => {
     // find any method calls
     // or find any property access expressions that use "this"
-    if (
-      ts.isPropertyAccessExpression(node) &&
-      isThisExpression(node.expression)
-    ) {
+    if (ts.isPropertyAccessExpression(node) && isThisExpression(node.expression)) {
       // check if the parent is a binary expression
       // and that the operator is an assignment
       // and that the current node is the left side of the assignment

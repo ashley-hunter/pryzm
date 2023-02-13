@@ -16,21 +16,18 @@ export function stripThis<T extends ts.Node, R extends ts.Node = T>(
 
 // create a ts transformer factory
 function stripThisTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
-  return (context) => {
+  return context => {
     const visitor = (node: ts.Node): ts.Node => {
       // e.g. @State() test: string = this.name;
       // e.g. @State() test: string = this.getName();
       // e.g. @State() test: string = this.person.name;
-      if (
-        ts.isPropertyAccessExpression(node) &&
-        isThisExpression(node.expression)
-      ) {
+      if (ts.isPropertyAccessExpression(node) && isThisExpression(node.expression)) {
         return node.name;
       }
 
       return ts.visitEachChild(node, visitor, context);
     };
 
-    return (root) => ts.visitNode(root, visitor);
+    return root => ts.visitNode(root, visitor);
   };
 }

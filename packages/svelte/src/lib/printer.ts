@@ -13,11 +13,9 @@ export class ReactPrinter implements Printer<SvelteTranformer> {
       ${metadata.imports}
 
       <script lang="ts">
-        ${metadata.props.map((prop) => printNode(prop.statement)).join('\n')}
-        ${metadata.states.map((state) => printNode(state.statement)).join('\n')}
-        ${metadata.computed
-          .map((computed) => printNode(computed.statement))
-          .join('\n')}
+        ${metadata.props.map(prop => printNode(prop.statement)).join('\n')}
+        ${metadata.states.map(state => printNode(state.statement)).join('\n')}
+        ${metadata.computed.map(computed => printNode(computed.statement)).join('\n')}
       </script>
 
       ${metadata.template}

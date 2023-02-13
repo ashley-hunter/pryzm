@@ -3,25 +3,15 @@ import * as ts from 'typescript';
 import { ComponentMetadata } from './component-metadata';
 
 export function parseFile(code: string): ComponentMetadata[] {
-  const sourceFile = ts.createSourceFile(
-    '',
-    code,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TSX
-  );
+  const sourceFile = ts.createSourceFile('', code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 
   return parseSourceFile(sourceFile);
 }
 
-export function parseSourceFile(
-  sourceFile: ts.SourceFile
-): ComponentMetadata[] {
+export function parseSourceFile(sourceFile: ts.SourceFile): ComponentMetadata[] {
   const components = getComponents(sourceFile);
 
-  return components.map((component) =>
-    collectComponentMetadata(sourceFile, component)
-  );
+  return components.map(component => collectComponentMetadata(sourceFile, component));
 }
 
 function getComponents(ast: ts.Node): ts.ClassDeclaration[] {
@@ -110,16 +100,12 @@ function getPropertiesWithDecorator(
 
     // find any get accessor that has a Prop decorator and report an error
     if (ts.isGetAccessor(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(
-        `Cannot use @${decoratorName}() on a getter. Use a property instead.`
-      );
+      throw new Error(`Cannot use @${decoratorName}() on a getter. Use a property instead.`);
     }
 
     // find any set accessor that has a Prop decorator and report an error
     if (ts.isSetAccessor(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(
-        `Cannot use @${decoratorName}() on a setter. Use a property instead.`
-      );
+      throw new Error(`Cannot use @${decoratorName}() on a setter. Use a property instead.`);
     }
 
     ts.forEachChild(node, visitor);
@@ -143,15 +129,11 @@ function getAccessorsWithDecorator(
     }
 
     if (ts.isSetAccessor(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(
-        `Cannot use @${decoratorName}() on a setter, use a getter instead.`
-      );
+      throw new Error(`Cannot use @${decoratorName}() on a setter, use a getter instead.`);
     }
 
     if (ts.isPropertyDeclaration(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(
-        `Cannot use @${decoratorName}() on a property, use a getter instead.`
-      );
+      throw new Error(`Cannot use @${decoratorName}() on a property, use a getter instead.`);
     }
 
     ts.forEachChild(node, visitor);
@@ -213,8 +195,7 @@ function getTemplate(
   }
 
   // get the return statement
-  const returnStatement = renderMethod.body!
-    .statements[0] as ts.ReturnStatement;
+  const returnStatement = renderMethod.body!.statements[0] as ts.ReturnStatement;
 
   // get the return value
   let returnValue = returnStatement.expression;
@@ -259,32 +240,24 @@ function hasDecorator(
   return false;
 }
 
-function hasAnyDecorator(
-  node: ts.ClassDeclaration | ts.PropertyLikeDeclaration
-): boolean {
-  return [
-    'Prop',
-    'State',
-    'Event',
-    'Computed',
-    'Ref',
-    'Provider',
-    'Inject',
-  ].some((decorator) => hasDecorator(node, decorator));
+function hasAnyDecorator(node: ts.ClassDeclaration | ts.PropertyLikeDeclaration): boolean {
+  return ['Prop', 'State', 'Event', 'Computed', 'Ref', 'Provider', 'Inject'].some(decorator =>
+    hasDecorator(node, decorator)
+  );
 }
 
 function ensureNoStaticMembers(component: ts.ClassDeclaration): void {
   const visitor = (node: ts.Node) => {
     if (
       ts.isPropertyDeclaration(node) &&
-      node.modifiers?.some((m) => m.kind === ts.SyntaxKind.StaticKeyword)
+      node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)
     ) {
       throw new Error('Static properties are not supported');
     }
 
     if (
       ts.isMethodDeclaration(node) &&
-      node.modifiers?.some((m) => m.kind === ts.SyntaxKind.StaticKeyword)
+      node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)
     ) {
       throw new Error('Static methods are not supported');
     }
@@ -299,9 +272,7 @@ function ensureNoUndecoratedProperties(component: ts.ClassDeclaration): void {
   const visitor = (node: ts.Node) => {
     // if the node is a property or accessor then check that it has a decorator
     if (
-      (ts.isPropertyDeclaration(node) ||
-        ts.isGetAccessor(node) ||
-        ts.isSetAccessor(node)) &&
+      (ts.isPropertyDeclaration(node) || ts.isGetAccessor(node) || ts.isSetAccessor(node)) &&
       !hasAnyDecorator(node)
     ) {
       throw new Error(
@@ -317,26 +288,22 @@ function ensureNoUndecoratedProperties(component: ts.ClassDeclaration): void {
 
 function ensureNoPrivateMembers(metadata: ComponentMetadata): void {
   // check that all props and events are public (i.e. not private or protected)
-  metadata.props.forEach((prop) => {
-    if (prop.modifiers?.some((m) => m.kind === ts.SyntaxKind.PrivateKeyword)) {
+  metadata.props.forEach(prop => {
+    if (prop.modifiers?.some(m => m.kind === ts.SyntaxKind.PrivateKeyword)) {
       throw new Error(`Prop "${getText(prop.name)}" cannot be private`);
     }
 
-    if (
-      prop.modifiers?.some((m) => m.kind === ts.SyntaxKind.ProtectedKeyword)
-    ) {
+    if (prop.modifiers?.some(m => m.kind === ts.SyntaxKind.ProtectedKeyword)) {
       throw new Error(`Prop "${getText(prop.name)}" cannot be protected`);
     }
   });
 
-  metadata.events.forEach((event) => {
-    if (event.modifiers?.some((m) => m.kind === ts.SyntaxKind.PrivateKeyword)) {
+  metadata.events.forEach(event => {
+    if (event.modifiers?.some(m => m.kind === ts.SyntaxKind.PrivateKeyword)) {
       throw new Error(`Event "${getText(event.name)}" cannot be private`);
     }
 
-    if (
-      event.modifiers?.some((m) => m.kind === ts.SyntaxKind.ProtectedKeyword)
-    ) {
+    if (event.modifiers?.some(m => m.kind === ts.SyntaxKind.ProtectedKeyword)) {
       throw new Error(`Event "${getText(event.name)}" cannot be protected`);
     }
   });
@@ -344,7 +311,7 @@ function ensureNoPrivateMembers(metadata: ComponentMetadata): void {
 
 function ensureFieldsAreInitialized(metadata: ComponentMetadata): void {
   // check that all events are of type EventEmitter
-  metadata.events.forEach((event) => {
+  metadata.events.forEach(event => {
     // ensure the property is initialized as a new EventEmitter
     if (
       !event.initializer ||
@@ -352,60 +319,44 @@ function ensureFieldsAreInitialized(metadata: ComponentMetadata): void {
       !ts.isIdentifier(event.initializer.expression) ||
       event.initializer.expression.text !== 'EventEmitter'
     ) {
-      throw new Error(
-        `Event "${event.name}" must be initialized as a new EventEmitter`
-      );
+      throw new Error(`Event "${event.name}" must be initialized as a new EventEmitter`);
     }
   });
 
   // check that all providers are initialized
-  metadata.providers.forEach((provider) => {
+  metadata.providers.forEach(provider => {
     if (!provider.initializer) {
-      throw new Error(
-        `Provider "${getText(provider.name)}" must be initialized`
-      );
+      throw new Error(`Provider "${getText(provider.name)}" must be initialized`);
     }
   });
 }
 
 function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
   // check that all props are readonly
-  metadata.props.forEach((prop) => {
-    if (
-      !prop.modifiers?.some((m) => m.kind === ts.SyntaxKind.ReadonlyKeyword)
-    ) {
+  metadata.props.forEach(prop => {
+    if (!prop.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword)) {
       throw new Error(`Prop "${getText(prop.name)}" must be readonly`);
     }
   });
 
   // ensure that events are readonly
-  metadata.events.forEach((event) => {
-    if (
-      !event.modifiers?.some((m) => m.kind === ts.SyntaxKind.ReadonlyKeyword)
-    ) {
+  metadata.events.forEach(event => {
+    if (!event.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword)) {
       throw new Error(`Event "${getText(event.name)}" must be readonly`);
     }
   });
 
   // ensure that providers are readonly
-  metadata.providers.forEach((provider) => {
-    if (
-      !provider.modifiers?.some((m) => m.kind === ts.SyntaxKind.ReadonlyKeyword)
-    ) {
+  metadata.providers.forEach(provider => {
+    if (!provider.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword)) {
       throw new Error(`Provider "${getText(provider.name)}" must be readonly`);
     }
   });
 
   // ensure the dependencies are readonly
-  metadata.injects.forEach((dependency) => {
-    if (
-      !dependency.modifiers?.some(
-        (m) => m.kind === ts.SyntaxKind.ReadonlyKeyword
-      )
-    ) {
-      throw new Error(
-        `Dependency "${getText(dependency.name)}" must be readonly`
-      );
+  metadata.injects.forEach(dependency => {
+    if (!dependency.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword)) {
+      throw new Error(`Dependency "${getText(dependency.name)}" must be readonly`);
     }
   });
 }

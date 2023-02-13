@@ -1,9 +1,7 @@
 import * as ts from 'typescript';
 import { getText } from './name';
 
-export function getTagName(
-  node: ts.JsxElement | ts.JsxSelfClosingElement
-): string {
+export function getTagName(node: ts.JsxElement | ts.JsxSelfClosingElement): string {
   if (ts.isJsxElement(node)) {
     return getText(node.openingElement.tagName);
   }
@@ -19,9 +17,7 @@ export function getAttributeName(node: ts.JsxAttribute): string {
   return getText(node.name);
 }
 
-export function getAttributeValue(
-  node: ts.JsxAttribute
-): ts.Expression | undefined {
+export function getAttributeValue(node: ts.JsxAttribute): ts.Expression | undefined {
   if (node.initializer && ts.isJsxExpression(node.initializer)) {
     return node.initializer.expression;
   }

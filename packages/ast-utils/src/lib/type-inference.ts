@@ -5,10 +5,7 @@ export function inferType(
   initializer: ts.Expression | undefined,
   defaultToAny?: false
 ): ts.TypeNode | undefined;
-export function inferType(
-  initializer: ts.Expression | undefined,
-  defaultToAny?: true
-): ts.TypeNode;
+export function inferType(initializer: ts.Expression | undefined, defaultToAny?: true): ts.TypeNode;
 export function inferType(
   initializer: ts.Expression | undefined,
   defaultToAny?: boolean
@@ -32,14 +29,13 @@ export function inferType(
     case ts.SyntaxKind.ArrowFunction:
       return ts.factory.createFunctionTypeNode(
         undefined,
-        (initializer as ts.ArrowFunction).parameters.map((parameter) =>
+        (initializer as ts.ArrowFunction).parameters.map(parameter =>
           ts.factory.createParameterDeclaration(
             undefined,
             undefined,
             parameter.name,
             undefined,
-            parameter.type ??
-              ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
+            parameter.type ?? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
           )
         ),
         (initializer as ts.ArrowFunction).type ??
@@ -49,14 +45,13 @@ export function inferType(
     case ts.SyntaxKind.FunctionExpression:
       return ts.factory.createFunctionTypeNode(
         undefined,
-        (initializer as ts.FunctionExpression).parameters.map((parameter) =>
+        (initializer as ts.FunctionExpression).parameters.map(parameter =>
           ts.factory.createParameterDeclaration(
             undefined,
             undefined,
             parameter.name,
             undefined,
-            parameter.type ??
-              ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
+            parameter.type ?? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
           )
         ),
         (initializer as ts.FunctionExpression).type ??
@@ -65,8 +60,7 @@ export function inferType(
 
     case ts.SyntaxKind.ArrayLiteralExpression:
       // infer the type of the first element in the array
-      const firstElement = (initializer as ts.ArrayLiteralExpression)
-        .elements[0];
+      const firstElement = (initializer as ts.ArrayLiteralExpression).elements[0];
 
       // if there is no first element, then the array is empty
       // so we can infer the type as any
@@ -83,28 +77,24 @@ export function inferType(
       return ts.factory.createArrayTypeNode(elementType);
     case ts.SyntaxKind.ObjectLiteralExpression:
       return ts.factory.createTypeLiteralNode(
-        (initializer as ts.ObjectLiteralExpression).properties.map(
-          (property) => {
-            if (ts.isPropertyAssignment(property)) {
-              return ts.factory.createPropertySignature(
-                undefined,
-                getText(property.name),
-                undefined,
-                inferType(property.initializer, true)
-              );
-            }
+        (initializer as ts.ObjectLiteralExpression).properties.map(property => {
+          if (ts.isPropertyAssignment(property)) {
             return ts.factory.createPropertySignature(
               undefined,
-              getText(property.name!),
+              getText(property.name),
               undefined,
-              ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
+              inferType(property.initializer, true)
             );
           }
-        )
+          return ts.factory.createPropertySignature(
+            undefined,
+            getText(property.name!),
+            undefined,
+            ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
+          );
+        })
       );
     default:
-      return defaultToAny
-        ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
-        : undefined;
+      return defaultToAny ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword) : undefined;
   }
 }

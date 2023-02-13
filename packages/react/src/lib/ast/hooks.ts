@@ -102,24 +102,20 @@ export function useMemo(
           ts.factory.createIdentifier(name),
           undefined,
           undefined,
-          ts.factory.createCallExpression(
-            ts.factory.createIdentifier('useMemo'),
-            undefined,
-            [
-              ts.factory.createArrowFunction(
-                undefined,
-                undefined,
-                [],
-                undefined,
-                undefined,
-                stripThis(initializer)!
-              ),
-              ts.factory.createArrayLiteralExpression(
-                dependencies.map((dep) => ts.factory.createIdentifier(dep)),
-                false
-              ),
-            ]
-          )
+          ts.factory.createCallExpression(ts.factory.createIdentifier('useMemo'), undefined, [
+            ts.factory.createArrowFunction(
+              undefined,
+              undefined,
+              [],
+              undefined,
+              undefined,
+              stripThis(initializer)!
+            ),
+            ts.factory.createArrayLiteralExpression(
+              dependencies.map(dep => ts.factory.createIdentifier(dep)),
+              false
+            ),
+          ])
         ),
       ],
       ts.NodeFlags.Const
@@ -151,24 +147,20 @@ export function useCallback(
           ts.factory.createIdentifier(name),
           undefined,
           undefined,
-          ts.factory.createCallExpression(
-            ts.factory.createIdentifier('useCallback'),
-            undefined,
-            [
-              ts.factory.createArrowFunction(
-                undefined,
-                undefined,
-                parameters,
-                undefined,
-                undefined,
-                stripThis(transformAssignment(initializer))!
-              ),
-              ts.factory.createArrayLiteralExpression(
-                dependencies.map((dep) => ts.factory.createIdentifier(dep)),
-                false
-              ),
-            ]
-          )
+          ts.factory.createCallExpression(ts.factory.createIdentifier('useCallback'), undefined, [
+            ts.factory.createArrowFunction(
+              undefined,
+              undefined,
+              parameters,
+              undefined,
+              undefined,
+              stripThis(transformAssignment(initializer))!
+            ),
+            ts.factory.createArrayLiteralExpression(
+              dependencies.map(dep => ts.factory.createIdentifier(dep)),
+              false
+            ),
+          ])
         ),
       ],
       ts.NodeFlags.Const

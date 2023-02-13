@@ -14,16 +14,12 @@ describe('Type inference', () => {
 
   it('should infer a boolean type from true', () => {
     const initializer = getInitializer(`const variable = true;`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"boolean"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"boolean"');
   });
 
   it('should infer a boolean type from false', () => {
     const initializer = getInitializer(`const variable = false;`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"boolean"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"boolean"');
   });
 
   it('should infer an array type', () => {
@@ -33,9 +29,7 @@ describe('Type inference', () => {
 
   it('should infer an array type with a string element', () => {
     const initializer = getInitializer(`const variable = ["value"];`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"string[]"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"string[]"');
   });
 
   it('should infer an object type', () => {
@@ -79,38 +73,26 @@ describe('Type inference', () => {
 
   it('should infer an arrow function with no parameters', () => {
     const initializer = getInitializer(`const variable = () => {};`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"() => any"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"() => any"');
   });
 
   it('should infer an arrow function with a return type', () => {
     const initializer = getInitializer(`const variable = (): number => {};`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"() => number"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"() => number"');
   });
 
   it('should infer an arrow function with a parameter', () => {
     const initializer = getInitializer(`const variable = (param) => {};`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"(param: any) => any"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"(param: any) => any"');
   });
 
   it('should infer an arrow function with a parameter with types', () => {
-    const initializer = getInitializer(
-      `const variable = (param: number) => {};`
-    );
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"(param: number) => any"'
-    );
+    const initializer = getInitializer(`const variable = (param: number) => {};`);
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"(param: number) => any"');
   });
 
   it('should infer an arrow function with multiple parameters', () => {
-    const initializer = getInitializer(
-      `const variable = (param1, param2) => {};`
-    );
+    const initializer = getInitializer(`const variable = (param1, param2) => {};`);
     expect(printType(inferType(initializer))).toMatchInlineSnapshot(
       '"(param1: any, param2: any) => any"'
     );
@@ -118,49 +100,33 @@ describe('Type inference', () => {
 
   it('should infer an anonymous function with no parameters', () => {
     const initializer = getInitializer(`const variable = function() {};`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"() => any"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"() => any"');
   });
 
   it('should infer an anonymous function with a return type', () => {
-    const initializer = getInitializer(
-      `const variable = function(): number {};`
-    );
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"() => number"'
-    );
+    const initializer = getInitializer(`const variable = function(): number {};`);
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"() => number"');
   });
 
   it('should infer an anonymous function with a parameter', () => {
     const initializer = getInitializer(`const variable = function(param) {};`);
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"(param: any) => any"'
-    );
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"(param: any) => any"');
   });
 
   it('should infer an anonymous function with a parameter with types', () => {
-    const initializer = getInitializer(
-      `const variable = function(param: number) {};`
-    );
-    expect(printType(inferType(initializer))).toMatchInlineSnapshot(
-      '"(param: number) => any"'
-    );
+    const initializer = getInitializer(`const variable = function(param: number) {};`);
+    expect(printType(inferType(initializer))).toMatchInlineSnapshot('"(param: number) => any"');
   });
 
   it('should infer an anonymous function with multiple parameters', () => {
-    const initializer = getInitializer(
-      `const variable = function(param1, param2) {};`
-    );
+    const initializer = getInitializer(`const variable = function(param1, param2) {};`);
     expect(printType(inferType(initializer))).toMatchInlineSnapshot(
       '"(param1: any, param2: any) => any"'
     );
   });
 
   it('should infer an arrow function with multiple parameters with types', () => {
-    const initializer = getInitializer(
-      `const variable = (param1: number, param2: string) => {};`
-    );
+    const initializer = getInitializer(`const variable = (param1: number, param2: string) => {};`);
     expect(printType(inferType(initializer))).toMatchInlineSnapshot(
       '"(param1: number, param2: string) => any"'
     );
@@ -177,8 +143,8 @@ describe('Type inference', () => {
 
     // get the initialiser from the first property assignment e.g.
     // const a = "test" => 'test'
-    const initializer = (source.statements[0] as ts.VariableStatement)
-      .declarationList.declarations[0].initializer;
+    const initializer = (source.statements[0] as ts.VariableStatement).declarationList
+      .declarations[0].initializer;
 
     return initializer!;
   }

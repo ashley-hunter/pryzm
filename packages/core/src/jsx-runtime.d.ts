@@ -48,9 +48,7 @@ export declare namespace JSX {
     1: any;
   }
 
-  type EventHandlerUnion<T, E extends Event> =
-    | EventHandler<T, E>
-    | BoundEventHandler<T, E>;
+  type EventHandlerUnion<T, E extends Event> = EventHandler<T, E> | BoundEventHandler<T, E>;
 
   // Intrinsic attributes enable us to define certain keys as attributes on an element, while
   // at the same time hiding them from the element's `props`.
@@ -199,20 +197,11 @@ export declare namespace JSX {
   // See CSS 3 <length> type https://drafts.csswg.org/css-values-3/#lengths
   type CSSLength = number | string;
 
-  type HTMLAutocapitalize =
-    | 'off'
-    | 'none'
-    | 'on'
-    | 'sentences'
-    | 'words'
-    | 'characters';
+  type HTMLAutocapitalize = 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
 
   type HTMLDir = 'ltr' | 'rtl' | 'auto';
 
-  type HTMLFormEncType =
-    | 'application/x-www-form-urlencoded'
-    | 'multipart/form-data'
-    | 'text/plain';
+  type HTMLFormEncType = 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain';
 
   type HTMLFormMethod = 'post' | 'get' | 'dialog';
 
@@ -298,25 +287,10 @@ export declare namespace JSX {
     itemref?: string;
 
     // others
-    align?:
-      | 'start'
-      | 'end'
-      | 'center'
-      | 'baseline'
-      | 'stretch'
-      | 'left'
-      | 'right';
+    align?: 'start' | 'end' | 'center' | 'baseline' | 'stretch' | 'left' | 'right';
     part?: string;
     exportparts?: string;
-    inputmode?:
-      | 'none'
-      | 'text'
-      | 'tel'
-      | 'url'
-      | 'email'
-      | 'numeric'
-      | 'decimal'
-      | 'search';
+    inputmode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
 
     // camelcase
     contentEditable?: boolean | 'inherit';
@@ -329,15 +303,7 @@ export declare namespace JSX {
     itemId?: string;
     itemRef?: string;
     exportParts?: string;
-    inputMode?:
-      | 'none'
-      | 'text'
-      | 'tel'
-      | 'url'
-      | 'email'
-      | 'numeric'
-      | 'decimal'
-      | 'search';
+    inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
 
     // WAI-ARIA
     role?: AriaRole | undefined;
@@ -711,8 +677,7 @@ export declare namespace JSX {
     value?: string | string[] | number;
   }
 
-  interface HTMLSlotElementAttributes<T = HTMLSlotElement>
-    extends HTMLAttributes<T> {
+  interface HTMLSlotElementAttributes<T = HTMLSlotElement> extends HTMLAttributes<T> {
     name?: string;
   }
 
@@ -955,11 +920,7 @@ export declare namespace JSX {
     'color-interpolation'?: 'auto' | 'sRGB' | 'linearRGB' | 'inherit';
     'color-interpolation-filters'?: 'auto' | 'sRGB' | 'linearRGB' | 'inherit';
     'color-profile'?: string;
-    'color-rendering'?:
-      | 'auto'
-      | 'optimizeSpeed'
-      | 'optimizeQuality'
-      | 'inherit';
+    'color-rendering'?: 'auto' | 'optimizeSpeed' | 'optimizeQuality' | 'inherit';
     cursor?: string;
     direction?: 'ltr' | 'rtl' | 'inherit';
     display?: string;
@@ -990,11 +951,7 @@ export declare namespace JSX {
     'font-weight'?: number | string;
     'glyph-orientation-horizontal'?: string;
     'glyph-orientation-vertical'?: string;
-    'image-rendering'?:
-      | 'auto'
-      | 'optimizeQuality'
-      | 'optimizeSpeed'
-      | 'inherit';
+    'image-rendering'?: 'auto' | 'optimizeQuality' | 'optimizeSpeed' | 'inherit';
     kerning?: string;
     'letter-spacing'?: number | string;
     'lighting-color'?: string;
@@ -1017,36 +974,19 @@ export declare namespace JSX {
       | 'all'
       | 'none'
       | 'inherit';
-    'shape-rendering'?:
-      | 'auto'
-      | 'optimizeSpeed'
-      | 'crispEdges'
-      | 'geometricPrecision'
-      | 'inherit';
+    'shape-rendering'?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision' | 'inherit';
     'stop-color'?: string;
     'stop-opacity'?: number | string | 'inherit';
     stroke?: string;
     'stroke-dasharray'?: string;
     'stroke-dashoffset'?: number | string;
     'stroke-linecap'?: 'butt' | 'round' | 'square' | 'inherit';
-    'stroke-linejoin'?:
-      | 'arcs'
-      | 'bevel'
-      | 'miter'
-      | 'miter-clip'
-      | 'round'
-      | 'inherit';
+    'stroke-linejoin'?: 'arcs' | 'bevel' | 'miter' | 'miter-clip' | 'round' | 'inherit';
     'stroke-miterlimit'?: number | string | 'inherit';
     'stroke-opacity'?: number | string | 'inherit';
     'stroke-width'?: number | string;
     'text-anchor'?: 'start' | 'middle' | 'end' | 'inherit';
-    'text-decoration'?:
-      | 'none'
-      | 'underline'
-      | 'overline'
-      | 'line-through'
-      | 'blink'
-      | 'inherit';
+    'text-decoration'?: 'none' | 'underline' | 'overline' | 'line-through' | 'blink' | 'inherit';
     'text-rendering'?:
       | 'auto'
       | 'optimizeSpeed'
@@ -1056,14 +996,7 @@ export declare namespace JSX {
     'unicode-bidi'?: string;
     visibility?: 'visible' | 'hidden' | 'collapse' | 'inherit';
     'word-spacing'?: number | string;
-    'writing-mode'?:
-      | 'lr-tb'
-      | 'rl-tb'
-      | 'tb-rl'
-      | 'lr'
-      | 'rl'
-      | 'tb'
-      | 'inherit';
+    'writing-mode'?: 'lr-tb' | 'rl-tb' | 'tb-rl' | 'lr' | 'rl' | 'tb' | 'inherit';
   }
 
   interface AnimationElementSVGAttributes<T>
@@ -1210,10 +1143,7 @@ export declare namespace JSX {
       AnimationTimingSVGAttributes,
       AnimationValueSVGAttributes,
       AnimationAdditionSVGAttributes,
-      Pick<
-        PresentationSVGAttributes,
-        'color-interpolation' | 'color-rendering'
-      > {}
+      Pick<PresentationSVGAttributes, 'color-interpolation' | 'color-rendering'> {}
 
   interface AnimateMotionSVGAttributes<T>
     extends AnimationElementSVGAttributes<T>,
@@ -1265,9 +1195,7 @@ export declare namespace JSX {
       StylableSVGAttributes,
       TransformableSVGAttributes {}
 
-  interface DescSVGAttributes<T>
-    extends CoreSVGAttributes<T>,
-      StylableSVGAttributes {}
+  interface DescSVGAttributes<T> extends CoreSVGAttributes<T>, StylableSVGAttributes {}
 
   interface EllipseSVGAttributes<T>
     extends GraphicsElementSVGAttributes<T>,
@@ -1347,8 +1275,7 @@ export declare namespace JSX {
     yChannelSelector?: 'R' | 'G' | 'B' | 'A';
   }
 
-  interface FeDistantLightSVGAttributes<T>
-    extends LightSourceElementSVGAttributes<T> {
+  interface FeDistantLightSVGAttributes<T> extends LightSourceElementSVGAttributes<T> {
     azimuth?: number | string;
     elevation?: number | string;
   }
@@ -1356,10 +1283,7 @@ export declare namespace JSX {
   interface FeFloodSVGAttributes<T>
     extends FilterPrimitiveElementSVGAttributes<T>,
       StylableSVGAttributes,
-      Pick<
-        PresentationSVGAttributes,
-        'color' | 'flood-color' | 'flood-opacity'
-      > {}
+      Pick<PresentationSVGAttributes, 'color' | 'flood-color' | 'flood-opacity'> {}
 
   interface FeFuncSVGAttributes<T> extends CoreSVGAttributes<T> {
     type?: 'identity' | 'table' | 'discrete' | 'linear' | 'gamma';
@@ -1410,8 +1334,7 @@ export declare namespace JSX {
     dy?: number | string;
   }
 
-  interface FePointLightSVGAttributes<T>
-    extends LightSourceElementSVGAttributes<T> {
+  interface FePointLightSVGAttributes<T> extends LightSourceElementSVGAttributes<T> {
     x?: number | string;
     y?: number | string;
     z?: number | string;
@@ -1428,8 +1351,7 @@ export declare namespace JSX {
     kernelUnitLength?: number | string;
   }
 
-  interface FeSpotLightSVGAttributes<T>
-    extends LightSourceElementSVGAttributes<T> {
+  interface FeSpotLightSVGAttributes<T> extends LightSourceElementSVGAttributes<T> {
     x?: number | string;
     y?: number | string;
     z?: number | string;
@@ -1512,18 +1434,14 @@ export declare namespace JSX {
       ExternalResourceSVGAttributes,
       StylableSVGAttributes,
       TransformableSVGAttributes,
-      Pick<
-        PresentationSVGAttributes,
-        'marker-start' | 'marker-mid' | 'marker-end'
-      > {
+      Pick<PresentationSVGAttributes, 'marker-start' | 'marker-mid' | 'marker-end'> {
     x1?: number | string;
     y1?: number | string;
     x2?: number | string;
     y2?: number | string;
   }
 
-  interface LinearGradientSVGAttributes<T>
-    extends GradientElementSVGAttributes<T> {
+  interface LinearGradientSVGAttributes<T> extends GradientElementSVGAttributes<T> {
     x1?: number | string;
     x2?: number | string;
     y1?: number | string;
@@ -1566,10 +1484,7 @@ export declare namespace JSX {
       ExternalResourceSVGAttributes,
       StylableSVGAttributes,
       TransformableSVGAttributes,
-      Pick<
-        PresentationSVGAttributes,
-        'marker-start' | 'marker-mid' | 'marker-end'
-      > {
+      Pick<PresentationSVGAttributes, 'marker-start' | 'marker-mid' | 'marker-end'> {
     d?: string;
     pathLength?: number | string;
   }
@@ -1598,10 +1513,7 @@ export declare namespace JSX {
       ExternalResourceSVGAttributes,
       StylableSVGAttributes,
       TransformableSVGAttributes,
-      Pick<
-        PresentationSVGAttributes,
-        'marker-start' | 'marker-mid' | 'marker-end'
-      > {
+      Pick<PresentationSVGAttributes, 'marker-start' | 'marker-mid' | 'marker-end'> {
     points?: string;
   }
 
@@ -1612,15 +1524,11 @@ export declare namespace JSX {
       ExternalResourceSVGAttributes,
       StylableSVGAttributes,
       TransformableSVGAttributes,
-      Pick<
-        PresentationSVGAttributes,
-        'marker-start' | 'marker-mid' | 'marker-end'
-      > {
+      Pick<PresentationSVGAttributes, 'marker-start' | 'marker-mid' | 'marker-end'> {
     points?: string;
   }
 
-  interface RadialGradientSVGAttributes<T>
-    extends GradientElementSVGAttributes<T> {
+  interface RadialGradientSVGAttributes<T> extends GradientElementSVGAttributes<T> {
     cx?: number | string;
     cy?: number | string;
     r?: number | string;
@@ -2074,14 +1982,7 @@ export declare namespace JSX {
      * Indicates what functions can be performed when a dragged object is released on the drop target.
      * @deprecated in ARIA 1.1
      */
-    'aria-dropeffect'?:
-      | 'none'
-      | 'copy'
-      | 'execute'
-      | 'link'
-      | 'move'
-      | 'popup'
-      | undefined;
+    'aria-dropeffect'?: 'none' | 'copy' | 'execute' | 'link' | 'move' | 'popup' | undefined;
     /**
      * Identifies the element that provides an error message for the object.
      * @see aria-invalid @see aria-describedby.
@@ -2119,13 +2020,7 @@ export declare namespace JSX {
      * Indicates the entered value does not conform to the format expected by the application.
      * @see aria-errormessage.
      */
-    'aria-invalid'?:
-      | boolean
-      | 'false'
-      | 'true'
-      | 'grammar'
-      | 'spelling'
-      | undefined;
+    'aria-invalid'?: boolean | 'false' | 'true' | 'grammar' | 'spelling' | undefined;
     /** Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element. */
     'aria-keyshortcuts'?: string | undefined;
     /**

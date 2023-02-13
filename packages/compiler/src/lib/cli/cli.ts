@@ -9,11 +9,7 @@ export function runCLI(tsconfig: string): void {
   // load tsconfig.json file
   const { config } = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
 
-  const { options, fileNames, errors } = ts.parseJsonConfigFileContent(
-    config,
-    ts.sys,
-    path
-  );
+  const { options, fileNames, errors } = ts.parseJsonConfigFileContent(config, ts.sys, path);
 
   const program = ts.createProgram({
     options,
@@ -25,7 +21,7 @@ export function runCLI(tsconfig: string): void {
   const sourceFiles = program.getSourceFiles();
 
   // transform source files
-  sourceFiles.forEach((sourceFile) => {
+  sourceFiles.forEach(sourceFile => {
     parseSourceFile(sourceFile);
   });
 }

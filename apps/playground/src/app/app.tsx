@@ -73,15 +73,13 @@ export class App {
 
               <span className="text-white px-3 py-2 rounded-md text-lg font-medium">
                 Pryzm
-                <small className="text-xs font-medium text-gray-400 pl-1">
-                  v0.1
-                </small>
+                <small className="text-xs font-medium text-gray-400 pl-1">v0.1</small>
               </span>
 
               <select
                 className="ml-auto inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100"
                 value={target}
-                onChange={(event) => setTarget(event.target.value as any)}
+                onChange={event => setTarget(event.target.value as any)}
               >
                 <option value="react">React</option>
                 <option value="svelte">Svelte</option>
@@ -94,8 +92,8 @@ export class App {
         <Editor
           className="flex-1 border-r h-full outline-none"
           value={code}
-          onValueChange={(code) => setCode(code)}
-          highlight={(code) => highlight(code, languages.js)}
+          onValueChange={code => setCode(code)}
+          highlight={code => highlight(code, languages.js)}
           padding={10}
           style={{
             fontFamily: '"Fira code", "Fira Mono", monospace',
@@ -114,8 +112,8 @@ export class App {
           <Editor
             className="flex-1 h-full"
             value={output}
-            onValueChange={(code) => {}}
-            highlight={(code) => highlight(code, languages.js)}
+            onValueChange={code => {}}
+            highlight={code => highlight(code, languages.js)}
             padding={10}
             disabled
             style={{

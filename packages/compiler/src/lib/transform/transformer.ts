@@ -1,10 +1,11 @@
 import * as ts from 'typescript';
 import { parseFile } from '../parser/parser';
 
-type TransformerFn<
-  T extends Transformer,
-  K extends keyof Transformer
-> = T[K] extends (...args: any) => any ? ReturnType<T[K]> : any;
+type TransformerFn<T extends Transformer, K extends keyof Transformer> = T[K] extends (
+  ...args: any
+) => any
+  ? ReturnType<T[K]>
+  : any;
 
 export type TransformerResult<T extends Transformer> = {
   props: TransformerFn<T, 'Prop'>[];
@@ -29,12 +30,8 @@ export interface Transformer {
   Computed?: (value: ts.GetAccessorDeclaration) => any;
   Provider?: (value: ts.PropertyDeclaration) => any;
   Inject?: (value: ts.PropertyDeclaration) => any;
-  Template?: (
-    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement
-  ) => any;
-  PostTransform?: (
-    metadata: TransformerResult<Transformer>
-  ) => TransformerResult<Transformer>;
+  Template?: (value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement) => any;
+  PostTransform?: (metadata: TransformerResult<Transformer>) => TransformerResult<Transformer>;
 }
 
 const noop = <T>(value: T) => value;

@@ -1,15 +1,12 @@
 import * as ts from 'typescript';
 
-export function hasDecorator(
-  node: ts.PropertyAssignment,
-  name: string
-): boolean {
+export function hasDecorator(node: ts.PropertyAssignment, name: string): boolean {
   if (!ts.canHaveDecorators(node)) {
     return false;
   }
 
   return (
-    ts.getDecorators(node)?.some((modifier) => {
+    ts.getDecorators(node)?.some(modifier => {
       return (
         ts.isDecorator(modifier) &&
         ts.isCallExpression(modifier.expression) &&
@@ -28,7 +25,7 @@ export function getDecorator(
     return undefined;
   }
 
-  return ts.getDecorators(node)?.find((modifier) => {
+  return ts.getDecorators(node)?.find(modifier => {
     return (
       ts.isDecorator(modifier) &&
       ts.isCallExpression(modifier.expression) &&

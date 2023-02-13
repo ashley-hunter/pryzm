@@ -33,7 +33,7 @@ export const templateTransformer: TemplateTransformer<
       children,
       ts.factory.createJsxJsxClosingFragment()
     ),
-  Attribute: (value) => {
+  Attribute: value => {
     // if the attribute is called "class", we need to rename it to "className"
     if (ts.isIdentifier(value.name) && value.name.escapedText === 'class') {
       // if the attribute value is an object then we want to wrap it in a call to the "clsx" function
@@ -47,11 +47,9 @@ export const templateTransformer: TemplateTransformer<
           ts.factory.createIdentifier('className'),
           ts.factory.createJsxExpression(
             undefined,
-            ts.factory.createCallExpression(
-              ts.factory.createIdentifier('clsx'),
-              undefined,
-              [stripThis(value.initializer.expression)!]
-            )
+            ts.factory.createCallExpression(ts.factory.createIdentifier('clsx'), undefined, [
+              stripThis(value.initializer.expression)!,
+            ])
           )
         );
       }
@@ -65,14 +63,11 @@ export const templateTransformer: TemplateTransformer<
 
     // otherwise if the attribute value is an expression, we need to strip the "this" keyword
     if (value.initializer && ts.isJsxExpression(value.initializer)) {
-      return ts.factory.createJsxAttribute(
-        value.name,
-        stripThis(value.initializer)
-      );
+      return ts.factory.createJsxAttribute(value.name, stripThis(value.initializer));
     }
 
     return value;
   },
-  Expression: (value) => stripThis(value)!,
-  Text: (value) => value,
+  Expression: value => stripThis(value)!,
+  Text: value => value,
 };

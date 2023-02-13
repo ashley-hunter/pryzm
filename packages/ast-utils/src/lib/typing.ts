@@ -5,23 +5,10 @@ export function isThisExpression(node: ts.Node): node is ts.ThisExpression {
   return node.kind === ts.SyntaxKind.ThisKeyword;
 }
 
-export function isMutableArrayCallExpression(
-  node: ts.Node
-): node is ts.CallExpression {
-  const mutableArrayMethods = [
-    'push',
-    'pop',
-    'shift',
-    'unshift',
-    'splice',
-    'sort',
-    'reverse',
-  ];
+export function isMutableArrayCallExpression(node: ts.Node): node is ts.CallExpression {
+  const mutableArrayMethods = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'];
 
-  if (
-    !ts.isCallExpression(node) ||
-    !ts.isPropertyAccessExpression(node.expression)
-  ) {
+  if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)) {
     return false;
   }
 

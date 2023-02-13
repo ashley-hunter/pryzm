@@ -1,12 +1,4 @@
-import {
-  Component,
-  Computed,
-  Event,
-  Prop,
-  Provider,
-  Ref,
-  State,
-} from './decorators';
+import { Component, Computed, Event, Prop, Provider, Ref, State } from './decorators';
 import { EventEmitter } from './types';
 
 const MyServiceToken = Symbol('MyService');
@@ -29,11 +21,7 @@ export class Button {
 
   render() {
     return (
-      <button
-        ref={this.button}
-        disabled={this.isDisabled}
-        onClick={this.onClick.emit()}
-      >
+      <button ref={this.button} disabled={this.isDisabled} onClick={this.onClick.emit()}>
         {this.isPrimary ? 'Primary' : 'Secondary'}
       </button>
     );

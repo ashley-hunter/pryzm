@@ -18,9 +18,7 @@ export const templateTransformer: TemplateTransformer<
   Element: (value, attributes, children) => {
     const tagName = getTagName(value);
 
-    return `<${tagName} ${attributes.join(' ')}>${children.join(
-      '\n'
-    )}</${tagName}>`;
+    return `<${tagName} ${attributes.join(' ')}>${children.join('\n')}</${tagName}>`;
   },
   SelfClosingElement: (value, attributes) => {
     const tagName = getTagName(value);
@@ -30,12 +28,12 @@ export const templateTransformer: TemplateTransformer<
   Fragment: (value, children) => {
     return children.join('\n');
   },
-  Attribute: (attribute) => {
+  Attribute: attribute => {
     const name = getAttributeName(attribute);
     const value = getAttributeValue(attribute);
 
     return `${name}={${printNode(stripThis(value)!)}}`;
   },
-  Expression: (value) => printNode(stripThis(value.expression)!),
-  Text: (value) => value.text,
+  Expression: value => printNode(stripThis(value.expression)!),
+  Text: value => value.text,
 };
