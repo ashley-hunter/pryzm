@@ -1,23 +1,18 @@
 import { print as reactPrint } from '@pryzm/react';
 import { print as sveltePrint } from '@pryzm/svelte';
+import { print as vuePrint } from '@pryzm/vue';
 import { Buffer } from 'buffer';
-import { format } from 'prettier';
 import * as sveltePlugin from 'prettier-plugin-svelte';
 import * as parserHtml from 'prettier/parser-html';
 import * as parserCss from 'prettier/parser-postcss';
 import * as parserTypeScript from 'prettier/parser-typescript';
+import { format } from 'prettier/standalone';
 import { highlight, languages } from 'prismjs';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
 import { useMemo, useState } from 'react';
 import Editor from 'react-simple-code-editor';
-import * as svelteCompiler from 'svelte/compiler';
 window.Buffer = Buffer;
-window.require = (name: string) => {
-  if (name === 'svelte/compiler') {
-    return svelteCompiler;
-  }
-};
 
 export function App() {
   const [code, setCode] = useState(`@Component()
@@ -38,13 +33,20 @@ export class App {
 
 }`);
   const [error, setError] = useState<Error | null>(null);
-  const [target, setTarget] = useState<'react' | 'svelte'>('react');
+  const [target, setTarget] = useState<'react' | 'svelte' | 'vue'>('react');
 
   const output = useMemo(() => {
     setError(null);
     try {
       if (target === 'react') {
         return reactPrint(code);
+      }
+
+      if (target === 'vue') {
+        return format(vuePrint(code), {
+          plugins: [parserTypeScript, parserCss, parserHtml],
+          parser: 'vue',
+        });
       }
 
       return format(sveltePrint(code), {
@@ -83,6 +85,7 @@ export class App {
               >
                 <option value="react">React</option>
                 <option value="svelte">Svelte</option>
+                <option value="vue">Vue</option>
               </select>
             </div>
           </div>

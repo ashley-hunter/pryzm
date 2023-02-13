@@ -3,11 +3,11 @@ import { Printer, transform, TransformerResult } from '@pryzm/compiler';
 import { SvelteTranformer, transformer } from './transformer';
 
 export function print(source: string): string {
-  const printer = new ReactPrinter();
+  const printer = new SveltePrinter();
   return printer.print(transform(source, transformer));
 }
 
-export class ReactPrinter implements Printer<SvelteTranformer> {
+export class SveltePrinter implements Printer<SvelteTranformer> {
   print(metadata: TransformerResult<SvelteTranformer>): string {
     return `
       ${metadata.imports}
