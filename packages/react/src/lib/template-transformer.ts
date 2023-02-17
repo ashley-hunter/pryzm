@@ -10,23 +10,42 @@ export const templateTransformer: TemplateTransformer<
   ts.JsxExpression,
   ts.JsxSelfClosingElement
 > = {
-  Element: (value, attributes, children) => {
+  Element: (value, attributes, children, context) => {
+    const id = context.data.get('id') as string | undefined;
+
     return ts.factory.createJsxElement(
       ts.factory.createJsxOpeningElement(
         value.openingElement.tagName,
         value.openingElement.typeArguments,
-        ts.factory.createJsxAttributes(attributes)
+        ts.factory.createJsxAttributes(
+          id
+            ? [
+                ...attributes,
+                ts.factory.createJsxAttribute(ts.factory.createIdentifier(id), undefined),
+              ]
+            : attributes
+        )
       ),
       children,
       value.closingElement
     );
   },
-  SelfClosingElement: (value, attributes) =>
-    ts.factory.createJsxSelfClosingElement(
+  SelfClosingElement: (value, attributes, context) => {
+    const id = context.data.get('id') as string | undefined;
+
+    return ts.factory.createJsxSelfClosingElement(
       value.tagName,
       value.typeArguments,
-      ts.factory.createJsxAttributes(attributes)
-    ),
+      ts.factory.createJsxAttributes(
+        id
+          ? [
+              ...attributes,
+              ts.factory.createJsxAttribute(ts.factory.createIdentifier(id), undefined),
+            ]
+          : attributes
+      )
+    );
+  },
   Fragment: (value, children) =>
     ts.factory.createJsxFragment(
       ts.factory.createJsxOpeningFragment(),

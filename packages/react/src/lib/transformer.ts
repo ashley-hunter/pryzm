@@ -8,7 +8,13 @@ import {
   inferType,
   stripThis,
 } from '@pryzm/ast-utils';
-import { Transformer, TransformerResult, transformTemplate } from '@pryzm/compiler';
+import {
+  Transformer,
+  TransformerContext,
+  TransformerResult,
+  transformTemplate,
+} from '@pryzm/compiler';
+import { compileStyle } from '@vue/component-compiler-utils/lib/compileStyle';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { useCallback, useMemo, useRef, useState } from './ast/hooks';
@@ -62,8 +68,11 @@ export interface ReactTransformer extends Transformer {
     token: ts.Identifier;
     type: ts.TypeNode | undefined;
   };
+  Styles(style: string, context: TransformerContext): string;
   Template?: (
-    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement
+    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
+    styles: string,
+    context: TransformerContext
   ) => ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement;
   PostTransform: (
     metadata: TransformerResult<ReactTransformer>
@@ -210,11 +219,61 @@ export const transformer: ReactTransformer = {
 
     return { name, statement, dependencies };
   },
-  Template(value) {
-    return transformTemplate(value, templateTransformer) as
+  Styles(style, context) {
+    if (style === '') {
+      return '';
+    }
+
+    // generate a unique id for the component that will be used to scope styles
+    if (!context.data.has('id')) {
+      context.data.set('id', `data-v-${Math.random().toString(36).substring(2, 9)}`);
+    }
+
+    // convert the style to a scoped style
+    const output = compileStyle({
+      source: style,
+      id: context.data.get('id') as string,
+      scoped: true,
+      filename: 'https://style.css',
+    });
+
+    return output.code;
+  },
+  Template(value, styles, context) {
+    const template = transformTemplate(value, templateTransformer, context) as
       | ts.JsxFragment
       | ts.JsxElement
       | ts.JsxSelfClosingElement;
+
+    // if there are no styles then return the template directly
+    if (!context.data.has('id')) {
+      return template;
+    }
+
+    // otherwise wrap the template in a fragment and add a style element
+    return factory.createJsxFragment(
+      factory.createJsxOpeningFragment(),
+      [
+        template,
+        factory.createJsxElement(
+          factory.createJsxOpeningElement(
+            factory.createIdentifier('style'),
+            undefined,
+            factory.createJsxAttributes([
+              factory.createJsxAttribute(factory.createIdentifier('jsx'), undefined),
+            ])
+          ),
+          [
+            factory.createJsxExpression(
+              undefined,
+              factory.createNoSubstitutionTemplateLiteral(styles)
+            ),
+          ],
+          factory.createJsxClosingElement(factory.createIdentifier('style'))
+        ),
+      ],
+      factory.createJsxJsxClosingFragment()
+    );
   },
   PostTransform(metadata) {
     // remove any imports from @pryzm/core

@@ -1,5 +1,10 @@
 import * as ts from 'typescript';
+import { ComponentMetadata } from '../parser/component-metadata';
 import { parseFile } from '../parser/parser';
+
+export type TransformerContext = {
+  data: Map<string, unknown>;
+};
 
 type TransformerFn<T extends Transformer, K extends keyof Transformer> = T[K] extends (
   ...args: any
@@ -23,20 +28,26 @@ export type TransformerResult<T extends Transformer> = {
 };
 
 export interface Transformer {
-  Prop?: (value: ts.PropertyDeclaration) => any;
-  State?: (value: ts.PropertyDeclaration) => any;
-  Method?: (value: ts.MethodDeclaration) => any;
-  Event?: (value: ts.PropertyDeclaration) => any;
-  Ref?: (value: ts.PropertyDeclaration) => any;
-  Computed?: (value: ts.GetAccessorDeclaration) => any;
-  Provider?: (value: ts.PropertyDeclaration) => any;
-  Inject?: (value: ts.PropertyDeclaration) => any;
-  Template?: (value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement) => any;
-  Styles?: (value: string) => any;
-  PostTransform?: (metadata: TransformerResult<Transformer>) => TransformerResult<Transformer>;
+  Prop?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  State?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  Method?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
+  Event?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  Ref?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  Computed?: (value: ts.GetAccessorDeclaration, context: TransformerContext) => any;
+  Provider?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  Inject?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  Template?: (
+    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
+    styles: string,
+    context: TransformerContext
+  ) => any;
+  Styles?: (value: string, context: TransformerContext) => any;
+  PreTransform?: (metadata: ComponentMetadata, context: TransformerContext) => void;
+  PostTransform?: (
+    metadata: TransformerResult<Transformer>,
+    context: TransformerContext
+  ) => TransformerResult<Transformer>;
 }
-
-const noop = <T>(value: T) => value;
 
 export function transform<T extends Transformer>(
   source: string,
@@ -52,20 +63,28 @@ export function transform<T extends Transformer>(
     throw new Error('Multiple components found');
   }
 
+  const context: TransformerContext = {
+    data: new Map(),
+  };
+
   const metadata = components[0];
 
-  const props = metadata.props.map(transformer.Prop ?? noop);
-  const states = metadata.state.map(transformer.State ?? noop);
-  const computed = metadata.computed.map(transformer.Computed ?? noop);
-  const events = metadata.events.map(transformer.Event ?? noop);
-  const methods = metadata.methods.map(transformer.Method ?? noop);
-  const refs = metadata.refs.map(transformer.Ref ?? noop);
-  const providers = metadata.providers.map(transformer.Provider ?? noop);
-  const injects = metadata.injects.map(transformer.Inject ?? noop);
-  const styles = transformer.Styles ? transformer.Styles(metadata.styles) : metadata.styles;
-  const template = transformer.Template
-    ? transformer.Template(metadata.template)
-    : metadata.template;
+  transformer.PreTransform?.(metadata, context);
+  const styles = transformer.Styles?.(metadata.styles, context) ?? metadata.styles;
+  const props = metadata.props.map(prop => transformer.Prop?.(prop, context) ?? prop);
+  const states = metadata.state.map(state => transformer.State?.(state, context) ?? state);
+  const computed = metadata.computed.map(
+    computed => transformer.Computed?.(computed, context) ?? computed
+  );
+  const events = metadata.events.map(event => transformer.Event?.(event, context) ?? event);
+  const methods = metadata.methods.map(method => transformer.Method?.(method, context) ?? method);
+  const refs = metadata.refs.map(ref => transformer.Ref?.(ref, context) ?? ref);
+  const providers = metadata.providers.map(
+    provider => transformer.Provider?.(provider, context) ?? provider
+  );
+  const injects = metadata.injects.map(inject => transformer.Inject?.(inject, context) ?? inject);
+  const template =
+    transformer.Template?.(metadata.template, metadata.styles, context) ?? metadata.template;
 
   const result: TransformerResult<Transformer> = {
     ...metadata,
@@ -81,5 +100,5 @@ export function transform<T extends Transformer>(
     template,
   };
 
-  return transformer.PostTransform ? transformer.PostTransform(result) : result;
+  return transformer.PostTransform!(result, context);
 }

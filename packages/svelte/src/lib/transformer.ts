@@ -5,7 +5,12 @@ import {
   isPropertyReadonly,
   stripThis,
 } from '@pryzm/ast-utils';
-import { Transformer, TransformerResult, transformTemplate } from '@pryzm/compiler';
+import {
+  Transformer,
+  TransformerContext,
+  TransformerResult,
+  transformTemplate,
+} from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
@@ -40,7 +45,10 @@ export interface SvelteTranformer extends Transformer {
     token: ts.Identifier;
     type: ts.TypeNode | undefined;
   };
-  Template?: (value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement) => string;
+  Template?: (
+    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
+    context: TransformerContext
+  ) => string;
   PostTransform?: (
     metadata: TransformerResult<SvelteTranformer>
   ) => TransformerResult<SvelteTranformer>;
@@ -140,7 +148,7 @@ export const transformer: SvelteTranformer = {
 
     return { statement };
   },
-  Template(value) {
-    return transformTemplate(value, templateTransformer);
+  Template(value, context) {
+    return transformTemplate(value, templateTransformer, context);
   },
 };

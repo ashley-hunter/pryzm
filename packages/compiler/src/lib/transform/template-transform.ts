@@ -1,5 +1,6 @@
 import { stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
+import { TransformerContext } from './transformer';
 
 export interface TemplateTransformer<
   TElement,
@@ -12,16 +13,22 @@ export interface TemplateTransformer<
   Element: (
     value: ts.JsxElement,
     attributes: TAttribute[],
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[],
+    context: TransformerContext
   ) => TElement;
-  SelfClosingElement: (value: ts.JsxSelfClosingElement, attributes: TAttribute[]) => TSelfClosing;
+  SelfClosingElement: (
+    value: ts.JsxSelfClosingElement,
+    attributes: TAttribute[],
+    context: TransformerContext
+  ) => TSelfClosing;
   Fragment: (
     value: ts.JsxFragment,
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[]
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[],
+    context: TransformerContext
   ) => TFragment;
-  Attribute: (value: ts.JsxAttribute) => TAttribute;
-  Text: (value: ts.JsxText) => TText;
-  Expression: (value: ts.JsxExpression) => TExpression;
+  Attribute: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
+  Text: (value: ts.JsxText, context: TransformerContext) => TText;
+  Expression: (value: ts.JsxExpression, context: TransformerContext) => TExpression;
 }
 
 export function transformTemplate<
@@ -40,9 +47,10 @@ export function transformTemplate<
     TText,
     TExpression,
     TSelfClosing
-  >
+  >,
+  context: TransformerContext
 ) {
-  const visitor = new TemplateVisitor(transformer);
+  const visitor = new TemplateVisitor(transformer, context);
 
   return visitor.visit(stripParentNode(value));
 }
@@ -63,7 +71,8 @@ export class TemplateVisitor<
       TText,
       TExpression,
       TSelfClosing
-    >
+    >,
+    private context: TransformerContext
   ) {}
 
   visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing | TExpression {
@@ -91,7 +100,7 @@ export class TemplateVisitor<
   }
 
   visitText(value: ts.JsxText) {
-    return this.transformer.Text(value);
+    return this.transformer.Text(value, this.context);
   }
 
   visitElement(value: ts.JsxElement) {
@@ -99,17 +108,17 @@ export class TemplateVisitor<
       this.visitAttribute.bind(this)
     );
     const children = value.children.map(this.visit.bind(this));
-    return this.transformer.Element(value, attributes, children);
+    return this.transformer.Element(value, attributes, children, this.context);
   }
 
   visitSelfClosingElement(value: ts.JsxSelfClosingElement) {
     const attributes = value.attributes.properties.map(this.visitAttribute.bind(this));
-    return this.transformer.SelfClosingElement(value, attributes);
+    return this.transformer.SelfClosingElement(value, attributes, this.context);
   }
 
   visitFragment(value: ts.JsxFragment) {
     const children = value.children.map(this.visit.bind(this));
-    return this.transformer.Fragment(value, children);
+    return this.transformer.Fragment(value, children, this.context);
   }
 
   visitAttribute(value: ts.JsxAttributeLike) {
@@ -117,7 +126,7 @@ export class TemplateVisitor<
       throw new Error('Spread attributes are not supported as they cannot be statically analyzed');
     }
 
-    return this.transformer.Attribute(value);
+    return this.transformer.Attribute(value, this.context);
   }
 
   visitChildren(value: ts.NodeArray<ts.JsxChild>) {
@@ -129,7 +138,7 @@ export class TemplateVisitor<
   }
 
   visitExpression(value: ts.JsxExpression): TExpression {
-    return this.transformer.Expression(value);
+    return this.transformer.Expression(value, this.context);
   }
 }
 
