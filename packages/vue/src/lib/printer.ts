@@ -42,6 +42,17 @@ export class VuePrinter implements Printer<VueTranformer> {
     `;
   }
 
+  private getStyle(metadata: TransformerResult<VueTranformer>): string {
+    if (metadata.styles.length === 0) {
+      return '';
+    }
+
+    return `<style scoped>
+      ${metadata.styles}
+    </style>
+    `;
+  }
+
   print(metadata: TransformerResult<VueTranformer>): string {
     return `
     <script setup lang="ts">
@@ -67,9 +78,7 @@ export class VuePrinter implements Printer<VueTranformer> {
       ${metadata.template}
     </template>
 
-    <style>
-      /* scoped styles */
-    </style>
+    ${this.getStyle(metadata)}
     `;
   }
 }

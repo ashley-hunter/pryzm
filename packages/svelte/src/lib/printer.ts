@@ -8,6 +8,17 @@ export function print(source: string): string {
 }
 
 export class SveltePrinter implements Printer<SvelteTranformer> {
+  private getStyle(metadata: TransformerResult<SvelteTranformer>): string {
+    if (metadata.styles.length === 0) {
+      return '';
+    }
+
+    return `<style>
+      ${metadata.styles}
+    </style>
+    `;
+  }
+
   print(metadata: TransformerResult<SvelteTranformer>): string {
     return `
       ${metadata.imports}
@@ -19,6 +30,8 @@ export class SveltePrinter implements Printer<SvelteTranformer> {
       </script>
 
       ${metadata.template}
+
+      ${this.getStyle(metadata)}
     `;
   }
 }

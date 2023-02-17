@@ -165,25 +165,28 @@ function getMethods(component: ts.ClassDeclaration): ts.MethodDeclaration[] {
   return methods;
 }
 
-function getStyles(component: ts.ClassDeclaration): string | undefined {
+function getStyles(component: ts.ClassDeclaration): string {
   // find the component decorator on the component class and extract the value of the styles property
   const componentDecorator = getDecorator(component, 'Component');
 
   if (!componentDecorator) {
-    return undefined;
+    return '';
   }
 
   const stylesProperty = getDecoratorProperty(componentDecorator, 'styles');
 
-  if (!stylesProperty) {
-    return undefined;
+  if (!stylesProperty || !ts.isPropertyAssignment(stylesProperty)) {
+    return '';
   }
 
-  if (ts.isPropertyAssignment(stylesProperty) && ts.isStringLiteral(stylesProperty.initializer)) {
-    return getText(stylesProperty.initializer);
+  if (
+    ts.isStringLiteral(stylesProperty.initializer) ||
+    ts.isNoSubstitutionTemplateLiteral(stylesProperty.initializer)
+  ) {
+    return stylesProperty.initializer.text;
   }
 
-  return undefined;
+  return '';
 }
 
 function getTemplate(

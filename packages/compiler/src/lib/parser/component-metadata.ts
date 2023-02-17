@@ -12,5 +12,5 @@ export interface ComponentMetadata {
   injects: ts.PropertyDeclaration[];
   template: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement;
   imports: ts.ImportDeclaration[];
-  styles?: string;
+  styles: string;
 }

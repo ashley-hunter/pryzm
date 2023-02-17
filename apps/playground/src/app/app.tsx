@@ -39,7 +39,10 @@ export class App {
     setError(null);
     try {
       if (target === 'react') {
-        return reactPrint(code);
+        return format(reactPrint(code), {
+          plugins: [parserTypeScript, parserCss],
+          parser: 'typescript',
+        });
       }
 
       if (target === 'vue') {
