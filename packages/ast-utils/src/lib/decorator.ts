@@ -18,7 +18,7 @@ export function hasDecorator(node: ts.PropertyAssignment, name: string): boolean
 }
 
 export function getDecorator(
-  node: ts.PropertyLikeDeclaration,
+  node: ts.PropertyLikeDeclaration | ts.ClassDeclaration,
   name: string
 ): ts.Decorator | undefined {
   if (!ts.canHaveDecorators(node)) {
@@ -35,13 +35,29 @@ export function getDecorator(
   });
 }
 
-export function getDecoratorArgument(
-  decorator: ts.Decorator,
-  name: string
-): ts.Expression | undefined {
+export function getDecoratorParameter(decorator: ts.Decorator): ts.Expression | undefined {
   if (!ts.isCallExpression(decorator.expression)) {
     return undefined;
   }
 
   return decorator.expression.arguments[0];
+}
+
+export function getDecoratorProperty(
+  decorator: ts.Decorator,
+  name: string
+): ts.ObjectLiteralElementLike | undefined {
+  const parameter = getDecoratorParameter(decorator);
+
+  if (!parameter || !ts.isObjectLiteralExpression(parameter)) {
+    return undefined;
+  }
+
+  return parameter.properties.find(property => {
+    return (
+      ts.isPropertyAssignment(property) &&
+      ts.isIdentifier(property.name) &&
+      property.name.text === name
+    );
+  });
 }

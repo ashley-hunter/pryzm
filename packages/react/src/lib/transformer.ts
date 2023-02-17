@@ -2,7 +2,7 @@ import {
   addComment,
   extractComment,
   getDecorator,
-  getDecoratorArgument,
+  getDecoratorParameter,
   getPropertyName,
   getText,
   inferType,
@@ -160,7 +160,7 @@ export const transformer: ReactTransformer = {
 
     // get the token from the decorator
     const decorator = getDecorator(value, 'Inject')!;
-    const token = getDecoratorArgument(decorator, 'Inject');
+    const token = getDecoratorParameter(decorator);
 
     if (!token || !ts.isIdentifier(token)) {
       throw new Error('Inject must have a token');
@@ -173,7 +173,7 @@ export const transformer: ReactTransformer = {
     const name = getPropertyName(value);
 
     const decorator = getDecorator(value, 'Provider')!;
-    const token = getDecoratorArgument(decorator, 'Provider');
+    const token = getDecoratorParameter(decorator);
 
     if (!token || !ts.isIdentifier(token)) {
       throw new Error('Provider must have a token');

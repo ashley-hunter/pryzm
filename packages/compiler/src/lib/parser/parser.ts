@@ -1,4 +1,4 @@
-import { getText } from '@pryzm/ast-utils';
+import { getDecorator, getDecoratorProperty, getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { ComponentMetadata } from './component-metadata';
 
@@ -51,6 +51,7 @@ function collectComponentMetadata(
     injects: getPropertiesWithDecorator(component, 'Inject'),
     methods: getMethods(component),
     template: getTemplate(component),
+    styles: getStyles(component),
   };
 
   // post collect checks
@@ -162,6 +163,27 @@ function getMethods(component: ts.ClassDeclaration): ts.MethodDeclaration[] {
   ts.forEachChild(component, visitor);
 
   return methods;
+}
+
+function getStyles(component: ts.ClassDeclaration): string | undefined {
+  // find the component decorator on the component class and extract the value of the styles property
+  const componentDecorator = getDecorator(component, 'Component');
+
+  if (!componentDecorator) {
+    return undefined;
+  }
+
+  const stylesProperty = getDecoratorProperty(componentDecorator, 'styles');
+
+  if (!stylesProperty) {
+    return undefined;
+  }
+
+  if (ts.isPropertyAssignment(stylesProperty) && ts.isStringLiteral(stylesProperty.initializer)) {
+    return getText(stylesProperty.initializer);
+  }
+
+  return undefined;
 }
 
 function getTemplate(
