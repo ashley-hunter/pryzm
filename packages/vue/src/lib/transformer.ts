@@ -1,10 +1,5 @@
 import { getPropertyName, getPropertyType, getReturnExpression, stripThis } from '@pryzm/ast-utils';
-import {
-  Transformer,
-  TransformerContext,
-  TransformerResult,
-  transformTemplate,
-} from '@pryzm/compiler';
+import { Transformer, TransformerContext, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
@@ -44,9 +39,9 @@ export interface VueTranformer extends Transformer {
   };
   Template?: (
     value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
+    styles: string,
     context: TransformerContext
   ) => string;
-  PostTransform?: (metadata: TransformerResult<VueTranformer>) => TransformerResult<VueTranformer>;
 }
 
 export const transformer: VueTranformer = {
@@ -164,7 +159,7 @@ export const transformer: VueTranformer = {
 
     return { statement };
   },
-  Template(value, context) {
+  Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);
   },
 };

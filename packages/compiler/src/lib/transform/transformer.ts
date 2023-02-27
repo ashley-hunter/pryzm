@@ -70,7 +70,11 @@ export function transform<T extends Transformer>(
   const metadata = components[0];
 
   transformer.PreTransform?.(metadata, context);
-  const styles = transformer.Styles?.(metadata.styles, context) ?? metadata.styles;
+  let styles = transformer.Styles?.(metadata.styles, context) ?? metadata.styles;
+
+  // remove any new line characters from styles
+  styles = styles.replace(/(\r\n|\n|\r)/gm, '');
+
   const props = metadata.props.map(prop => transformer.Prop?.(prop, context) ?? prop);
   const states = metadata.state.map(state => transformer.State?.(state, context) ?? state);
   const computed = metadata.computed.map(
@@ -83,8 +87,7 @@ export function transform<T extends Transformer>(
     provider => transformer.Provider?.(provider, context) ?? provider
   );
   const injects = metadata.injects.map(inject => transformer.Inject?.(inject, context) ?? inject);
-  const template =
-    transformer.Template?.(metadata.template, metadata.styles, context) ?? metadata.template;
+  const template = transformer.Template?.(metadata.template, styles, context) ?? metadata.template;
 
   const result: TransformerResult<Transformer> = {
     ...metadata,
@@ -100,5 +103,5 @@ export function transform<T extends Transformer>(
     template,
   };
 
-  return transformer.PostTransform!(result, context);
+  return transformer.PostTransform ? transformer.PostTransform(result, context) : result;
 }

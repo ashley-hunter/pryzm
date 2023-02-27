@@ -47,6 +47,7 @@ export interface SvelteTranformer extends Transformer {
   };
   Template?: (
     value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
+    styles: string,
     context: TransformerContext
   ) => string;
   PostTransform?: (
@@ -148,7 +149,7 @@ export const transformer: SvelteTranformer = {
 
     return { statement };
   },
-  Template(value, context) {
+  Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);
   },
 };
