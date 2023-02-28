@@ -14,7 +14,7 @@ import {
   TransformerResult,
   transformTemplate,
 } from '@pryzm/compiler';
-import { compileStyle } from '@vue/component-compiler-utils/lib/compileStyle';
+import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { useCallback, useMemo, useRef, useState } from './ast/hooks';

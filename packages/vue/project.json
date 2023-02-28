@@ -5,10 +5,14 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/vite:build",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/vue"
+        "outputPath": "dist/packages/vue",
+        "main": "packages/vue/src/index.ts",
+        "tsConfig": "packages/vue/tsconfig.lib.json",
+        "project": "packages/vue/package.json",
+        "assets": []
       }
     },
     "publish": {

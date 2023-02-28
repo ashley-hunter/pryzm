@@ -5,10 +5,14 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/vite:build",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/svelte"
+        "outputPath": "dist/packages/svelte",
+        "main": "packages/svelte/src/index.ts",
+        "tsConfig": "packages/svelte/tsconfig.lib.json",
+        "project": "packages/svelte/package.json",
+        "assets": []
       }
     },
     "publish": {

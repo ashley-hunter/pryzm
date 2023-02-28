@@ -1,24 +1,24 @@
 {
-  "name": "react",
+  "name": "lit",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/react/src",
+  "sourceRoot": "packages/lit/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/react",
-        "main": "packages/react/src/index.ts",
-        "tsConfig": "packages/react/tsconfig.lib.json",
-        "project": "packages/react/package.json",
+        "outputPath": "dist/packages/lit",
+        "main": "packages/lit/src/index.ts",
+        "project": "packages/lit/package.json",
+        "tsConfig": "packages/lit/tsconfig.lib.json",
         "assets": []
       }
     },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node tools/scripts/publish.mjs react {args.ver} {args.tag}"
+        "command": "node tools/scripts/publish.mjs lit {args.ver} {args.tag}"
       },
       "dependsOn": ["build"]
     },
@@ -26,14 +26,15 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/react/**/*.ts"]
+        "lintFilePatterns": ["packages/lit/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/vite:test",
-      "outputs": ["{projectRoot}/coverage"],
+      "outputs": ["coverage/packages/lit"],
       "options": {
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/lit"
       }
     }
   },

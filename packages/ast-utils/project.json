@@ -5,13 +5,14 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/esbuild:esbuild",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/ast-utils",
         "main": "packages/ast-utils/src/index.ts",
+        "project": "packages/ast-utils/package.json",
         "tsConfig": "packages/ast-utils/tsconfig.lib.json",
-        "assets": ["packages/ast-utils/*.md"]
+        "assets": []
       }
     },
     "publish": {

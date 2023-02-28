@@ -14,7 +14,6 @@
     "**/*.spec.js",
     "**/*.test.jsx",
     "**/*.spec.jsx",
-    "**/*.d.ts",
-    "../ast-utils/src/lib/comment.spec.ts"
+    "**/*.d.ts"
   ]
 }

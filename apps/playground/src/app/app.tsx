@@ -1,3 +1,4 @@
+import { print as litPrint } from '@pryzm/lit';
 import { print as reactPrint } from '@pryzm/react';
 import { print as sveltePrint } from '@pryzm/svelte';
 import { print as vuePrint } from '@pryzm/vue';
@@ -33,7 +34,7 @@ export class App {
 
 }`);
   const [error, setError] = useState<Error | null>(null);
-  const [target, setTarget] = useState<'react' | 'svelte' | 'vue'>('react');
+  const [target, setTarget] = useState<'react' | 'svelte' | 'vue' | 'lit'>('react');
 
   const output = useMemo(() => {
     setError(null);
@@ -49,6 +50,13 @@ export class App {
         return format(vuePrint(code), {
           plugins: [parserTypeScript, parserCss, parserHtml],
           parser: 'vue',
+        });
+      }
+
+      if (target === 'lit') {
+        return format(litPrint(code), {
+          plugins: [parserTypeScript, parserCss, parserHtml],
+          parser: 'typescript',
         });
       }
 
@@ -77,7 +85,7 @@ export class App {
             </div> */}
 
               <span className="text-white px-3 py-2 rounded-md text-lg font-medium">
-                Pryzm
+                Pryzm Compiler
                 <small className="text-xs font-medium text-gray-400 pl-1">v0.1</small>
               </span>
 
@@ -89,6 +97,7 @@ export class App {
                 <option value="react">React</option>
                 <option value="svelte">Svelte</option>
                 <option value="vue">Vue</option>
+                <option value="lit">Lit</option>
               </select>
             </div>
           </div>
