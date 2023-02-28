@@ -35,8 +35,6 @@ export class LitPrinter implements Printer<LitTranformer> {
           return html\`${metadata.template}\`;
         }
       }
-
-      customElements.define('${this.selector(metadata.name)}', ${metadata.name});
     `;
   }
 }
