@@ -1,10 +1,4 @@
-import {
-  getAttributeName,
-  getAttributeValue,
-  getTagName,
-  printNode,
-  stripThis,
-} from '@pryzm/ast-utils';
+import { getAttributeName, getAttributeValue, getTagName, printNode } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer<
@@ -32,8 +26,8 @@ export const templateTransformer: TemplateTransformer<
     const name = getAttributeName(attribute);
     const value = getAttributeValue(attribute);
 
-    return `${name}={${printNode(stripThis(value)!)}}`;
+    return `${name}={${printNode(value!)}}`;
   },
-  Expression: value => `{${printNode(stripThis(value.expression)!)}}`,
+  Expression: value => `\${${printNode(value.expression!)}}`,
   Text: value => value.text,
 };

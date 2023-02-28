@@ -1,10 +1,4 @@
-import {
-  getPropertyName,
-  getPropertyType,
-  getReturnExpression,
-  isPropertyReadonly,
-  stripThis,
-} from '@pryzm/ast-utils';
+import { getPropertyName } from '@pryzm/ast-utils';
 import {
   Transformer,
   TransformerContext,
@@ -16,21 +10,12 @@ import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface LitTranformer extends Transformer {
-  State(state: ts.PropertyDeclaration): {
-    statement: ts.VariableStatement;
-  };
-  Prop(prop: ts.PropertyDeclaration): {
-    statement: ts.VariableStatement;
-  };
-  Computed(computed: ts.GetAccessorDeclaration): {
-    statement: ts.LabeledStatement;
-  };
+  State(state: ts.PropertyDeclaration, context: TransformerContext): ts.PropertyDeclaration;
+  Prop(prop: ts.PropertyDeclaration, context: TransformerContext): ts.PropertyDeclaration;
+  Computed(computed: ts.GetAccessorDeclaration): ts.GetAccessorDeclaration;
   Ref(ref: ts.PropertyDeclaration): {
     name: string;
     statement: ts.VariableStatement;
-  };
-  Method(method: ts.MethodDeclaration): {
-    statement: ts.FunctionDeclaration;
   };
   Event(event: ts.PropertyDeclaration): {
     name: string;
@@ -55,69 +40,43 @@ export interface LitTranformer extends Transformer {
 
 export const transformer: LitTranformer = {
   Computed(computed) {
-    // computed is a get accessor declaration, we need to convert it to a variable statement that is exported
-    const name = getPropertyName(computed);
-    const initializer = getReturnExpression(computed);
-
-    const statement = factory.createLabeledStatement(
-      factory.createIdentifier('$'),
-      factory.createExpressionStatement(
-        factory.createBinaryExpression(
-          factory.createIdentifier(name),
-          factory.createToken(ts.SyntaxKind.EqualsToken),
-          stripThis(initializer)!
-        )
-      )
-    );
-
-    return { statement };
-  },
-  Prop(prop) {
-    // prop is a property declaration, we need to convert it to a variable statement
-    const name = getPropertyName(prop);
-    const type = getPropertyType(prop);
-    const initializer = prop.initializer;
-
-    const statement = factory.createVariableStatement(
+    return factory.createGetAccessorDeclaration(
       undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            type,
-            stripThis(initializer)
-          ),
-        ],
-        ts.NodeFlags.Let
-      )
-    );
-
-    return { statement };
-  },
-  State(state) {
-    // state is a property declaration, we need to convert it to a variable statement
-    const name = getPropertyName(state);
-    const type = getPropertyType(state);
-    const isReadonly = isPropertyReadonly(state);
-    const initializer = state.initializer;
-
-    const statement = factory.createVariableStatement(
+      computed.name,
+      [],
       undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            type,
-            stripThis(initializer)
-          ),
-        ],
-        isReadonly ? ts.NodeFlags.Const : ts.NodeFlags.Let
-      )
+      computed.body
     );
+  },
+  Prop(prop, context) {
+    context.importHandler.addNamedImport('property', 'lit/decorators.js');
 
-    return { statement };
+    return factory.createPropertyDeclaration(
+      [
+        factory.createDecorator(
+          factory.createCallExpression(factory.createIdentifier('property'), undefined, [])
+        ),
+      ],
+      prop.name,
+      undefined,
+      prop.type,
+      prop.initializer
+    );
+  },
+  State(state, context) {
+    context.importHandler.addNamedImport('state', 'lit/decorators.js');
+
+    return factory.createPropertyDeclaration(
+      [
+        factory.createDecorator(
+          factory.createCallExpression(factory.createIdentifier('state'), undefined, [])
+        ),
+      ],
+      state.name,
+      undefined,
+      state.type,
+      state.initializer
+    );
   },
   Event(event) {
     return { name: getPropertyName(event) };
@@ -131,23 +90,16 @@ export const transformer: LitTranformer = {
   Ref(value) {
     throw new Error('Method not implemented.');
   },
-  Method(method) {
-    // convert a method to a function declaration
-    const name = getPropertyName(method);
-    const returnType = method.type;
-    const statement = ts.factory.createFunctionDeclaration(
-      undefined,
-      undefined,
-      name,
-      undefined,
-      method.parameters,
-      returnType,
-      stripThis(method.body)
-    );
-
-    return { statement };
+  Styles(value, context) {
+    context.importHandler.addNamedImport('LitElement', 'lit');
+    return value;
   },
   Template(value, styles, context) {
+    context.importHandler.addNamedImport('html', 'lit');
     return transformTemplate(value, templateTransformer, context);
+  },
+  PreTransform(metadata, context) {
+    context.importHandler.addNamedImport('customElement', 'lit/decorators.js');
+    return metadata;
   },
 };
