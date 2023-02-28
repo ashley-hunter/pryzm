@@ -19,6 +19,8 @@ export class LitPrinter implements Printer<LitTranformer> {
       @customElement('${this.selector(metadata.name)}')
       class ${metadata.name} extends LitElement {
 
+        ${metadata.refs.map(printNode).join('\r\n')}
+
         ${metadata.props.map(printNode).join('\r\n')}
 
         ${metadata.states.map(printNode).join('\r\n')}

@@ -1,4 +1,4 @@
-import { getPropertyName } from '@pryzm/ast-utils';
+import { getPropertyName, getPropertyType } from '@pryzm/ast-utils';
 import {
   Transformer,
   TransformerContext,
@@ -13,10 +13,7 @@ export interface LitTranformer extends Transformer {
   State(state: ts.PropertyDeclaration, context: TransformerContext): ts.PropertyDeclaration;
   Prop(prop: ts.PropertyDeclaration, context: TransformerContext): ts.PropertyDeclaration;
   Computed(computed: ts.GetAccessorDeclaration): ts.GetAccessorDeclaration;
-  Ref(ref: ts.PropertyDeclaration): {
-    name: string;
-    statement: ts.VariableStatement;
-  };
+  Ref(ref: ts.PropertyDeclaration, context: TransformerContext): ts.PropertyDeclaration;
   Event(event: ts.PropertyDeclaration): {
     name: string;
   };
@@ -88,8 +85,20 @@ export const transformer: LitTranformer = {
   Provider(value) {
     throw new Error('Method not implemented.');
   },
-  Ref(value) {
-    throw new Error('Method not implemented.');
+  Ref(value, context) {
+    context.importHandler.addNamedImport('createRef', 'lit/directives/ref.js');
+    context.importHandler.addNamedImport('ref', 'lit/directives/ref.js');
+    context.importHandler.addNamedImport('Ref', 'lit');
+
+    const type = getPropertyType(value);
+
+    return factory.createPropertyDeclaration(
+      undefined,
+      factory.createIdentifier('inputRef'),
+      undefined,
+      factory.createTypeReferenceNode(factory.createIdentifier('Ref'), type ? [type] : undefined),
+      factory.createCallExpression(factory.createIdentifier('createRef'), undefined, [])
+    );
   },
   Styles(value, context) {
     context.importHandler.addNamedImport('LitElement', 'lit');

@@ -28,6 +28,10 @@ export const templateTransformer: TemplateTransformer<
 
     return `${name}={${printNode(value!)}}`;
   },
+  Ref(attribute) {
+    const value = getAttributeValue(attribute);
+    return `\${ref(${printNode(value!)})}`;
+  },
   Expression: value => `\${${printNode(value.expression!)}}`,
   Text: value => value.text,
 };
