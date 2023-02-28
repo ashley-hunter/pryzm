@@ -21,7 +21,13 @@ export class LitPrinter implements Printer<LitTranformer> {
 
         ${metadata.props.map(printNode).join('\r\n')}
 
+        ${metadata.states.map(printNode).join('\r\n')}
+
+        ${metadata.computed.map(printNode).join('\r\n')}
+
         ${metadata.styles ? 'static get styles() { return css`' + metadata.styles + '`; }' : ''}
+
+        ${metadata.methods.map(printNode).join('\r\n')}
 
         render() {
           return html\`${metadata.template}\`;

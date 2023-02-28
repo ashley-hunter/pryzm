@@ -71,6 +71,7 @@ export const transformer: LitTranformer = {
         factory.createDecorator(
           factory.createCallExpression(factory.createIdentifier('state'), undefined, [])
         ),
+        factory.createToken(ts.SyntaxKind.PrivateKeyword),
       ],
       state.name,
       undefined,

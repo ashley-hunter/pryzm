@@ -21,12 +21,14 @@ export class SveltePrinter implements Printer<SvelteTranformer> {
 
   print(metadata: TransformerResult<SvelteTranformer>): string {
     return `
-      ${metadata.imports}
+    <script lang="ts">
+        ${metadata.imports.map(printNode).join('\n')}
 
-      <script lang="ts">
         ${metadata.props.map(prop => printNode(prop.statement)).join('\n')}
         ${metadata.states.map(state => printNode(state.statement)).join('\n')}
         ${metadata.computed.map(computed => printNode(computed.statement)).join('\n')}
+
+        ${metadata.events.length > 0 ? 'const dispatch = createEventDispatcher();' : ''}
       </script>
 
       ${metadata.template}

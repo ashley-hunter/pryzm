@@ -32,7 +32,10 @@ export interface SvelteTranformer extends Transformer {
   Method(method: ts.MethodDeclaration): {
     statement: ts.FunctionDeclaration;
   };
-  Event(event: ts.PropertyDeclaration): {
+  Event(
+    event: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
   };
   Provider(provider: ts.PropertyDeclaration): {
@@ -121,7 +124,9 @@ export const transformer: SvelteTranformer = {
 
     return { statement };
   },
-  Event(event) {
+  Event(event, context) {
+    context.importHandler.addNamedImport('createEventDispatcher', 'svelte');
+
     return { name: getPropertyName(event) };
   },
   Inject(value) {
