@@ -1,9 +1,11 @@
 import * as ts from 'typescript';
 import { ComponentMetadata } from '../parser/component-metadata';
 import { parseFile } from '../parser/parser';
+import { ImportHandler } from '../utils/imports-handler';
 
 export type TransformerContext = {
   data: Map<string, unknown>;
+  importHandler: ImportHandler;
 };
 
 type TransformerFn<T extends Transformer, K extends keyof Transformer> = T[K] extends (
@@ -65,6 +67,7 @@ export function transform<T extends Transformer>(
 
   const context: TransformerContext = {
     data: new Map(),
+    importHandler: new ImportHandler(),
   };
 
   const metadata = components[0];
@@ -101,6 +104,7 @@ export function transform<T extends Transformer>(
     injects,
     styles,
     template,
+    imports: context.importHandler.getImportNodes(),
   };
 
   return transformer.PostTransform ? transformer.PostTransform(result, context) : result;

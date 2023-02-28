@@ -4,7 +4,6 @@ import {
   getDecorator,
   getDecoratorParameter,
   getPropertyName,
-  getText,
   inferType,
   stripThis,
 } from '@pryzm/ast-utils';
@@ -29,41 +28,65 @@ import { eventName, setterName } from './utils/names';
 import { renameIdentifierOccurences } from './utils/rename';
 
 export interface ReactTransformer extends Transformer {
-  State(state: ts.PropertyDeclaration): {
+  State(
+    state: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     getter: string;
     setter: string;
     statement: ts.VariableStatement;
   };
-  Prop(prop: ts.PropertyDeclaration): {
+  Prop(
+    prop: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     interfaceProperty: ts.PropertySignature;
     destructuredProperty: ts.BindingElement;
   };
-  Computed(computed: ts.GetAccessorDeclaration): {
+  Computed(
+    computed: ts.GetAccessorDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     dependencies: string[];
     statement: ts.VariableStatement;
   };
-  Ref(ref: ts.PropertyDeclaration): {
+  Ref(
+    ref: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     statement: ts.VariableStatement;
   };
-  Method(method: ts.MethodDeclaration): {
+  Method(
+    method: ts.MethodDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     dependencies: string[];
     statement: ts.VariableStatement;
   };
-  Event(event: ts.PropertyDeclaration): {
+  Event(
+    event: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     interfaceProperty: ts.PropertySignature;
     destructuredProperty: ts.BindingElement;
   };
-  Provider(provider: ts.PropertyDeclaration): {
+  Provider(
+    provider: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     token: ts.Identifier;
     statement: ts.VariableStatement;
   };
-  Inject(inject: ts.PropertyDeclaration): {
+  Inject(
+    inject: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     token: ts.Identifier;
     type: ts.TypeNode | undefined;
@@ -80,7 +103,9 @@ export interface ReactTransformer extends Transformer {
 }
 
 export const transformer: ReactTransformer = {
-  Computed(computed) {
+  Computed(computed, context) {
+    context.importHandler.addNamedImport('useMemo', 'react');
+
     const name = getPropertyName(computed);
 
     // scan the body for any dependencies
@@ -113,7 +138,9 @@ export const transformer: ReactTransformer = {
 
     return { name, interfaceProperty, destructuredProperty };
   },
-  State(state) {
+  State(state, context) {
+    context.importHandler.addNamedImport('useState', 'react');
+
     // get the name of the state
     const getter = getPropertyName(state);
 
@@ -193,7 +220,9 @@ export const transformer: ReactTransformer = {
 
     return { name, statement, token };
   },
-  Ref(value) {
+  Ref(value, context) {
+    context.importHandler.addNamedImport('useRef', 'react');
+
     // get the name of the ref
     const name = getPropertyName(value);
 
@@ -207,7 +236,9 @@ export const transformer: ReactTransformer = {
 
     return { name, statement };
   },
-  Method(method) {
+  Method(method, context) {
+    context.importHandler.addNamedImport('useCallback', 'react');
+
     const name = getPropertyName(method);
 
     // scan the body for any dependencies
@@ -273,52 +304,13 @@ export const transformer: ReactTransformer = {
       factory.createJsxJsxClosingFragment()
     );
   },
+  PreTransform(metadata, context) {
+    // add the react import
+    context.importHandler.addDefaultImport('React', 'react');
+
+    return metadata;
+  },
   PostTransform(metadata) {
-    // remove any imports from @pryzm/core
-    metadata.imports = metadata.imports.filter(
-      i => !getText(i.moduleSpecifier).includes('@pryzm/core')
-    );
-
-    // insert the required React imports
-    const reactImports: ts.ImportSpecifier[] = [];
-
-    // add the useState import if there are any states
-    if (metadata.states.length) {
-      reactImports.push(createImportSpecifier('useState'));
-    }
-
-    // add the useMemo import if there are any computed properties
-    if (metadata.computed.length) {
-      reactImports.push(createImportSpecifier('useMemo'));
-    }
-
-    // add the useCallback import if there are any methods
-    if (metadata.methods.length) {
-      reactImports.push(createImportSpecifier('useCallback'));
-    }
-
-    // add the useRef import if there are any refs
-    if (metadata.refs.length) {
-      reactImports.push(createImportSpecifier('useRef'));
-    }
-
-    // add the useContext import if there are any injects
-    if (metadata.injects.length) {
-      reactImports.push(createImportSpecifier('useContext'));
-    }
-
-    // Todo: provider
-
-    if (reactImports.length) {
-      metadata.imports.push(
-        factory.createImportDeclaration(
-          undefined,
-          factory.createImportClause(false, undefined, factory.createNamedImports(reactImports)),
-          factory.createStringLiteral('react')
-        )
-      );
-    }
-
     // find all events and rename to include the on prefix
     const eventsToRename = metadata.events.filter(event => event.name !== eventName(event.name));
 
@@ -330,7 +322,3 @@ export const transformer: ReactTransformer = {
     return metadata;
   },
 };
-
-function createImportSpecifier(name: string) {
-  return factory.createImportSpecifier(false, undefined, factory.createIdentifier(name));
-}
