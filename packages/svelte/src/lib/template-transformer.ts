@@ -34,6 +34,10 @@ export const templateTransformer: TemplateTransformer<
 
     return `${name}={${printNode(stripThis(value)!)}}`;
   },
+  Ref(attribute) {
+    const value = getAttributeValue(attribute);
+    return `bind:this={${printNode(stripThis(value)!)}}`;
+  },
   Expression: value => `{${printNode(stripThis(value.expression)!)}}`,
   Text: value => value.text,
 };

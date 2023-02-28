@@ -25,10 +25,7 @@ export interface SvelteTranformer extends Transformer {
   Computed(computed: ts.GetAccessorDeclaration): {
     statement: ts.LabeledStatement;
   };
-  Ref(ref: ts.PropertyDeclaration): {
-    name: string;
-    statement: ts.VariableStatement;
-  };
+  Ref(ref: ts.PropertyDeclaration): ts.VariableStatement;
   Method(method: ts.MethodDeclaration): {
     statement: ts.FunctionDeclaration;
   };
@@ -136,7 +133,22 @@ export const transformer: SvelteTranformer = {
     throw new Error('Method not implemented.');
   },
   Ref(value) {
-    throw new Error('Method not implemented.');
+    const type = getPropertyType(value);
+
+    return factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(getPropertyName(value)),
+            undefined,
+            type,
+            undefined
+          ),
+        ],
+        ts.NodeFlags.Let
+      )
+    );
   },
   Method(method) {
     // convert a method to a function declaration

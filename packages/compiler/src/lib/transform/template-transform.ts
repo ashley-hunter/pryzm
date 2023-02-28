@@ -27,6 +27,7 @@ export interface TemplateTransformer<
     context: TransformerContext
   ) => TFragment;
   Attribute: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
+  Ref?: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
   Text: (value: ts.JsxText, context: TransformerContext) => TText;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => TExpression;
 }
@@ -121,9 +122,13 @@ export class TemplateVisitor<
     return this.transformer.Fragment(value, children, this.context);
   }
 
-  visitAttribute(value: ts.JsxAttributeLike) {
+  visitAttribute(value: ts.JsxAttributeLike): TAttribute {
     if (ts.isJsxSpreadAttribute(value)) {
       throw new Error('Spread attributes are not supported as they cannot be statically analyzed');
+    }
+
+    if (value.name.escapedText === 'ref' && this.transformer.Ref) {
+      return this.visitRef(value);
     }
 
     return this.transformer.Attribute(value, this.context);
@@ -133,12 +138,12 @@ export class TemplateVisitor<
     return value.map(this.visit.bind(this));
   }
 
-  visitAttributes(value: ts.NodeArray<ts.JsxAttributeLike>) {
-    return value.map(this.visitAttribute.bind(this));
-  }
-
   visitExpression(value: ts.JsxExpression): TExpression {
     return this.transformer.Expression(value, this.context);
+  }
+
+  visitRef(attribute: ts.JsxAttribute): TAttribute {
+    return this.transformer.Ref!(attribute, this.context);
   }
 }
 

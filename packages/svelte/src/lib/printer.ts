@@ -24,6 +24,7 @@ export class SveltePrinter implements Printer<SvelteTranformer> {
     <script lang="ts">
         ${metadata.imports.map(printNode).join('\n')}
 
+        ${metadata.refs.map(ref => printNode(ref)).join('\n')}
         ${metadata.props.map(prop => printNode(prop.statement)).join('\n')}
         ${metadata.states.map(state => printNode(state.statement)).join('\n')}
         ${metadata.computed.map(computed => printNode(computed.statement)).join('\n')}
