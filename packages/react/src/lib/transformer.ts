@@ -259,9 +259,7 @@ export const transformer: ReactTransformer = {
           factory.createJsxOpeningElement(
             factory.createIdentifier('style'),
             undefined,
-            factory.createJsxAttributes([
-              factory.createJsxAttribute(factory.createIdentifier('jsx'), undefined),
-            ])
+            factory.createJsxAttributes([])
           ),
           [
             factory.createJsxExpression(
