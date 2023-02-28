@@ -56,6 +56,8 @@ export class VuePrinter implements Printer<VueTranformer> {
   print(metadata: TransformerResult<VueTranformer>): string {
     return `
     <script setup lang="ts">
+      ${metadata.imports.map(imp => printNode(imp)).join('\n')}
+
       interface Props {
         ${metadata.props
           .map(prop => `${prop.name}: ${prop.type ? printNode(prop.type) : 'any'};`)
@@ -63,6 +65,8 @@ export class VuePrinter implements Printer<VueTranformer> {
       }
 
       const ${this.getDestructuredProps(metadata)} = defineProps<Props>();
+
+      ${metadata.refs.map(ref => printNode(ref)).join('\n')}
 
       ${metadata.states.map(state => printNode(state.statement)).join('\n')}
 

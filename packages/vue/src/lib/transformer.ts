@@ -5,25 +5,34 @@ import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface VueTranformer extends Transformer {
-  State(state: ts.PropertyDeclaration): {
+  State(
+    state: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     statement: ts.VariableStatement;
   };
-  Prop(prop: ts.PropertyDeclaration): {
+  Prop(
+    prop: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     type: ts.TypeNode | undefined;
     initializer: ts.Expression | undefined;
   };
-  Computed(computed: ts.GetAccessorDeclaration): {
+  Computed(
+    computed: ts.GetAccessorDeclaration,
+    context: TransformerContext
+  ): {
     statement: ts.VariableStatement;
   };
-  Ref(ref: ts.PropertyDeclaration): {
-    name: string;
-    statement: ts.VariableStatement;
-  };
+  Ref(ref: ts.PropertyDeclaration, context: TransformerContext): ts.VariableStatement;
   Method(method: ts.MethodDeclaration): {
     statement: ts.FunctionDeclaration;
   };
-  Event(event: ts.PropertyDeclaration): {
+  Event(
+    event: ts.PropertyDeclaration,
+    context: TransformerContext
+  ): {
     name: string;
     type: ts.TypeNode | undefined;
   };
@@ -45,7 +54,8 @@ export interface VueTranformer extends Transformer {
 }
 
 export const transformer: VueTranformer = {
-  Computed(computed) {
+  Computed(computed, context) {
+    context.importHandler.addNamedImport('computed', 'vue');
     // computed is a get accessor declaration, we need to convert it to a variable statement that is exported
     const name = getPropertyName(computed);
     const type = getPropertyType(computed);
@@ -81,7 +91,8 @@ export const transformer: VueTranformer = {
 
     return { statement };
   },
-  Prop(prop) {
+  Prop(prop, context) {
+    context.importHandler.addNamedImport('defineProps', 'vue');
     // prop is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(prop);
     const type = getPropertyType(prop);
@@ -89,7 +100,7 @@ export const transformer: VueTranformer = {
 
     return { name, type, initializer };
   },
-  State(state) {
+  State(state, context) {
     // state is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(state);
     const type = getPropertyType(state);
@@ -98,6 +109,8 @@ export const transformer: VueTranformer = {
     // if the type is a primitive, we use `ref` to create a reactive variable
     // otherwise, we use `reactive` to create a reactive object
     const createReactive = ts.isTypeReferenceNode(type!) ? 'reactive' : 'ref';
+
+    context.importHandler.addNamedImport(createReactive, 'vue');
 
     const statement = factory.createVariableStatement(
       undefined,
@@ -120,7 +133,9 @@ export const transformer: VueTranformer = {
 
     return { statement };
   },
-  Event(event) {
+  Event(event, context) {
+    context.importHandler.addNamedImport('defineEmits', 'vue');
+
     // get the default value of the prop if it exists
     const initializer = event.initializer;
 
@@ -140,8 +155,29 @@ export const transformer: VueTranformer = {
   Provider(value) {
     throw new Error('Method not implemented.');
   },
-  Ref(value) {
-    throw new Error('Method not implemented.');
+  Ref(value, context) {
+    context.importHandler.addNamedImport('ref', 'vue');
+
+    const type = getPropertyType(value);
+
+    return factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(getPropertyName(value)),
+            undefined,
+            undefined,
+            factory.createCallExpression(
+              factory.createIdentifier('ref'),
+              type ? [type] : undefined,
+              [factory.createNull()]
+            )
+          ),
+        ],
+        ts.NodeFlags.Const
+      )
+    );
   },
   Method(method) {
     // convert a method to a function declaration
