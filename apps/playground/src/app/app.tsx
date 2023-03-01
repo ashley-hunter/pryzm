@@ -140,8 +140,9 @@ export class App {
           highlight={code => highlight(code, languages.js)}
           padding={10}
           style={{
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 14,
+            fontFamily:
+              '"Fira Mono", "DejaVu Sans Mono", Menlo, Consolas, "Liberation Mono", Monaco, "Lucida Console", monospace',
+            fontSize: 13,
           }}
         />
 
@@ -158,12 +159,12 @@ export class App {
           }}
         />
 
-        {error && (
+        {/* {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 flex-1">
             <p className="font-bold">Error</p>
             <p>{error.message}</p>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
