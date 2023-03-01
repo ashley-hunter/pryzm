@@ -1,6 +1,5 @@
 import {
   getPropertyName,
-  getPropertyType,
   getReturnExpression,
   isPropertyReadonly,
   stripThis,
@@ -131,8 +130,6 @@ export const transformer: SvelteTranformer = {
     throw new Error('Method not implemented.');
   },
   Ref(value) {
-    const type = getPropertyType(value);
-
     return factory.createVariableStatement(
       undefined,
       factory.createVariableDeclarationList(
@@ -140,7 +137,7 @@ export const transformer: SvelteTranformer = {
           factory.createVariableDeclaration(
             factory.createIdentifier(getPropertyName(value)),
             undefined,
-            type,
+            undefined,
             undefined
           ),
         ],
