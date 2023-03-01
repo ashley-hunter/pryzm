@@ -91,8 +91,7 @@ export const transformer: VueTranformer = {
 
     return { statement };
   },
-  Prop(prop, context) {
-    context.importHandler.addNamedImport('defineProps', 'vue');
+  Prop(prop) {
     // prop is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(prop);
     const type = getPropertyType(prop);

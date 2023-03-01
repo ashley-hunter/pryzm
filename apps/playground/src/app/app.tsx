@@ -99,6 +99,18 @@ export class App {
     }
   }, [target]);
 
+  const customSetup = useMemo(() => {
+    if (target !== 'lit') {
+      return;
+    }
+
+    return {
+      dependencies: {
+        lit: 'latest',
+      },
+    };
+  }, [target]);
+
   return (
     <div className="flex flex-col h-screen">
       <nav className="bg-gray-800">
@@ -148,6 +160,7 @@ export class App {
 
         <Sandpack
           template={template}
+          customSetup={customSetup}
           options={{
             readOnly: true,
             showTabs: true,
