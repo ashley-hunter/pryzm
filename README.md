@@ -12,7 +12,7 @@
 | **Events**                | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Styles**                | ✅    | ✅     | ✅  | ✅  |
 | **Refs**                  | ✅    | ✅     | ✅  | ✅  |
-| **Slots**                 | ❌    | ❌     | ❌  | ❌  |
+| **Slots**                 | ✅    | ✅     | ✅  | ✅  |
 | **Comment Extraction**    | ✅    | ❌     | ❌  | ❌  |
 | **Lifecycle Hooks**       | ❌    | ❌     | ❌  | ❌  |
 | **Providers/DI**          | ❌    | ❌     | ❌  | ❌  |

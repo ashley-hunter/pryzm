@@ -7,6 +7,7 @@ export const templateTransformer: TemplateTransformer<
   string,
   string,
   string,
+  string,
   string
 > = {
   Element: (value, attributes, children) => {
@@ -18,6 +19,12 @@ export const templateTransformer: TemplateTransformer<
     const tagName = getTagName(value);
 
     return `<${tagName} ${attributes.join(' ')} />`;
+  },
+  Slot(name) {
+    if (name === 'default') {
+      return `<slot></slot>`;
+    }
+    return `<slot name="${name}"></slot>`;
   },
   Fragment: (value, children) => {
     return children.join('\n');
