@@ -1,6 +1,5 @@
 import { getText, isThisExpression } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
-import { setterName } from './names';
 
 export function findDependencies<T extends ts.Block>(node: T): string[] {
   const dependencies = new Set<string>();
@@ -19,7 +18,8 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
         node === node.parent.left
       ) {
         // add the property name to the dependencies array
-        dependencies.add(setterName(getText(node.name)));
+        // dependencies.add(setterName(getText(node.name)));
+        // do nothing as setters are guaranteed to be referentially equal
       } else {
         // add the property name to the dependencies array
         dependencies.add(getText(node.name));
