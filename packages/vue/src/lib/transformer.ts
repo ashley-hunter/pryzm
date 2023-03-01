@@ -132,9 +132,7 @@ export const transformer: VueTranformer = {
 
     return { statement };
   },
-  Event(event, context) {
-    context.importHandler.addNamedImport('defineEmits', 'vue');
-
+  Event(event) {
     // get the default value of the prop if it exists
     const initializer = event.initializer;
 
