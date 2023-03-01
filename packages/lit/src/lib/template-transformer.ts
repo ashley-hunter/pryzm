@@ -7,16 +7,7 @@ import {
 } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
-export const templateTransformer: TemplateTransformer<
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string
-> = {
+export const templateTransformer: TemplateTransformer = {
   Element: (value, attributes, children) => {
     const tagName = getTagName(value);
 

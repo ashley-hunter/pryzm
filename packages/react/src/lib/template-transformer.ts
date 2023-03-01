@@ -1,95 +1,54 @@
-import { getAttribute, getAttributeValue, getChildOrFragment, stripThis } from '@pryzm/ast-utils';
+import {
+  getAttribute,
+  getAttributeName,
+  getAttributeValue,
+  getChildOrFragment,
+  getTagName,
+  printNode,
+  stripThis,
+} from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
-import { factory } from 'typescript';
 
-export const templateTransformer: TemplateTransformer<
-  ts.JsxElement,
-  ts.JsxFragment,
-  ts.JsxAttribute,
-  ts.JsxText,
-  ts.JsxExpression,
-  ts.JsxExpression,
-  ts.JsxExpression,
-  ts.JsxSelfClosingElement
-> = {
+export const templateTransformer: TemplateTransformer = {
   Element: (value, attributes, children, context) => {
-    const id = context.data.get('id') as string | undefined;
+    const id = context.data.get('id') ?? '';
 
-    return factory.createJsxElement(
-      factory.createJsxOpeningElement(
-        value.openingElement.tagName,
-        value.openingElement.typeArguments,
-        factory.createJsxAttributes(
-          id
-            ? [...attributes, factory.createJsxAttribute(factory.createIdentifier(id), undefined)]
-            : attributes
-        )
-      ),
-      children,
-      value.closingElement
-    );
+    const tagName = getTagName(value);
+
+    return `<${tagName} ${id} ${attributes.join(' ')}>${children.join('\n')}</${tagName}>`;
   },
   SelfClosingElement: (value, attributes, context) => {
-    const id = context.data.get('id') as string | undefined;
+    const id = context.data.get('id') ?? '';
 
-    return factory.createJsxSelfClosingElement(
-      value.tagName,
-      value.typeArguments,
-      factory.createJsxAttributes(
-        id
-          ? [...attributes, factory.createJsxAttribute(factory.createIdentifier(id), undefined)]
-          : attributes
-      )
-    );
+    const tagName = getTagName(value);
+
+    return `<${tagName} ${id} ${attributes.join(' ')} />`;
   },
   Slot: name => {
-    if (name === 'default') {
-      name = 'children';
-    }
-
-    return factory.createJsxExpression(undefined, factory.createIdentifier(name));
+    return `{${name === 'default' ? 'children' : name}}`;
   },
-  Fragment: (value, children) =>
-    factory.createJsxFragment(
-      factory.createJsxOpeningFragment(),
-      children,
-      factory.createJsxJsxClosingFragment()
-    ),
+  Fragment: (value, children) => {
+    return `<>${children.join('\n')}</>`;
+  },
   Attribute: value => {
+    let attributeName = getAttributeName(value);
+    const attributeValue = getAttributeValue(value);
+
     // if the attribute is called "class", we need to rename it to "className"
-    if (ts.isIdentifier(value.name) && value.name.escapedText === 'class') {
-      // if the attribute value is an object then we want to wrap it in a call to the "clsx" function
-      if (
-        value.initializer &&
-        ts.isJsxExpression(value.initializer) &&
-        value.initializer.expression &&
-        ts.isObjectLiteralExpression(value.initializer.expression)
-      ) {
-        return factory.createJsxAttribute(
-          factory.createIdentifier('className'),
-          factory.createJsxExpression(
-            undefined,
-            factory.createCallExpression(factory.createIdentifier('clsx'), undefined, [
-              stripThis(value.initializer.expression)!,
-            ])
-          )
-        );
-      }
-
-      // otherwise simply rename the attribute
-      return factory.createJsxAttribute(
-        factory.createIdentifier('className'),
-        stripThis(value.initializer)
-      );
+    if (attributeName === 'class') {
+      attributeName = 'className';
     }
 
-    // otherwise if the attribute value is an expression, we need to strip the "this" keyword
-    if (value.initializer && ts.isJsxExpression(value.initializer)) {
-      return factory.createJsxAttribute(value.name, stripThis(value.initializer));
+    // ensure the name is in camelCase
+    attributeName = attributeName.replace(/-([a-z])/g, g => g[1].toUpperCase());
+
+    // if the attribute value is a string literal, we can just print it
+    if (attributeValue && ts.isStringLiteral(attributeValue)) {
+      return `${attributeName}="${attributeValue.text}"`;
     }
 
-    return value;
+    return `${attributeName}={${printNode(stripThis(attributeValue)!)}}`;
   },
   Show: node => {
     const condition = getAttribute(node.openingElement.attributes, 'when');
@@ -107,15 +66,17 @@ export const templateTransformer: TemplateTransformer<
 
     const child = getChildOrFragment(node);
 
-    return factory.createJsxExpression(
-      undefined,
-      factory.createBinaryExpression(
-        stripThis(when)!,
-        factory.createToken(ts.SyntaxKind.AmpersandAmpersandToken),
-        child as ts.JsxExpression
-      )
-    );
+    return `{ ${printNode(stripThis(when)!)} && ${printNode(child)} }`;
+
+    // return factory.createJsxExpression(
+    //   undefined,
+    //   factory.createBinaryExpression(
+    //     stripThis(when)!,
+    //     factory.createToken(ts.SyntaxKind.AmpersandAmpersandToken),
+    //     child as ts.JsxExpression
+    //   )
+    // );
   },
-  Expression: value => stripThis(value)!,
-  Text: value => value,
+  Expression: value => printNode(stripThis(value)!),
+  Text: value => value.text,
 };

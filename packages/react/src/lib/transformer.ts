@@ -303,40 +303,14 @@ export const transformer: ReactTransformer = {
     return output.code;
   },
   Template(value, styles, context) {
-    const template = transformTemplate(value, templateTransformer, context) as
-      | ts.JsxFragment
-      | ts.JsxElement
-      | ts.JsxSelfClosingElement;
+    const template = transformTemplate(value, templateTransformer, context);
 
     // if there are no styles then return the template directly
     if (!context.data.has('id')) {
-      return printNode(template);
+      return template;
     }
 
-    // otherwise wrap the template in a fragment and add a style element
-    return printNode(
-      factory.createJsxFragment(
-        factory.createJsxOpeningFragment(),
-        [
-          template,
-          factory.createJsxElement(
-            factory.createJsxOpeningElement(
-              factory.createIdentifier('style'),
-              undefined,
-              factory.createJsxAttributes([])
-            ),
-            [
-              factory.createJsxExpression(
-                undefined,
-                factory.createNoSubstitutionTemplateLiteral(styles)
-              ),
-            ],
-            factory.createJsxClosingElement(factory.createIdentifier('style'))
-          ),
-        ],
-        factory.createJsxJsxClosingFragment()
-      )
-    );
+    return `<>${template}<style>{\`${styles}\`}</style></>`;
   },
   PreTransform(metadata, context) {
     // add the react import

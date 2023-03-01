@@ -2,65 +2,30 @@ import { getTagName, getText, stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { TransformerContext } from './transformer';
 
-export interface TemplateTransformer<
-  TElement,
-  TFragment,
-  TAttribute,
-  TText,
-  TExpression,
-  TSlot,
-  TShow,
-  TSelfClosing = TElement
-> {
+export interface TemplateTransformer {
   Element: (
     value: ts.JsxElement,
-    attributes: TAttribute[],
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot | TShow)[],
+    attributes: string[],
+    children: string[],
     context: TransformerContext
-  ) => TElement;
+  ) => string;
   SelfClosingElement: (
     value: ts.JsxSelfClosingElement,
-    attributes: TAttribute[],
+    attributes: string[],
     context: TransformerContext
-  ) => TSelfClosing;
-  Slot(name: string, context: TransformerContext): TSlot;
-  Fragment: (
-    value: ts.JsxFragment,
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot | TShow)[],
-    context: TransformerContext
-  ) => TFragment;
-  Attribute: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
-  Ref?: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
-  Text: (value: ts.JsxText, context: TransformerContext) => TText;
-  Expression: (value: ts.JsxExpression, context: TransformerContext) => TExpression;
-  Show: (
-    value: ts.JsxElement,
-    children: (TElement | TFragment | TText | TExpression | TSlot | TShow | TSelfClosing)[],
-    context: TransformerContext
-  ) => TShow;
+  ) => string;
+  Slot(name: string, context: TransformerContext): string;
+  Fragment: (value: ts.JsxFragment, children: string[], context: TransformerContext) => string;
+  Attribute: (value: ts.JsxAttribute, context: TransformerContext) => string;
+  Ref?: (value: ts.JsxAttribute, context: TransformerContext) => string;
+  Text: (value: ts.JsxText, context: TransformerContext) => string;
+  Expression: (value: ts.JsxExpression, context: TransformerContext) => string;
+  Show: (value: ts.JsxElement, children: string[], context: TransformerContext) => string;
 }
 
-export function transformTemplate<
-  TElement,
-  TFragment,
-  TAttribute,
-  TText,
-  TExpression,
-  TSlot,
-  TShow,
-  TSelfClosing = TElement
->(
+export function transformTemplate(
   value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
-  transformer: TemplateTransformer<
-    TElement,
-    TFragment,
-    TAttribute,
-    TText,
-    TExpression,
-    TSlot,
-    TShow,
-    TSelfClosing
-  >,
+  transformer: TemplateTransformer,
   context: TransformerContext
 ) {
   const visitor = new TemplateVisitor(transformer, context);
@@ -68,31 +33,10 @@ export function transformTemplate<
   return visitor.visit(stripParentNode(value));
 }
 
-export class TemplateVisitor<
-  TElement,
-  TFragment,
-  TAttribute,
-  TText,
-  TExpression,
-  TSlot,
-  TShow,
-  TSelfClosing = TElement
-> {
-  constructor(
-    private transformer: TemplateTransformer<
-      TElement,
-      TFragment,
-      TAttribute,
-      TText,
-      TExpression,
-      TSlot,
-      TShow,
-      TSelfClosing
-    >,
-    private context: TransformerContext
-  ) {}
+export class TemplateVisitor {
+  constructor(private transformer: TemplateTransformer, private context: TransformerContext) {}
 
-  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing | TExpression | TSlot | TShow {
+  visit(value: JsxNode): string {
     if (ts.isJsxText(value)) {
       return this.visitText(value);
     }
@@ -154,7 +98,7 @@ export class TemplateVisitor<
     return this.transformer.Fragment(value, children, this.context);
   }
 
-  visitAttribute(value: ts.JsxAttributeLike): TAttribute {
+  visitAttribute(value: ts.JsxAttributeLike): string {
     if (ts.isJsxSpreadAttribute(value)) {
       throw new Error('Spread attributes are not supported as they cannot be statically analyzed');
     }
@@ -170,22 +114,19 @@ export class TemplateVisitor<
     return value.map(this.visit.bind(this));
   }
 
-  visitExpression(value: ts.JsxExpression): TExpression {
+  visitExpression(value: ts.JsxExpression): string {
     return this.transformer.Expression(value, this.context);
   }
 
-  visitRef(attribute: ts.JsxAttribute): TAttribute {
+  visitRef(attribute: ts.JsxAttribute): string {
     return this.transformer.Ref!(attribute, this.context);
   }
 
-  visitShow(
-    value: ts.JsxElement,
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot | TShow)[]
-  ): TShow {
+  visitShow(value: ts.JsxElement, children: string[]): string {
     return this.transformer.Show(value, children, this.context);
   }
 
-  visitSlot(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement): TSlot {
+  visitSlot(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement): string {
     const name = node.attributes.properties
       .filter(ts.isJsxAttribute)
       .find(a => getText(a.name) === 'name')?.initializer;
