@@ -45,6 +45,22 @@ export function getChildOrFragment(node: ts.JsxElement): ts.JsxChild {
     child => !ts.isJsxText(child) || !child.containsOnlyTriviaWhiteSpaces
   );
 
+  if (nonWhitespaceChildren.length === 0) {
+    return factory.createJsxFragment(
+      factory.createJsxOpeningFragment(),
+      [],
+      factory.createJsxJsxClosingFragment()
+    );
+  }
+
+  if (nonWhitespaceChildren.length === 1 && ts.isJsxText(nonWhitespaceChildren[0])) {
+    return factory.createJsxFragment(
+      factory.createJsxOpeningFragment(),
+      node.children,
+      factory.createJsxJsxClosingFragment()
+    );
+  }
+
   // get the children of the <Show> element, if there are more than one then we need to wrap them in a fragment
   return nonWhitespaceChildren.length > 1
     ? factory.createJsxFragment(
@@ -52,7 +68,7 @@ export function getChildOrFragment(node: ts.JsxElement): ts.JsxChild {
         node.children,
         factory.createJsxJsxClosingFragment()
       )
-    : nonWhitespaceChildren[0] ?? factory.createJsxText('');
+    : nonWhitespaceChildren[0];
 }
 
 /**
