@@ -144,7 +144,6 @@ export class App {
       </nav>
       <div className="flex flex-col flex-1">
         <Editor
-          className="flex-1 border-r h-full outline-none"
           onChange={value => setCode(value!)}
           language="typescript"
           value={code}
