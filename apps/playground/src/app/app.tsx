@@ -1,4 +1,5 @@
 import { Sandpack } from '@codesandbox/sandpack-react';
+import Editor from '@monaco-editor/react';
 import { print as litPrint } from '@pryzm/lit';
 import { print as reactPrint } from '@pryzm/react';
 import { print as sveltePrint } from '@pryzm/svelte';
@@ -9,15 +10,13 @@ import * as parserHtml from 'prettier/parser-html';
 import * as parserCss from 'prettier/parser-postcss';
 import * as parserTypeScript from 'prettier/parser-typescript';
 import { format } from 'prettier/standalone';
-import { highlight, languages } from 'prismjs';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/themes/prism.css';
-import { useMemo, useState } from 'react';
-import Editor from 'react-simple-code-editor';
+import { useCallback, useMemo, useState } from 'react';
 window.Buffer = Buffer;
 
 export function App() {
-  const [code, setCode] = useState(`@Component()
+  const [code, setCode] = useState(`import { Component, Prop, Computed, State } from '@pryzm/core';
+
+@Component()
 export class App {
 
   @Prop() readonly firstName = "John";
@@ -111,20 +110,19 @@ export class App {
     };
   }, [target]);
 
+  const handleEditorDidMount = useCallback((editor: any, monaco: any) => {
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      jsx: 'react',
+      experimentalDecorators: true,
+    });
+  }, []);
+
   return (
     <div className="flex flex-col h-screen">
       <nav className="bg-gray-800">
         <div className="mx-auto px-2 sm:px-6 lg:px-8">
           <div className="relative flex h-16 items-center justify-between">
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-              {/* <div className="flex flex-shrink-0 items-center">
-              <img
-                className="h-8 w-auto"
-                src="/assets/logo.svg"
-                alt="Your Company"
-              />
-            </div> */}
-
               <span className="text-white px-3 py-2 rounded-md text-lg font-medium">
                 Pryzm Compiler
                 <small className="text-xs font-medium text-gray-400 pl-1">v0.1</small>
@@ -147,15 +145,10 @@ export class App {
       <div className="flex flex-col flex-1">
         <Editor
           className="flex-1 border-r h-full outline-none"
+          onChange={value => setCode(value!)}
+          language="typescript"
           value={code}
-          onValueChange={code => setCode(code)}
-          highlight={code => highlight(code, languages.js)}
-          padding={10}
-          style={{
-            fontFamily:
-              '"Fira Mono", "DejaVu Sans Mono", Menlo, Consolas, "Liberation Mono", Monaco, "Lucida Console", monospace',
-            fontSize: 13,
-          }}
+          onMount={handleEditorDidMount}
         />
 
         <Sandpack
