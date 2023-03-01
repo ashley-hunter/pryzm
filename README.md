@@ -24,4 +24,4 @@
 | **Child Components**    | ❌    | ❌     | ❌  | ❌  |
 | **Multiple Files**      | ❌    | ❌     | ❌  | ❌  |
 | **Exporting**           | ❌    | ❌     | ❌  | ❌  |
-| **Component Previews**  | ❌    | ❌     | ❌  | ❌  |
+| **Component Previews**  | ✅    | ✅     | ✅  | ❌  |
