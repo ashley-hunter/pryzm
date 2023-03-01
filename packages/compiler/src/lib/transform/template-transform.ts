@@ -1,4 +1,4 @@
-import { getText, stripParentNode } from '@pryzm/ast-utils';
+import { getTagName, getText, stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { TransformerContext } from './transformer';
 
@@ -9,12 +9,13 @@ export interface TemplateTransformer<
   TText,
   TExpression,
   TSlot,
+  TShow,
   TSelfClosing = TElement
 > {
   Element: (
     value: ts.JsxElement,
     attributes: TAttribute[],
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot)[],
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot | TShow)[],
     context: TransformerContext
   ) => TElement;
   SelfClosingElement: (
@@ -25,13 +26,18 @@ export interface TemplateTransformer<
   Slot(name: string, context: TransformerContext): TSlot;
   Fragment: (
     value: ts.JsxFragment,
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot)[],
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot | TShow)[],
     context: TransformerContext
   ) => TFragment;
   Attribute: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
   Ref?: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
   Text: (value: ts.JsxText, context: TransformerContext) => TText;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => TExpression;
+  Show: (
+    value: ts.JsxElement,
+    children: (TElement | TFragment | TText | TExpression | TSlot | TShow | TSelfClosing)[],
+    context: TransformerContext
+  ) => TShow;
 }
 
 export function transformTemplate<
@@ -41,6 +47,7 @@ export function transformTemplate<
   TText,
   TExpression,
   TSlot,
+  TShow,
   TSelfClosing = TElement
 >(
   value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
@@ -51,6 +58,7 @@ export function transformTemplate<
     TText,
     TExpression,
     TSlot,
+    TShow,
     TSelfClosing
   >,
   context: TransformerContext
@@ -67,6 +75,7 @@ export class TemplateVisitor<
   TText,
   TExpression,
   TSlot,
+  TShow,
   TSelfClosing = TElement
 > {
   constructor(
@@ -77,12 +86,13 @@ export class TemplateVisitor<
       TText,
       TExpression,
       TSlot,
+      TShow,
       TSelfClosing
     >,
     private context: TransformerContext
   ) {}
 
-  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing | TExpression | TSlot {
+  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing | TExpression | TSlot | TShow {
     if (ts.isJsxText(value)) {
       return this.visitText(value);
     }
@@ -112,7 +122,7 @@ export class TemplateVisitor<
 
   visitElement(value: ts.JsxElement) {
     // if the element is a slot, we need to transform it into a slot element
-    if (getText(value.openingElement.tagName) === 'slot') {
+    if (getTagName(value) === 'slot') {
       return this.visitSlot(value.openingElement);
     }
 
@@ -120,12 +130,18 @@ export class TemplateVisitor<
       this.visitAttribute.bind(this)
     );
     const children = value.children.map(this.visit.bind(this));
+
+    // if the element is a show, we need to transform it into a show element
+    if (getTagName(value) === 'Show') {
+      return this.visitShow(value, children);
+    }
+
     return this.transformer.Element(value, attributes, children, this.context);
   }
 
   visitSelfClosingElement(value: ts.JsxSelfClosingElement) {
     // if the element is a slot, we need to transform it into a slot element
-    if (getText(value.tagName) === 'slot') {
+    if (getTagName(value) === 'slot') {
       return this.visitSlot(value);
     }
 
@@ -160,6 +176,13 @@ export class TemplateVisitor<
 
   visitRef(attribute: ts.JsxAttribute): TAttribute {
     return this.transformer.Ref!(attribute, this.context);
+  }
+
+  visitShow(
+    value: ts.JsxElement,
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot | TShow)[]
+  ): TShow {
+    return this.transformer.Show(value, children, this.context);
   }
 
   visitSlot(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement): TSlot {

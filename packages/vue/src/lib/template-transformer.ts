@@ -1,13 +1,16 @@
 import {
+  getAttribute,
   getAttributeName,
   getAttributeValue,
   getTagName,
   printNode,
+  sanitizeAttribute,
   stripThis,
 } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer<
+  string,
   string,
   string,
   string,
@@ -52,6 +55,26 @@ export const templateTransformer: TemplateTransformer<
     const value = getAttributeValue(attribute);
 
     return `ref="${printNode(stripThis(value)!)}"`;
+  },
+  Show(node, children) {
+    const condition = getAttribute(node.openingElement.attributes, 'when');
+
+    if (!condition) {
+      throw new Error('Missing "when" attribute on <Show> element');
+    }
+
+    const when = getAttributeValue(condition);
+
+    // check that the condition is an expression
+    if (!when) {
+      throw new Error('The "when" attribute on <Show> element must be an expression');
+    }
+
+    return `
+    <template v-if="${sanitizeAttribute(printNode(stripThis(when)!))}">
+      ${children.join('')}
+    </template>
+    `;
   },
   Expression: value => `{{${printNode(stripThis(value.expression)!)}}}`,
   Text: value => value.text,

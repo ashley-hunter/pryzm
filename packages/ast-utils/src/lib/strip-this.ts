@@ -1,5 +1,5 @@
-import { stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
+import { stripParentNode } from './strip-parent-node';
 import { isThisExpression } from './typing';
 
 export function stripThis<T extends ts.Node, R extends ts.Node = T>(

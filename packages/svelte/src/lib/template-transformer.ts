@@ -1,4 +1,5 @@
 import {
+  getAttribute,
   getAttributeName,
   getAttributeValue,
   getTagName,
@@ -8,6 +9,7 @@ import {
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer<
+  string,
   string,
   string,
   string,
@@ -44,6 +46,26 @@ export const templateTransformer: TemplateTransformer<
   Ref(attribute) {
     const value = getAttributeValue(attribute);
     return `bind:this={${printNode(stripThis(value)!)}}`;
+  },
+  Show(node, children) {
+    const condition = getAttribute(node.openingElement.attributes, 'when');
+
+    if (!condition) {
+      throw new Error('Missing "when" attribute on <Show> element');
+    }
+
+    const when = getAttributeValue(condition);
+
+    // check that the condition is an expression
+    if (!when) {
+      throw new Error('The "when" attribute on <Show> element must be an expression');
+    }
+
+    return `
+    {#if ${printNode(stripThis(when)!)}}
+      ${children.join('')}
+    {/if}
+    `;
   },
   Expression: value => `{${printNode(stripThis(value.expression)!)}}`,
   Text: value => value.text,

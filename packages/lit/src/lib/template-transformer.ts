@@ -1,7 +1,14 @@
-import { getAttributeName, getAttributeValue, getTagName, printNode } from '@pryzm/ast-utils';
+import {
+  getAttribute,
+  getAttributeName,
+  getAttributeValue,
+  getTagName,
+  printNode,
+} from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer<
+  string,
   string,
   string,
   string,
@@ -38,6 +45,24 @@ export const templateTransformer: TemplateTransformer<
   Ref(attribute) {
     const value = getAttributeValue(attribute);
     return `\${ref(${printNode(value!)})}`;
+  },
+  Show(node, children, context) {
+    context.importHandler.addNamedImport('when', 'lit/directives/when.js');
+
+    const condition = getAttribute(node.openingElement.attributes, 'when');
+
+    if (!condition) {
+      throw new Error('Missing "when" attribute on <Show> element');
+    }
+
+    const when = getAttributeValue(condition);
+
+    // check that the condition is an expression
+    if (!when) {
+      throw new Error('Missing expression in "when" attribute on <Show> element');
+    }
+
+    return `\${when(${printNode(when)}, () => html\`${children.join('\n').trim()}\`)}`;
   },
   Expression: value => `\${${printNode(value.expression!)}}`,
   Text: value => value.text,
