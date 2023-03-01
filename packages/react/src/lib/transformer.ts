@@ -1,6 +1,4 @@
 import {
-  addComment,
-  extractComment,
   getDecorator,
   getDecoratorParameter,
   getPropertyName,
@@ -124,10 +122,7 @@ export const transformer: ReactTransformer = {
     // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
     const statement = useMemo(name, computed.body!, dependencies);
 
-    // add the comments back to the statement
-    addComment(statement, extractComment(computed));
-
-    return { name, statement: printNode(statement), dependencies };
+    return { name, statement, dependencies };
   },
   Prop(prop) {
     // get the name of the prop
@@ -192,10 +187,7 @@ export const transformer: ReactTransformer = {
     // convert the property to a useState hook
     const statement = useState(getter, setter, initializer, type);
 
-    // add the comments back to the statement
-    addComment(statement, extractComment(state));
-
-    return { getter, setter, statement: printNode(statement) };
+    return { getter, setter, statement };
   },
   Event(event) {
     // get the name of the prop
@@ -258,7 +250,7 @@ export const transformer: ReactTransformer = {
     // wrap the initializer in a useRef hook
     const statement = useRef(name, value.initializer!);
 
-    return { name, statement: printNode(statement), token: printNode(token) };
+    return { name, statement, token: printNode(token) };
   },
   Ref(value, context) {
     context.importHandler.addNamedImport('useRef', 'react');
@@ -274,7 +266,7 @@ export const transformer: ReactTransformer = {
     // convert the property to a useRef hook
     const statement = useRef(name, factory.createNull(), type);
 
-    return { name, statement: printNode(statement) };
+    return { name, statement };
   },
   Method(method, context) {
     context.importHandler.addNamedImport('useCallback', 'react');
@@ -288,7 +280,7 @@ export const transformer: ReactTransformer = {
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
     const statement = useCallback(name, method.parameters, method.body!, dependencies);
 
-    return { name, statement: printNode(statement), dependencies };
+    return { name, statement, dependencies };
   },
   Styles(style, context) {
     if (style === '') {

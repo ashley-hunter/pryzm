@@ -1,4 +1,4 @@
-import { stripThis } from '@pryzm/ast-utils';
+import { printNode, stripThis } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { transformAssignment } from '../utils/assignment';
 
@@ -9,29 +9,11 @@ import { transformAssignment } from '../utils/assignment';
  * @param type The type of the ref
  * @returns The useRef hook
  */
-export function useRef(
-  name: string,
-  initializer: ts.Expression,
-  type?: ts.TypeNode
-): ts.VariableStatement {
-  return ts.factory.createVariableStatement(
-    undefined,
-    ts.factory.createVariableDeclarationList(
-      [
-        ts.factory.createVariableDeclaration(
-          ts.factory.createIdentifier(name),
-          undefined,
-          undefined,
-          ts.factory.createCallExpression(
-            ts.factory.createIdentifier('useRef'),
-            type ? [type] : undefined,
-            [stripThis(initializer)!]
-          )
-        ),
-      ],
-      ts.NodeFlags.Const
-    )
-  );
+export function useRef(name: string, initializer: ts.Expression, type?: ts.TypeNode): string {
+  const initialValue = initializer ? printNode(initializer) : '';
+  const generic = type ? `<${printNode(type)}>` : '';
+
+  return `const ${name} = useRef${generic}(${initialValue});`;
 }
 
 /**
@@ -48,36 +30,11 @@ export function useState(
   setter: string,
   initializer?: ts.Expression,
   type?: ts.TypeNode
-): ts.VariableStatement {
-  return ts.factory.createVariableStatement(
-    undefined,
-    ts.factory.createVariableDeclarationList(
-      [
-        ts.factory.createVariableDeclaration(
-          ts.factory.createArrayBindingPattern([
-            ts.factory.createBindingElement(
-              undefined,
-              undefined,
-              ts.factory.createIdentifier(getter)
-            ),
-            ts.factory.createBindingElement(
-              undefined,
-              undefined,
-              ts.factory.createIdentifier(setter)
-            ),
-          ]),
-          undefined,
-          undefined,
-          ts.factory.createCallExpression(
-            ts.factory.createIdentifier('useState'),
-            type ? [type] : undefined,
-            initializer ? [stripThis(initializer)!] : undefined
-          )
-        ),
-      ],
-      ts.NodeFlags.Const
-    )
-  );
+): string {
+  const initialValue = initializer ? printNode(initializer) : '';
+  const generic = type ? `<${printNode(type)}>` : '';
+
+  return `const [${getter}, ${setter}] = useState${generic}(${initialValue});`;
 }
 
 /**
@@ -89,38 +46,10 @@ export function useState(
  * @example
  * const name = useMemo(() => 'value', []);
  */
-export function useMemo(
-  name: string,
-  initializer: ts.BlockLike,
-  dependencies: string[]
-): ts.VariableStatement {
-  return ts.factory.createVariableStatement(
-    undefined,
-    ts.factory.createVariableDeclarationList(
-      [
-        ts.factory.createVariableDeclaration(
-          ts.factory.createIdentifier(name),
-          undefined,
-          undefined,
-          ts.factory.createCallExpression(ts.factory.createIdentifier('useMemo'), undefined, [
-            ts.factory.createArrowFunction(
-              undefined,
-              undefined,
-              [],
-              undefined,
-              undefined,
-              stripThis(initializer)!
-            ),
-            ts.factory.createArrayLiteralExpression(
-              dependencies.map(dep => ts.factory.createIdentifier(dep)),
-              false
-            ),
-          ])
-        ),
-      ],
-      ts.NodeFlags.Const
-    )
-  );
+export function useMemo(name: string, initializer: ts.BlockLike, dependencies: string[]): string {
+  return `const ${name} = useMemo(() => ${printNode(stripThis(initializer)!)}, [${dependencies.join(
+    ', '
+  )}]);`;
 }
 
 /**
@@ -138,32 +67,10 @@ export function useCallback(
   parameters: ts.NodeArray<ts.ParameterDeclaration>,
   initializer: ts.BlockLike,
   dependencies: string[]
-): ts.VariableStatement {
-  return ts.factory.createVariableStatement(
-    undefined,
-    ts.factory.createVariableDeclarationList(
-      [
-        ts.factory.createVariableDeclaration(
-          ts.factory.createIdentifier(name),
-          undefined,
-          undefined,
-          ts.factory.createCallExpression(ts.factory.createIdentifier('useCallback'), undefined, [
-            ts.factory.createArrowFunction(
-              undefined,
-              undefined,
-              parameters,
-              undefined,
-              undefined,
-              stripThis(transformAssignment(initializer))!
-            ),
-            ts.factory.createArrayLiteralExpression(
-              dependencies.map(dep => ts.factory.createIdentifier(dep)),
-              false
-            ),
-          ])
-        ),
-      ],
-      ts.NodeFlags.Const
-    )
-  );
+): string {
+  return `const ${name} = useCallback((${parameters
+    .map(p => printNode(p))
+    .join(', ')}) => ${printNode(
+    stripThis(transformAssignment(initializer))!
+  )}, [${dependencies.join(', ')}]);`;
 }

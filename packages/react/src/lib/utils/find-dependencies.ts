@@ -17,8 +17,6 @@ export function findDependencies<T extends ts.Block>(node: T): string[] {
         node.parent.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
         node === node.parent.left
       ) {
-        // add the property name to the dependencies array
-        // dependencies.add(setterName(getText(node.name)));
         // do nothing as setters are guaranteed to be referentially equal
       } else {
         // add the property name to the dependencies array

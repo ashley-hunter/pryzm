@@ -71,6 +71,6 @@ describe('Find Dependencies', () => {
     // find the dependencies
     const dependencies = findDependencies(getAccessor.body!);
 
-    expect(dependencies).toEqual(['setTest']);
+    expect(dependencies).toEqual([]);
   });
 });
