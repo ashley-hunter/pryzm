@@ -5,9 +5,12 @@ import { ReactTransformer } from '../transformer';
 
 export function createComponent(metadata: TransformerResult<ReactTransformer>) {
   return factory.createFunctionDeclaration(
-    [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+    [
+      factory.createToken(ts.SyntaxKind.ExportKeyword),
+      factory.createToken(ts.SyntaxKind.DefaultKeyword),
+    ],
     undefined,
-    factory.createIdentifier('UxaAlert'),
+    factory.createIdentifier(metadata.name),
     undefined,
     [
       factory.createParameterDeclaration(

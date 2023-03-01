@@ -13,6 +13,7 @@
 | **Styles**              | ✅    | ✅     | ✅  | ✅  |
 | **Refs**                | ✅    | ✅     | ✅  | ✅  |
 | **Slots**               | ❌    | ❌     | ❌  | ❌  |
+| **Comment Extraction**  | ✅    | ❌     | ❌  | ❌  |
 | **Lifecycle Hooks**     | ❌    | ❌     | ❌  | ❌  |
 | **Providers/DI**        | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Classes** | ❌    | ❌     | ❌  | ❌  |

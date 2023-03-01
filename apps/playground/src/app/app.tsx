@@ -1,3 +1,4 @@
+import { Sandpack } from '@codesandbox/sandpack-react';
 import { print as litPrint } from '@pryzm/lit';
 import { print as reactPrint } from '@pryzm/react';
 import { print as sveltePrint } from '@pryzm/svelte';
@@ -70,6 +71,34 @@ export class App {
     }
   }, [code, target]);
 
+  // get the sandpack template
+  const template = useMemo(() => {
+    switch (target) {
+      case 'react':
+        return 'react-ts';
+      case 'vue':
+        return 'vue-ts';
+      case 'svelte':
+        return 'svelte';
+      case 'lit':
+        return 'vanilla-ts';
+    }
+  }, [target]);
+
+  // get the primary file name for the sandpack template
+  const primaryFile = useMemo(() => {
+    switch (target) {
+      case 'react':
+        return '/App.tsx';
+      case 'vue':
+        return '/src/App.vue';
+      case 'svelte':
+        return '/App.svelte';
+      case 'lit':
+        return '/index.ts';
+    }
+  }, [target]);
+
   return (
     <div className="flex flex-col h-screen">
       <nav className="bg-gray-800">
@@ -103,7 +132,7 @@ export class App {
           </div>
         </div>
       </nav>
-      <div className="flex flex-1">
+      <div className="flex flex-col flex-1">
         <Editor
           className="flex-1 border-r h-full outline-none"
           value={code}
@@ -116,26 +145,24 @@ export class App {
           }}
         />
 
+        <Sandpack
+          template={template}
+          options={{
+            readOnly: true,
+            showTabs: true,
+            showRefreshButton: true,
+            showConsoleButton: true,
+          }}
+          files={{
+            [primaryFile]: output,
+          }}
+        />
+
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 flex-1">
             <p className="font-bold">Error</p>
             <p>{error.message}</p>
           </div>
-        )}
-
-        {!error && (
-          <Editor
-            className="flex-1 h-full"
-            value={output}
-            onValueChange={code => {}}
-            highlight={code => highlight(code, languages.js)}
-            padding={10}
-            disabled
-            style={{
-              fontFamily: '"Fira code", "Fira Mono", monospace',
-              fontSize: 14,
-            }}
-          />
         )}
       </div>
     </div>

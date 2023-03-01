@@ -77,7 +77,6 @@ export const transformer: SvelteTranformer = {
   Prop(prop) {
     // prop is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(prop);
-    const type = getPropertyType(prop);
     const initializer = prop.initializer;
 
     const statement = factory.createVariableStatement(
@@ -87,7 +86,7 @@ export const transformer: SvelteTranformer = {
           factory.createVariableDeclaration(
             factory.createIdentifier(name),
             undefined,
-            type,
+            undefined,
             stripThis(initializer)
           ),
         ],
@@ -100,7 +99,6 @@ export const transformer: SvelteTranformer = {
   State(state) {
     // state is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(state);
-    const type = getPropertyType(state);
     const isReadonly = isPropertyReadonly(state);
     const initializer = state.initializer;
 
@@ -111,7 +109,7 @@ export const transformer: SvelteTranformer = {
           factory.createVariableDeclaration(
             factory.createIdentifier(name),
             undefined,
-            type,
+            undefined,
             stripThis(initializer)
           ),
         ],
