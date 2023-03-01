@@ -21,3 +21,7 @@
 .token.string {
   color: #2e6bd0 !important;
 }
+
+.npm__react-simple-code-editor__textarea:focus-visible {
+  outline: none;
+}

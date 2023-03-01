@@ -101,7 +101,7 @@ export const transformer: LitTranformer = {
     );
   },
   Styles(value, context) {
-    context.importHandler.addNamedImport('LitElement', 'lit');
+    context.importHandler.addNamedImport('css', 'lit');
     return value;
   },
   Template(value, styles, context) {
@@ -109,6 +109,7 @@ export const transformer: LitTranformer = {
     return transformTemplate(value, templateTransformer, context);
   },
   PreTransform(metadata, context) {
+    context.importHandler.addNamedImport('LitElement', 'lit');
     context.importHandler.addNamedImport('customElement', 'lit/decorators.js');
     return metadata;
   },
