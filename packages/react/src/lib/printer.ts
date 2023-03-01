@@ -1,38 +1,51 @@
+import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerResult } from '@pryzm/compiler';
-import * as ts from 'typescript';
-import { createComponent } from './printer/component';
-import { createPropsInterface } from './printer/props';
 import { ReactTransformer, transformer } from './transformer';
+import { propsName } from './utils/names';
 
 export function print(source: string): string {
   const printer = new ReactPrinter();
-  return printer.print(transform(source, transformer));
+  const a = printer.print(transform(source, transformer));
+  debugger;
+  return a;
 }
 
 export class ReactPrinter implements Printer<ReactTransformer> {
+  private getInterfaceProperties(metadata: TransformerResult<ReactTransformer>): string {
+    return [
+      ...metadata.props.map(prop => prop.interfaceProperty),
+      ...metadata.events.map(prop => prop.interfaceProperty),
+      ...metadata.slots.map(slot => slot.interfaceProperty),
+    ].join('\n');
+  }
+
+  private getDesctructuredProperties(metadata: TransformerResult<ReactTransformer>): string {
+    return [
+      ...metadata.props.map(prop => prop.destructuredProperty),
+      ...metadata.events.map(prop => prop.destructuredProperty),
+      ...metadata.slots.map(slot => slot.destructuredProperty),
+    ].join(', ');
+  }
+
   print(metadata: TransformerResult<ReactTransformer>): string {
-    const statements: ts.Statement[] = [];
+    return `
+      ${metadata.imports.map(printNode).join('\n')}
 
-    // Add imports
-    statements.push(...metadata.imports);
+      export interface ${propsName(metadata.name)} {
+        ${this.getInterfaceProperties(metadata)}
+      }
 
-    // Add the props
-    statements.push(createPropsInterface(metadata));
+      export default function ${metadata.name}({${this.getDesctructuredProperties(
+      metadata
+    )}}: ${propsName(metadata.name)}) {
 
-    // Add the component
-    statements.push(createComponent(metadata));
+        ${metadata.refs.map(ref => ref.statement).join('\n')}
+        ${metadata.states.map(state => state.statement).join('\n')}
+        ${metadata.computed.map(computed => computed.statement).join('\n')}
+        ${metadata.methods.map(method => method.statement).join('\n')}
 
-    // create a source file from the statements
-    const sourceFile = ts.factory.createSourceFile(
-      statements,
-      ts.factory.createToken(ts.SyntaxKind.EndOfFileToken),
-      ts.NodeFlags.None
-    );
-
-    // create a printer
-    const printer = ts.createPrinter();
-
-    // print the source file
-    return printer.printFile(sourceFile);
+        return ${metadata.template};
+      }
+    `;
   }
 }

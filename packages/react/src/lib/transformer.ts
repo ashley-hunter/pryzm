@@ -5,6 +5,7 @@ import {
   getDecoratorParameter,
   getPropertyName,
   inferType,
+  printNode,
   stripThis,
 } from '@pryzm/ast-utils';
 import {
@@ -34,15 +35,15 @@ export interface ReactTransformer extends Transformer {
   ): {
     getter: string;
     setter: string;
-    statement: ts.VariableStatement;
+    statement: string;
   };
   Prop(
     prop: ts.PropertyDeclaration,
     context: TransformerContext
   ): {
     name: string;
-    interfaceProperty: ts.PropertySignature;
-    destructuredProperty: ts.BindingElement;
+    interfaceProperty: string;
+    destructuredProperty: string;
   };
   Computed(
     computed: ts.GetAccessorDeclaration,
@@ -50,14 +51,14 @@ export interface ReactTransformer extends Transformer {
   ): {
     name: string;
     dependencies: string[];
-    statement: ts.VariableStatement;
+    statement: string;
   };
   Ref(
     ref: ts.PropertyDeclaration,
     context: TransformerContext
   ): {
     name: string;
-    statement: ts.VariableStatement;
+    statement: string;
   };
   Method(
     method: ts.MethodDeclaration,
@@ -65,46 +66,46 @@ export interface ReactTransformer extends Transformer {
   ): {
     name: string;
     dependencies: string[];
-    statement: ts.VariableStatement;
+    statement: string;
   };
   Event(
     event: ts.PropertyDeclaration,
     context: TransformerContext
   ): {
     name: string;
-    interfaceProperty: ts.PropertySignature;
-    destructuredProperty: ts.BindingElement;
+    interfaceProperty: string;
+    destructuredProperty: string;
   };
   Provider(
     provider: ts.PropertyDeclaration,
     context: TransformerContext
   ): {
     name: string;
-    token: ts.Identifier;
-    statement: ts.VariableStatement;
+    token: string;
+    statement: string;
   };
   Inject(
     inject: ts.PropertyDeclaration,
     context: TransformerContext
   ): {
     name: string;
-    token: ts.Identifier;
-    type: ts.TypeNode | undefined;
+    token: string;
+    type: string | undefined;
   };
   Slots(
     slot: string,
     context: TransformerContext
   ): {
     name: string;
-    interfaceProperty: ts.PropertySignature;
-    destructuredProperty: ts.BindingElement;
+    interfaceProperty: string;
+    destructuredProperty: string;
   };
   Styles(style: string, context: TransformerContext): string;
   Template?: (
     value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
     styles: string,
     context: TransformerContext
-  ) => ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement;
+  ) => string;
   PostTransform: (
     metadata: TransformerResult<ReactTransformer>
   ) => TransformerResult<ReactTransformer>;
@@ -126,7 +127,7 @@ export const transformer: ReactTransformer = {
     // add the comments back to the statement
     addComment(statement, extractComment(computed));
 
-    return { name, statement, dependencies };
+    return { name, statement: printNode(statement), dependencies };
   },
   Prop(prop) {
     // get the name of the prop
@@ -144,7 +145,11 @@ export const transformer: ReactTransformer = {
     // create the destructured property with the default value attached
     const destructuredProperty = createDestructuredProperty(name, initializer);
 
-    return { name, interfaceProperty, destructuredProperty };
+    return {
+      name,
+      interfaceProperty: printNode(interfaceProperty),
+      destructuredProperty: printNode(destructuredProperty),
+    };
   },
   Slots(slot, context) {
     // if the slot is 'default' then we need to rename it to 'children'
@@ -163,7 +168,11 @@ export const transformer: ReactTransformer = {
     // create the destructured property with the default value attached
     const destructuredProperty = createDestructuredProperty(slot);
 
-    return { name: slot, interfaceProperty, destructuredProperty };
+    return {
+      name: slot,
+      interfaceProperty: printNode(interfaceProperty),
+      destructuredProperty: printNode(destructuredProperty),
+    };
   },
   State(state, context) {
     context.importHandler.addNamedImport('useState', 'react');
@@ -186,7 +195,7 @@ export const transformer: ReactTransformer = {
     // add the comments back to the statement
     addComment(statement, extractComment(state));
 
-    return { getter, setter, statement };
+    return { getter, setter, statement: printNode(statement) };
   },
   Event(event) {
     // get the name of the prop
@@ -212,14 +221,18 @@ export const transformer: ReactTransformer = {
     // create the destructured property with the default value attached
     const destructuredProperty = createDestructuredProperty(name);
 
-    return { name, interfaceProperty, destructuredProperty };
+    return {
+      name,
+      interfaceProperty: printNode(interfaceProperty),
+      destructuredProperty: printNode(destructuredProperty),
+    };
   },
   Inject(value) {
     // get the name of the inject
     const name = getPropertyName(value);
 
     // get the type
-    const type = value.type;
+    const type = value.type ? printNode(value.type) : undefined;
 
     // get the token from the decorator
     const decorator = getDecorator(value, 'Inject')!;
@@ -229,7 +242,7 @@ export const transformer: ReactTransformer = {
       throw new Error('Inject must have a token');
     }
 
-    return { name, token, type };
+    return { name, token: printNode(token), type };
   },
   Provider(value) {
     // get the name of the provider
@@ -245,7 +258,7 @@ export const transformer: ReactTransformer = {
     // wrap the initializer in a useRef hook
     const statement = useRef(name, value.initializer!);
 
-    return { name, statement, token };
+    return { name, statement: printNode(statement), token: printNode(token) };
   },
   Ref(value, context) {
     context.importHandler.addNamedImport('useRef', 'react');
@@ -261,7 +274,7 @@ export const transformer: ReactTransformer = {
     // convert the property to a useRef hook
     const statement = useRef(name, factory.createNull(), type);
 
-    return { name, statement };
+    return { name, statement: printNode(statement) };
   },
   Method(method, context) {
     context.importHandler.addNamedImport('useCallback', 'react');
@@ -275,7 +288,7 @@ export const transformer: ReactTransformer = {
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
     const statement = useCallback(name, method.parameters, method.body!, dependencies);
 
-    return { name, statement, dependencies };
+    return { name, statement: printNode(statement), dependencies };
   },
   Styles(style, context) {
     if (style === '') {
@@ -305,30 +318,32 @@ export const transformer: ReactTransformer = {
 
     // if there are no styles then return the template directly
     if (!context.data.has('id')) {
-      return template;
+      return printNode(template);
     }
 
     // otherwise wrap the template in a fragment and add a style element
-    return factory.createJsxFragment(
-      factory.createJsxOpeningFragment(),
-      [
-        template,
-        factory.createJsxElement(
-          factory.createJsxOpeningElement(
-            factory.createIdentifier('style'),
-            undefined,
-            factory.createJsxAttributes([])
-          ),
-          [
-            factory.createJsxExpression(
+    return printNode(
+      factory.createJsxFragment(
+        factory.createJsxOpeningFragment(),
+        [
+          template,
+          factory.createJsxElement(
+            factory.createJsxOpeningElement(
+              factory.createIdentifier('style'),
               undefined,
-              factory.createNoSubstitutionTemplateLiteral(styles)
+              factory.createJsxAttributes([])
             ),
-          ],
-          factory.createJsxClosingElement(factory.createIdentifier('style'))
-        ),
-      ],
-      factory.createJsxJsxClosingFragment()
+            [
+              factory.createJsxExpression(
+                undefined,
+                factory.createNoSubstitutionTemplateLiteral(styles)
+              ),
+            ],
+            factory.createJsxClosingElement(factory.createIdentifier('style'))
+          ),
+        ],
+        factory.createJsxJsxClosingFragment()
+      )
     );
   },
   PreTransform(metadata, context) {
