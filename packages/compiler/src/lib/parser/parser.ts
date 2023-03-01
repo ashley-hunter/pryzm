@@ -1,5 +1,6 @@
 import { getDecorator, getDecoratorProperty, getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
+import { toLowerCamelCase } from '../utils/names';
 import { ComponentMetadata } from './component-metadata';
 
 export function parseFile(code: string): ComponentMetadata[] {
@@ -52,6 +53,7 @@ function collectComponentMetadata(
     methods: getMethods(component),
     template: getTemplate(component),
     styles: getStyles(component),
+    slots: getSlots(component),
   };
 
   // post collect checks
@@ -187,6 +189,55 @@ function getStyles(component: ts.ClassDeclaration): string {
   }
 
   return '';
+}
+
+function getSlots(component: ts.ClassDeclaration): string[] {
+  const slots: string[] = [];
+
+  const visitor = (node: ts.Node) => {
+    // if the element is a JSX element or JSX self closing element and the tag name is "slot"
+    // the add the name attribute to the list of slots if the name attribute exists, otherwise
+    // add the default slot
+    if (ts.isJsxElement(node) && node.openingElement.tagName.getText() === 'slot') {
+      const nameAttr = node.openingElement.attributes.properties.find(
+        attr => ts.isJsxAttribute(attr) && attr.name.getText() === 'name'
+      );
+
+      if (
+        nameAttr &&
+        ts.isJsxAttribute(nameAttr) &&
+        nameAttr.initializer &&
+        ts.isStringLiteral(nameAttr.initializer)
+      ) {
+        slots.push(nameAttr.initializer.text);
+      } else {
+        slots.push('default');
+      }
+    }
+
+    if (ts.isJsxSelfClosingElement(node) && node.tagName.getText() === 'slot') {
+      const nameAttr = node.attributes.properties.find(
+        attr => ts.isJsxAttribute(attr) && attr.name.getText() === 'name'
+      );
+
+      if (
+        nameAttr &&
+        ts.isJsxAttribute(nameAttr) &&
+        nameAttr.initializer &&
+        ts.isStringLiteral(nameAttr.initializer)
+      ) {
+        slots.push(nameAttr.initializer.text);
+      } else {
+        slots.push('default');
+      }
+    }
+
+    ts.forEachChild(node, visitor);
+  };
+
+  ts.forEachChild(component, visitor);
+
+  return slots.map(toLowerCamelCase);
 }
 
 function getTemplate(

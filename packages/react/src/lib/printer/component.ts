@@ -2,6 +2,7 @@ import { TransformerResult } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { ReactTransformer } from '../transformer';
+import { propsName } from '../utils/names';
 
 export function createComponent(metadata: TransformerResult<ReactTransformer>) {
   return factory.createFunctionDeclaration(
@@ -16,9 +17,16 @@ export function createComponent(metadata: TransformerResult<ReactTransformer>) {
       factory.createParameterDeclaration(
         undefined,
         undefined,
-        factory.createObjectBindingPattern(metadata.props.map(prop => prop.destructuredProperty)),
+        factory.createObjectBindingPattern([
+          ...metadata.props.map(prop => prop.destructuredProperty),
+          ...metadata.events.map(event => event.destructuredProperty),
+          ...metadata.slots.map(slot => slot.destructuredProperty),
+        ]),
         undefined,
-        undefined,
+        factory.createTypeReferenceNode(
+          factory.createIdentifier(propsName(metadata.name)),
+          undefined
+        ),
         undefined
       ),
     ],
@@ -34,111 +42,4 @@ export function createComponent(metadata: TransformerResult<ReactTransformer>) {
       true
     )
   );
-
-  // return factory.createVariableStatement(
-  //   [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-  //   factory.createVariableDeclarationList(
-  //     [
-  //       factory.createVariableDeclaration(
-  //         factory.createIdentifier(metadata.name),
-  //         undefined,
-  //         factory.createTypeReferenceNode(factory.createIdentifier('FC'), [
-  //           factory.createTypeReferenceNode(
-  //             factory.createIdentifier(propsName(metadata.name)),
-  //             undefined
-  //           ),
-  //         ]),
-  //         factory.createArrowFunction(
-  //           undefined,
-  //           undefined,
-  //           [
-  //             factory.createParameterDeclaration(
-  //               undefined,
-  //               undefined,
-  //               factory.createObjectBindingPattern(
-  //                 metadata.props.map(prop => prop.destructuredProperty)
-  //               ),
-  //               undefined,
-  //               undefined,
-  //               undefined
-  //             ),
-  //           ],
-  //           undefined,
-  //           factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-  //           factory.createBlock(
-  //             [
-  //               ...metadata.states.map(state => state.statement),
-  //               ...metadata.computed.map(computed => computed.statement),
-  //               ...metadata.methods.map(method => method.statement),
-  //               factory.createReturnStatement(metadata.template),
-  //             ],
-  //             true
-  //           )
-  //         )
-  //       ),
-  //     ],
-  //     ts.NodeFlags.Const
-  //   )
-  // );
-
-  // return factory.createVariableStatement(
-  //   [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-  //   factory.createVariableDeclarationList(
-  //     [
-  //       factory.createVariableDeclaration(
-  //         factory.createIdentifier(metadata.name),
-  //         undefined,
-  //         undefined,
-  //         factory.createCallExpression(
-  //           factory.createIdentifier('forwardRef'),
-  //           [
-  //             factory.createTypeReferenceNode(factory.createIdentifier('HTMLElement'), undefined),
-  //             factory.createTypeReferenceNode(
-  //               factory.createIdentifier(propsName(metadata.name)),
-  //               undefined
-  //             ),
-  //           ],
-  //           [
-  //             factory.createArrowFunction(
-  //               undefined,
-  //               undefined,
-  //               [
-  //                 factory.createParameterDeclaration(
-  //                   undefined,
-  //                   undefined,
-  //                   factory.createObjectBindingPattern(
-  //                     metadata.props.map(prop => prop.destructuredProperty)
-  //                   ),
-  //                   undefined,
-  //                   undefined,
-  //                   undefined
-  //                 ),
-  //                 factory.createParameterDeclaration(
-  //                   undefined,
-  //                   undefined,
-  //                   factory.createIdentifier('ref'),
-  //                   undefined,
-  //                   undefined,
-  //                   undefined
-  //                 ),
-  //               ],
-  //               undefined,
-  //               factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-  //               factory.createBlock(
-  //                 [
-  //                   ...metadata.states.map(state => state.statement),
-  //                   ...metadata.computed.map(computed => computed.statement),
-  //                   ...metadata.methods.map(method => method.statement),
-  //                   factory.createReturnStatement(metadata.template),
-  //                 ],
-  //                 true
-  //               )
-  //             ),
-  //           ]
-  //         )
-  //       ),
-  //     ],
-  //     ts.NodeFlags.Const
-  //   )
-  // );
 }

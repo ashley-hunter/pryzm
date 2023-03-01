@@ -13,6 +13,7 @@ export function createPropsInterface(metadata: TransformerResult<ReactTransforme
     [
       ...metadata.props.map(prop => prop.interfaceProperty),
       ...metadata.events.map(event => event.interfaceProperty),
+      ...metadata.slots.map(slot => slot.interfaceProperty),
     ]
   );
 }

@@ -1,4 +1,4 @@
-import { stripParentNode } from '@pryzm/ast-utils';
+import { getText, stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { TransformerContext } from './transformer';
 
@@ -8,12 +8,13 @@ export interface TemplateTransformer<
   TAttribute,
   TText,
   TExpression,
+  TSlot,
   TSelfClosing = TElement
 > {
   Element: (
     value: ts.JsxElement,
     attributes: TAttribute[],
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[],
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot)[],
     context: TransformerContext
   ) => TElement;
   SelfClosingElement: (
@@ -21,9 +22,10 @@ export interface TemplateTransformer<
     attributes: TAttribute[],
     context: TransformerContext
   ) => TSelfClosing;
+  Slot(name: string, context: TransformerContext): TSlot;
   Fragment: (
     value: ts.JsxFragment,
-    children: (TElement | TFragment | TSelfClosing | TText | TExpression)[],
+    children: (TElement | TFragment | TSelfClosing | TText | TExpression | TSlot)[],
     context: TransformerContext
   ) => TFragment;
   Attribute: (value: ts.JsxAttribute, context: TransformerContext) => TAttribute;
@@ -38,6 +40,7 @@ export function transformTemplate<
   TAttribute,
   TText,
   TExpression,
+  TSlot,
   TSelfClosing = TElement
 >(
   value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
@@ -47,6 +50,7 @@ export function transformTemplate<
     TAttribute,
     TText,
     TExpression,
+    TSlot,
     TSelfClosing
   >,
   context: TransformerContext
@@ -62,6 +66,7 @@ export class TemplateVisitor<
   TAttribute,
   TText,
   TExpression,
+  TSlot,
   TSelfClosing = TElement
 > {
   constructor(
@@ -71,12 +76,13 @@ export class TemplateVisitor<
       TAttribute,
       TText,
       TExpression,
+      TSlot,
       TSelfClosing
     >,
     private context: TransformerContext
   ) {}
 
-  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing | TExpression {
+  visit(value: JsxNode): TText | TElement | TFragment | TSelfClosing | TExpression | TSlot {
     if (ts.isJsxText(value)) {
       return this.visitText(value);
     }
@@ -105,6 +111,11 @@ export class TemplateVisitor<
   }
 
   visitElement(value: ts.JsxElement) {
+    // if the element is a slot, we need to transform it into a slot element
+    if (getText(value.openingElement.tagName) === 'slot') {
+      return this.visitSlot(value.openingElement);
+    }
+
     const attributes = value.openingElement.attributes.properties.map(
       this.visitAttribute.bind(this)
     );
@@ -113,6 +124,11 @@ export class TemplateVisitor<
   }
 
   visitSelfClosingElement(value: ts.JsxSelfClosingElement) {
+    // if the element is a slot, we need to transform it into a slot element
+    if (getText(value.tagName) === 'slot') {
+      return this.visitSlot(value);
+    }
+
     const attributes = value.attributes.properties.map(this.visitAttribute.bind(this));
     return this.transformer.SelfClosingElement(value, attributes, this.context);
   }
@@ -144,6 +160,18 @@ export class TemplateVisitor<
 
   visitRef(attribute: ts.JsxAttribute): TAttribute {
     return this.transformer.Ref!(attribute, this.context);
+  }
+
+  visitSlot(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement): TSlot {
+    const name = node.attributes.properties
+      .filter(ts.isJsxAttribute)
+      .find(a => getText(a.name) === 'name')?.initializer;
+
+    if (name && ts.isStringLiteral(name)) {
+      return this.transformer.Slot(name.text, this.context);
+    }
+
+    return this.transformer.Slot('default', this.context);
   }
 }
 

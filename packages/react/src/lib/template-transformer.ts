@@ -8,6 +8,7 @@ export const templateTransformer: TemplateTransformer<
   ts.JsxAttribute,
   ts.JsxText,
   ts.JsxExpression,
+  ts.JsxExpression,
   ts.JsxSelfClosingElement
 > = {
   Element: (value, attributes, children, context) => {
@@ -45,6 +46,13 @@ export const templateTransformer: TemplateTransformer<
           : attributes
       )
     );
+  },
+  Slot: name => {
+    if (name === 'default') {
+      name = 'children';
+    }
+
+    return ts.factory.createJsxExpression(undefined, ts.factory.createIdentifier(name));
   },
   Fragment: (value, children) =>
     ts.factory.createJsxFragment(

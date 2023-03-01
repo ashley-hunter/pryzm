@@ -25,6 +25,7 @@ export type TransformerResult<T extends Transformer> = {
   injects: TransformerFn<T, 'Inject'>[];
   template: TransformerFn<T, 'Template'>;
   imports: ts.ImportDeclaration[];
+  slots: TransformerFn<T, 'Slots'>[];
   styles: string;
   name: string;
 };
@@ -43,6 +44,7 @@ export interface Transformer {
     styles: string,
     context: TransformerContext
   ) => any;
+  Slots?: (slot: string, context: TransformerContext) => any;
   Styles?: (value: string, context: TransformerContext) => any;
   PreTransform?: (metadata: ComponentMetadata, context: TransformerContext) => void;
   PostTransform?: (
@@ -90,6 +92,7 @@ export function transform<T extends Transformer>(
     provider => transformer.Provider?.(provider, context) ?? provider
   );
   const injects = metadata.injects.map(inject => transformer.Inject?.(inject, context) ?? inject);
+  const slots = metadata.slots.map(slot => transformer.Slots?.(slot, context) ?? slot);
   const template = transformer.Template?.(metadata.template, styles, context) ?? metadata.template;
 
   const result: TransformerResult<Transformer> = {
@@ -104,6 +107,7 @@ export function transform<T extends Transformer>(
     injects,
     styles,
     template,
+    slots,
     imports: context.importHandler.getImportNodes(),
   };
 

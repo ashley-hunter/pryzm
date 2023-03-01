@@ -4,10 +4,10 @@ import * as ts from 'typescript';
 export function createInterfaceProperty(
   name: string,
   type: ts.TypeNode | ts.FunctionTypeNode,
-  source: ts.PropertyDeclaration
+  source?: ts.PropertyDeclaration
 ): ts.PropertySignature {
   // determine if the property is optional
-  const isOptional = source.questionToken !== undefined;
+  const isOptional = source ? source.questionToken !== undefined : true;
 
   const signature = ts.factory.createPropertySignature(
     undefined,

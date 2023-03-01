@@ -91,6 +91,14 @@ export interface ReactTransformer extends Transformer {
     token: ts.Identifier;
     type: ts.TypeNode | undefined;
   };
+  Slots(
+    slot: string,
+    context: TransformerContext
+  ): {
+    name: string;
+    interfaceProperty: ts.PropertySignature;
+    destructuredProperty: ts.BindingElement;
+  };
   Styles(style: string, context: TransformerContext): string;
   Template?: (
     value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
@@ -137,6 +145,25 @@ export const transformer: ReactTransformer = {
     const destructuredProperty = createDestructuredProperty(name, initializer);
 
     return { name, interfaceProperty, destructuredProperty };
+  },
+  Slots(slot, context) {
+    // if the slot is 'default' then we need to rename it to 'children'
+    if (slot === 'default') {
+      slot = 'children';
+    }
+
+    context.importHandler.addNamedImport('ReactNode', 'react');
+
+    // create the interface property with the type attached
+    const interfaceProperty = createInterfaceProperty(
+      slot,
+      factory.createTypeReferenceNode(factory.createIdentifier('ReactNode'), undefined)
+    );
+
+    // create the destructured property with the default value attached
+    const destructuredProperty = createDestructuredProperty(slot);
+
+    return { name: slot, interfaceProperty, destructuredProperty };
   },
   State(state, context) {
     context.importHandler.addNamedImport('useState', 'react');
