@@ -5,9 +5,7 @@ import { propsName } from './utils/names';
 
 export function print(source: string): string {
   const printer = new ReactPrinter();
-  const a = printer.print(transform(source, transformer));
-  debugger;
-  return a;
+  return printer.print(transform(source, transformer));
 }
 
 export class ReactPrinter implements Printer<ReactTransformer> {
