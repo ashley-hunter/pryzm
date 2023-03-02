@@ -46,11 +46,15 @@ export const transformer: SvelteTranformer = {
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);
   },
-  OnInit(metadata, context) {
-    throw new Error('Method not implemented.');
+  OnInit({ body }, context) {
+    context.importHandler.addNamedImport('onMount', 'svelte');
+
+    return `onMount(() => ${printNode(stripThis(body))});`;
   },
-  OnDestroy(metadata, context) {
-    throw new Error('Method not implemented.');
+  OnDestroy({ body }, context) {
+    context.importHandler.addNamedImport('onDestroy', 'svelte');
+
+    return `onDestroy(() => ${printNode(stripThis(body))});`;
   },
   Slots(slot, context) {
     return slot;
