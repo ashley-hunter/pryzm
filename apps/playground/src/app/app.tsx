@@ -143,12 +143,21 @@ export class App {
         </div>
       </nav>
       <div className="flex flex-col flex-1">
-        <Editor
-          onChange={value => setCode(value!)}
-          language="typescript"
-          value={code}
-          onMount={handleEditorDidMount}
-        />
+        <div className="relative flex-1">
+          <Editor
+            onChange={value => setCode(value!)}
+            language="typescript"
+            value={code}
+            onMount={handleEditorDidMount}
+          />
+          {error && (
+            <div className="absolute left-0 right-0 bottom-0 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-1 text-xs">
+              <p>
+                <span className="font-semibold">Error:</span> {error.message}
+              </p>
+            </div>
+          )}
+        </div>
 
         <Sandpack
           template={template}
@@ -163,13 +172,6 @@ export class App {
             [primaryFile]: output,
           }}
         />
-
-        {/* {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 flex-1">
-            <p className="font-bold">Error</p>
-            <p>{error.message}</p>
-          </div>
-        )} */}
       </div>
     </div>
   );
