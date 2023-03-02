@@ -2,6 +2,7 @@ import {
   getPropertyName,
   getReturnExpression,
   isPropertyReadonly,
+  printNode,
   stripThis,
 } from '@pryzm/ast-utils';
 import {
@@ -11,23 +12,14 @@ import {
   transformTemplate,
 } from '@pryzm/compiler';
 import * as ts from 'typescript';
-import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface SvelteTranformer extends Transformer {
-  State(state: ts.PropertyDeclaration): {
-    statement: ts.VariableStatement;
-  };
-  Prop(prop: ts.PropertyDeclaration): {
-    statement: ts.VariableStatement;
-  };
-  Computed(computed: ts.GetAccessorDeclaration): {
-    statement: ts.LabeledStatement;
-  };
-  Ref(ref: ts.PropertyDeclaration): ts.VariableStatement;
-  Method(method: ts.MethodDeclaration): {
-    statement: ts.FunctionDeclaration;
-  };
+  State(state: ts.PropertyDeclaration): string;
+  Prop(prop: ts.PropertyDeclaration): string;
+  Computed(computed: ts.GetAccessorDeclaration): string;
+  Ref(ref: ts.PropertyDeclaration): string;
+  Method(method: ts.MethodDeclaration): string;
   Event(
     event: ts.PropertyDeclaration,
     context: TransformerContext
@@ -60,63 +52,30 @@ export const transformer: SvelteTranformer = {
     const name = getPropertyName(computed);
     const initializer = getReturnExpression(computed);
 
-    const statement = factory.createLabeledStatement(
-      factory.createIdentifier('$'),
-      factory.createExpressionStatement(
-        factory.createBinaryExpression(
-          factory.createIdentifier(name),
-          factory.createToken(ts.SyntaxKind.EqualsToken),
-          stripThis(initializer)!
-        )
-      )
-    );
-
-    return { statement };
+    return `$: ${name} = ${printNode(stripThis(initializer)!)};`;
   },
   Prop(prop) {
     // prop is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(prop);
-    const initializer = prop.initializer;
+    const initializer = stripThis(prop.initializer);
 
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            stripThis(initializer)
-          ),
-        ],
-        ts.NodeFlags.Let
-      )
-    );
+    if (initializer) {
+      return `export let ${name} = ${printNode(initializer)};`;
+    }
 
-    return { statement };
+    return `export let ${name};`;
   },
   State(state) {
     // state is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(state);
     const isReadonly = isPropertyReadonly(state);
-    const initializer = state.initializer;
+    const initializer = stripThis(state.initializer);
 
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            stripThis(initializer)
-          ),
-        ],
-        isReadonly ? ts.NodeFlags.Const : ts.NodeFlags.Let
-      )
-    );
+    if (initializer) {
+      return `${isReadonly ? 'const' : 'let'} ${name} = ${printNode(initializer)};`;
+    }
 
-    return { statement };
+    return `${isReadonly ? 'const' : 'let'} ${name};`;
   },
   Event(event, context) {
     context.importHandler.addNamedImport('createEventDispatcher', 'svelte');
@@ -130,36 +89,12 @@ export const transformer: SvelteTranformer = {
     throw new Error('Method not implemented.');
   },
   Ref(value) {
-    return factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(getPropertyName(value)),
-            undefined,
-            undefined,
-            undefined
-          ),
-        ],
-        ts.NodeFlags.Let
-      )
-    );
+    return `let ${getPropertyName(value)};`;
   },
   Method(method) {
-    // convert a method to a function declaration
-    const name = getPropertyName(method);
-    const returnType = method.type;
-    const statement = ts.factory.createFunctionDeclaration(
-      undefined,
-      undefined,
-      name,
-      undefined,
-      method.parameters,
-      returnType,
-      stripThis(method.body)
-    );
-
-    return { statement };
+    return `function ${getPropertyName(method)}(${method.parameters.map(printNode).join(', ')})${
+      method.type ? `: ${method.type}` : ''
+    } ${printNode(stripThis(method.body)!)}`;
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

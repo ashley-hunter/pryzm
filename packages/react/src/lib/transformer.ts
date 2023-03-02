@@ -15,7 +15,7 @@ import {
 import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
-import { useCallback, useMemo, useRef, useState } from './ast/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from './ast/hooks';
 import {
   createDestructuredProperty,
   createFunctionTypeNode,
@@ -64,6 +64,18 @@ export interface ReactTransformer extends Transformer {
   ): {
     name: string;
     dependencies: string[];
+    statement: string;
+  };
+  OnInit(
+    method: ts.MethodDeclaration,
+    context: TransformerContext
+  ): {
+    statement: string;
+  };
+  OnDestroy(
+    method: ts.MethodDeclaration,
+    context: TransformerContext
+  ): {
     statement: string;
   };
   Event(
@@ -281,6 +293,37 @@ export const transformer: ReactTransformer = {
     const statement = useCallback(name, method.parameters, method.body!, dependencies);
 
     return { name, statement, dependencies };
+  },
+  OnInit(method, context) {
+    context.importHandler.addNamedImport('useEffect', 'react');
+
+    // convert a method to a useEffect hook
+    // e.g. onInit() { return 'test'; } => useEffect(() => { return 'test'; }, []);
+    const statement = useEffect(method.body!, []);
+
+    return { statement };
+  },
+  OnDestroy(method, context) {
+    context.importHandler.addNamedImport('useEffect', 'react');
+
+    // create a return statement for the useEffect hook
+    const returnStatement = factory.createBlock([
+      factory.createReturnStatement(
+        factory.createArrowFunction(
+          undefined,
+          undefined,
+          [],
+          undefined,
+          factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+          method.body!
+        )
+      ),
+    ]);
+
+    // convert a method to a useEffect hook with a cleanup function
+    const statement = useEffect(returnStatement, []);
+
+    return { statement };
   },
   Styles(style, context) {
     if (style === '') {

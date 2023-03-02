@@ -40,6 +40,9 @@ function collectComponentMetadata(
   ensureNoStaticMembers(component);
   ensureNoUndecoratedProperties(component);
 
+  const methods = getMethods(component);
+  const lifecycleMethods = ['onInit', 'onDestroy'];
+
   const metadata: ComponentMetadata = {
     imports: getImports(sourceFile),
     name: getComponentName(component),
@@ -50,7 +53,9 @@ function collectComponentMetadata(
     refs: getPropertiesWithDecorator(component, 'Ref'),
     providers: getPropertiesWithDecorator(component, 'Provider'),
     injects: getPropertiesWithDecorator(component, 'Inject'),
-    methods: getMethods(component),
+    methods: methods.filter(method => !lifecycleMethods.includes(method.name.getText())),
+    onInit: methods.find(method => method.name.getText() === 'onInit'),
+    onDestroy: methods.find(method => method.name.getText() === 'onDestroy'),
     template: getTemplate(component),
     styles: getStyles(component),
     slots: getSlots(component),

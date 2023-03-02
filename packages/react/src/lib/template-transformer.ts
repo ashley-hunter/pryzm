@@ -28,7 +28,7 @@ export const templateTransformer: TemplateTransformer = {
   Slot: name => {
     return `{${name === 'default' ? 'children' : name}}`;
   },
-  Fragment: (value, children) => {
+  Fragment: (_, children) => {
     return `<>${children.join('\n')}</>`;
   },
   Attribute: value => {
@@ -67,15 +67,6 @@ export const templateTransformer: TemplateTransformer = {
     const child = getChildOrFragment(node);
 
     return `{ ${printNode(stripThis(when)!)} && ${printNode(child)} }`;
-
-    // return factory.createJsxExpression(
-    //   undefined,
-    //   factory.createBinaryExpression(
-    //     stripThis(when)!,
-    //     factory.createToken(ts.SyntaxKind.AmpersandAmpersandToken),
-    //     child as ts.JsxExpression
-    //   )
-    // );
   },
   Expression: value => printNode(stripThis(value)!),
   Text: value => value.text,

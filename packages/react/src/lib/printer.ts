@@ -37,10 +37,17 @@ export class ReactPrinter implements Printer<ReactTransformer> {
       metadata
     )}}: ${propsName(metadata.name)}) {
 
-        ${metadata.refs.map(ref => ref.statement).join('\n')}
-        ${metadata.states.map(state => state.statement).join('\n')}
-        ${metadata.computed.map(computed => computed.statement).join('\n')}
-        ${metadata.methods.map(method => method.statement).join('\n')}
+        ${metadata.refs.map(ref => ref.statement).join('\n\n')}
+
+        ${metadata.states.map(state => state.statement).join('\n\n')}
+
+        ${metadata.computed.map(computed => computed.statement).join('\n\n')}
+
+        ${metadata.methods.map(method => method.statement).join('\n\n')}
+
+        ${metadata.onInit?.statement ?? ''}
+
+        ${metadata.onDestroy?.statement ?? ''}
 
         return ${metadata.template};
       }

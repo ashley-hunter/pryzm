@@ -20,6 +20,8 @@ export type TransformerResult<T extends Transformer> = {
   computed: TransformerFn<T, 'Computed'>[];
   events: TransformerFn<T, 'Event'>[];
   methods: TransformerFn<T, 'Method'>[];
+  onInit?: TransformerFn<T, 'OnInit'>;
+  onDestroy?: TransformerFn<T, 'OnDestroy'>;
   refs: TransformerFn<T, 'Ref'>[];
   providers: TransformerFn<T, 'Provider'>[];
   injects: TransformerFn<T, 'Inject'>[];
@@ -34,6 +36,8 @@ export interface Transformer {
   Prop?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
   State?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
   Method?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
+  OnInit?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
+  OnDestroy?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
   Event?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
   Ref?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
   Computed?: (value: ts.GetAccessorDeclaration, context: TransformerContext) => any;
@@ -87,6 +91,12 @@ export function transform<T extends Transformer>(
   );
   const events = metadata.events.map(event => transformer.Event?.(event, context) ?? event);
   const methods = metadata.methods.map(method => transformer.Method?.(method, context) ?? method);
+  const onInit = metadata.onInit
+    ? transformer.OnInit?.(metadata.onInit, context) ?? metadata.onInit
+    : undefined;
+  const onDestroy = metadata.onDestroy
+    ? transformer.OnDestroy?.(metadata.onDestroy, context) ?? metadata.onDestroy
+    : undefined;
   const refs = metadata.refs.map(ref => transformer.Ref?.(ref, context) ?? ref);
   const providers = metadata.providers.map(
     provider => transformer.Provider?.(provider, context) ?? provider
@@ -102,6 +112,8 @@ export function transform<T extends Transformer>(
     computed,
     events,
     methods,
+    onInit,
+    onDestroy,
     refs,
     providers,
     injects,

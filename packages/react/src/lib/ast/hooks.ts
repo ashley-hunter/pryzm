@@ -74,3 +74,15 @@ export function useCallback(
     stripThis(transformAssignment(initializer))!
   )}, [${dependencies.join(', ')}]);`;
 }
+
+/**
+ * Create a useEffect hook
+ * @param initializer The initializer of the effect
+ * @param dependencies The dependencies of the effect
+ * @returns The useEffect hook
+ * @example
+ * useEffect(() => 'value', []);
+ */
+export function useEffect(initializer: ts.BlockLike, dependencies: string[]): string {
+  return `useEffect(() => ${printNode(stripThis(initializer)!)}, [${dependencies.join(', ')}]);`;
+}

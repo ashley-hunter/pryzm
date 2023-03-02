@@ -1,6 +1,5 @@
 import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerResult } from '@pryzm/compiler';
-import { factory } from 'typescript';
 import { transformer, VueTranformer } from './transformer';
 
 export function print(source: string): string {
@@ -9,21 +8,6 @@ export function print(source: string): string {
 }
 
 export class VuePrinter implements Printer<VueTranformer> {
-  private getDestructuredProps(metadata: TransformerResult<VueTranformer>): string {
-    const props = factory.createObjectBindingPattern(
-      metadata.props.map(prop =>
-        factory.createBindingElement(
-          undefined,
-          undefined,
-          factory.createIdentifier(prop.name),
-          prop.initializer
-        )
-      )
-    );
-
-    return printNode(props);
-  }
-
   private getEventEmitters(metadata: TransformerResult<VueTranformer>): string {
     if (metadata.events.length === 0) {
       return '';
@@ -59,22 +43,20 @@ export class VuePrinter implements Printer<VueTranformer> {
       ${metadata.imports.map(imp => printNode(imp)).join('\n')}
 
       interface Props {
-        ${metadata.props
-          .map(prop => `${prop.name}: ${prop.type ? printNode(prop.type) : 'any'};`)
-          .join('\n')}
+        ${metadata.props.map(prop => `${prop.name}: ${prop.type ? prop.type : 'any'};`).join('\n')}
       }
 
-      const ${this.getDestructuredProps(metadata)} = defineProps<Props>();
+      const {${metadata.props.map(prop => prop.name).join(', ')}} = defineProps<Props>();
 
-      ${metadata.refs.map(ref => printNode(ref)).join('\n')}
+      ${metadata.refs.join('\n\n')}
 
-      ${metadata.states.map(state => printNode(state.statement)).join('\n')}
+      ${metadata.states.join('\n\n')}
 
-      ${metadata.computed.map(computed => printNode(computed.statement)).join('\n')}
+      ${metadata.computed.join('\n\n')}
 
       ${this.getEventEmitters(metadata)}
 
-      ${metadata.methods.map(method => printNode(method.statement)).join('\n')}
+      ${metadata.methods.join('\n')}
 
     </script>
 

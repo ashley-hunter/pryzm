@@ -1,34 +1,27 @@
-import { getPropertyName, getPropertyType, getReturnExpression, stripThis } from '@pryzm/ast-utils';
+import {
+  getPropertyName,
+  getPropertyType,
+  getReturnExpression,
+  printNode,
+  stripThis,
+} from '@pryzm/ast-utils';
 import { Transformer, TransformerContext, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
-import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface VueTranformer extends Transformer {
-  State(
-    state: ts.PropertyDeclaration,
-    context: TransformerContext
-  ): {
-    statement: ts.VariableStatement;
-  };
+  State(state: ts.PropertyDeclaration, context: TransformerContext): string;
   Prop(
     prop: ts.PropertyDeclaration,
     context: TransformerContext
   ): {
     name: string;
-    type: ts.TypeNode | undefined;
-    initializer: ts.Expression | undefined;
+    type: string | undefined;
+    initializer: string | undefined;
   };
-  Computed(
-    computed: ts.GetAccessorDeclaration,
-    context: TransformerContext
-  ): {
-    statement: ts.VariableStatement;
-  };
-  Ref(ref: ts.PropertyDeclaration, context: TransformerContext): ts.VariableStatement;
-  Method(method: ts.MethodDeclaration): {
-    statement: ts.FunctionDeclaration;
-  };
+  Computed(computed: ts.GetAccessorDeclaration, context: TransformerContext): string;
+  Ref(ref: ts.PropertyDeclaration, context: TransformerContext): string;
+  Method(method: ts.MethodDeclaration): string;
   Event(
     event: ts.PropertyDeclaration,
     context: TransformerContext
@@ -58,46 +51,17 @@ export const transformer: VueTranformer = {
     context.importHandler.addNamedImport('computed', 'vue');
     // computed is a get accessor declaration, we need to convert it to a variable statement that is exported
     const name = getPropertyName(computed);
-    const type = getPropertyType(computed);
     const initializer = getReturnExpression(computed);
 
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier('computed'),
-              type ? [type] : undefined,
-              [
-                factory.createArrowFunction(
-                  undefined,
-                  undefined,
-                  [],
-                  undefined,
-                  factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-                  stripThis(initializer) as ts.ConciseBody
-                ),
-              ]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
-
-    return { statement };
+    return `const ${name} = computed(() => ${printNode(stripThis(initializer)!)});`;
   },
   Prop(prop) {
     // prop is a property declaration, we need to convert it to a variable statement
     const name = getPropertyName(prop);
     const type = getPropertyType(prop);
-    const initializer = prop.initializer;
+    const initializer = prop.initializer ? printNode(prop.initializer) : undefined;
 
-    return { name, type, initializer };
+    return { name, type: type ? printNode(type) : undefined, initializer };
   },
   State(state, context) {
     // state is a property declaration, we need to convert it to a variable statement
@@ -111,26 +75,7 @@ export const transformer: VueTranformer = {
 
     context.importHandler.addNamedImport(createReactive, 'vue');
 
-    const statement = factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(name),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier(createReactive),
-              type ? [type] : undefined,
-              [initializer || factory.createNull()]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
-
-    return { statement };
+    return `const ${name} = ${createReactive}(${initializer ? printNode(initializer) : 'null'});`;
   },
   Event(event) {
     // get the default value of the prop if it exists
@@ -157,40 +102,18 @@ export const transformer: VueTranformer = {
 
     const type = getPropertyType(value);
 
-    return factory.createVariableStatement(
-      undefined,
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(getPropertyName(value)),
-            undefined,
-            undefined,
-            factory.createCallExpression(
-              factory.createIdentifier('ref'),
-              type ? [type] : undefined,
-              [factory.createNull()]
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
+    return `const ${getPropertyName(value)} = ref${type ? `<${printNode(type)}>` : ''}(${
+      value.initializer ? printNode(value.initializer) : 'null'
+    });`;
   },
   Method(method) {
     // convert a method to a function declaration
     const name = getPropertyName(method);
     const returnType = method.type;
-    const statement = ts.factory.createFunctionDeclaration(
-      undefined,
-      undefined,
-      name,
-      undefined,
-      method.parameters,
-      returnType,
-      stripThis(method.body)
-    );
 
-    return { statement };
+    return `function ${name}(${method.parameters.map(printNode).join(', ')})${
+      returnType ? `: ${printNode(returnType)}` : ''
+    } ${printNode(method.body!)};`;
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

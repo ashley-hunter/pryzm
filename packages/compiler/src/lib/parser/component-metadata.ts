@@ -7,6 +7,8 @@ export interface ComponentMetadata {
   computed: ts.GetAccessorDeclaration[];
   events: ts.PropertyDeclaration[];
   methods: ts.MethodDeclaration[];
+  onInit?: ts.MethodDeclaration;
+  onDestroy?: ts.MethodDeclaration;
   refs: ts.PropertyDeclaration[];
   providers: ts.PropertyDeclaration[];
   injects: ts.PropertyDeclaration[];
