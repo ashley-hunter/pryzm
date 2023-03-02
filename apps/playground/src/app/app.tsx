@@ -78,7 +78,7 @@ export class App {
       case 'vue':
         return 'vue-ts';
       case 'svelte':
-        return 'svelte';
+        return 'vite-svelte';
       case 'lit':
         return 'vanilla-ts';
     }
@@ -92,7 +92,7 @@ export class App {
       case 'vue':
         return '/src/App.vue';
       case 'svelte':
-        return '/App.svelte';
+        return '/src/App.svelte';
       case 'lit':
         return '/index.ts';
     }
