@@ -14,7 +14,7 @@
 | **Refs**                        | ✅    | ✅     | ✅  | ✅  |
 | **Slots**                       | ✅    | ✅     | ✅  | ✅  |
 | **Comment Extraction**          | ❌    | ❌     | ❌  | ❌  |
-| **Lifecycle Hooks**             | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
+| **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Classes**         | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Styles**          | ❌    | ❌     | ❌  | ❌  |
@@ -28,3 +28,5 @@
 | **Attribute Inheritance**       | ❌    | ❌     | ❌  | ❌  |
 | **Async Methods**               | ❌    | ❌     | ❌  | ❌  |
 | **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
+
+\* Only `onInit` and `onDestroy` are currently supported
