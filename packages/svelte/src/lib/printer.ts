@@ -1,5 +1,5 @@
 import { printNode } from '@pryzm/ast-utils';
-import { Printer, transform, TransformerResult } from '@pryzm/compiler';
+import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
 import { SvelteTranformer, transformer } from './transformer';
 
 export function print(source: string): string {
@@ -8,7 +8,7 @@ export function print(source: string): string {
 }
 
 export class SveltePrinter implements Printer<SvelteTranformer> {
-  private getStyle(metadata: TransformerResult<SvelteTranformer>): string {
+  private getStyle(metadata: TransformerOutput<SvelteTranformer>): string {
     if (metadata.styles.length === 0) {
       return '';
     }
@@ -19,7 +19,7 @@ export class SveltePrinter implements Printer<SvelteTranformer> {
     `;
   }
 
-  print(metadata: TransformerResult<SvelteTranformer>): string {
+  print(metadata: TransformerOutput<SvelteTranformer>): string {
     return `
     <script lang="ts">
         ${metadata.imports.map(printNode).join('\n')}

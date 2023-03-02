@@ -1,44 +1,10 @@
 import { getPropertyName, getPropertyType, printNode } from '@pryzm/ast-utils';
-import {
-  MethodTransformerMetadata,
-  PropertyTransformerMetadata,
-  Transformer,
-  TransformerContext,
-  TransformerResult,
-  transformTemplate,
-} from '@pryzm/compiler';
+import { StringTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
 
-export interface LitTranformer extends Transformer {
-  State(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
-  Prop(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
-  Computed(computed: ts.GetAccessorDeclaration): string;
-  Method(metadata: MethodTransformerMetadata): string;
-  OnInit(metadata: MethodTransformerMetadata): string;
-  OnDestroy(metadata: MethodTransformerMetadata): string;
-  Ref(ref: ts.PropertyDeclaration, context: TransformerContext): string;
-  Event(event: ts.PropertyDeclaration): {
-    name: string;
-  };
-  Provider(provider: ts.PropertyDeclaration): {
-    name: string;
-    token: ts.Identifier;
-    statement: ts.VariableStatement;
-  };
-  Inject(inject: ts.PropertyDeclaration): {
-    name: string;
-    token: ts.Identifier;
-    type: ts.TypeNode | undefined;
-  };
-  Template?: (
-    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
-    styles: string,
-    context: TransformerContext
-  ) => string;
-  PostTransform?: (metadata: TransformerResult<LitTranformer>) => TransformerResult<LitTranformer>;
-}
+export type LitTranformer = StringTransformer;
 
 export const transformer: LitTranformer = {
   Computed(computed) {
@@ -115,7 +81,7 @@ export const transformer: LitTranformer = {
     return printNode(disconnectedCallback);
   },
   Event(event) {
-    return { name: getPropertyName(event) };
+    return getPropertyName(event);
   },
   Inject(value) {
     throw new Error('Method not implemented.');
@@ -147,6 +113,9 @@ export const transformer: LitTranformer = {
   Template(value, styles, context) {
     context.importHandler.addNamedImport('html', 'lit');
     return transformTemplate(value, templateTransformer, context);
+  },
+  Slots(slot) {
+    return slot;
   },
   PreTransform(metadata, context) {
     context.importHandler.addNamedImport('LitElement', 'lit');

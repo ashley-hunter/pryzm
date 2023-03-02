@@ -1,6 +1,4 @@
-import { TransformerResult } from '@pryzm/compiler';
 import * as ts from 'typescript';
-import { ReactTransformer } from '../transformer';
 
 export function renameIdentifier<T extends ts.Node>(node: T, oldName: string, newName: string): T {
   // run the ts transformer
@@ -25,99 +23,99 @@ function renameIdentifierTransformer<T extends ts.Node>(
   };
 }
 
-export function renameIdentifierOccurences(
-  metadata: TransformerResult<ReactTransformer>,
-  oldName: string,
-  newName: string
-): TransformerResult<ReactTransformer> {
-  metadata.props = metadata.props.map(prop => {
-    if (prop.name === oldName) {
-      prop.name = newName;
-      prop.destructuredProperty = renameIdentifier(prop.destructuredProperty, oldName, newName);
-      prop.interfaceProperty = renameIdentifier(prop.interfaceProperty, oldName, newName);
-    }
+// export function renameIdentifierOccurences(
+//   metadata: TransformerOutput<ReactTransformer>,
+//   oldName: string,
+//   newName: string
+// ): TransformerOutput<ReactTransformer> {
+//   metadata.props = metadata.props.map(({name, destructuredProperty, interfaceProperty}) => {
+//     if (name === oldName) {
+//       name = newName;
+//       destructuredProperty = renameIdentifier(destructuredProperty, oldName, newName);
+//       interfaceProperty = renameIdentifier(interfaceProperty, oldName, newName);
+//     }
 
-    return prop;
-  });
+//     return {name, destructuredProperty, interfaceProperty};
+//   });
 
-  metadata.states = metadata.states.map(state => {
-    if (state.getter === oldName) {
-      state.getter = newName;
-    }
+//   metadata.states = metadata.states.map(state => {
+//     if (state.getter === oldName) {
+//       state.getter = newName;
+//     }
 
-    if (state.setter === oldName) {
-      state.setter = newName;
-    }
+//     if (state.setter === oldName) {
+//       state.setter = newName;
+//     }
 
-    state.statement = renameIdentifier(state.statement, oldName, newName);
+//     state.statement = renameIdentifier(state.statement, oldName, newName);
 
-    return state;
-  });
+//     return state;
+//   });
 
-  metadata.computed = metadata.computed.map(computed => {
-    if (computed.name === oldName) {
-      computed.name = newName;
-    }
+//   metadata.computed = metadata.computed.map(computed => {
+//     if (computed.name === oldName) {
+//       computed.name = newName;
+//     }
 
-    computed.statement = renameIdentifier(computed.statement, oldName, newName);
-    computed.dependencies = computed.dependencies.map(dependency => {
-      if (dependency === oldName) {
-        dependency = newName;
-      }
+//     computed.statement = renameIdentifier(computed.statement, oldName, newName);
+//     computed.dependencies = computed.dependencies.map(dependency => {
+//       if (dependency === oldName) {
+//         dependency = newName;
+//       }
 
-      return dependency;
-    });
+//       return dependency;
+//     });
 
-    return computed;
-  });
+//     return computed;
+//   });
 
-  metadata.events = metadata.events.map(event => {
-    if (event.name === oldName) {
-      event.name = newName;
-    }
+//   metadata.events = metadata.events.map(event => {
+//     if (event.name === oldName) {
+//       event.name = newName;
+//     }
 
-    event.destructuredProperty = renameIdentifier(event.destructuredProperty, oldName, newName);
-    event.interfaceProperty = renameIdentifier(event.interfaceProperty, oldName, newName);
+//     event.destructuredProperty = renameIdentifier(event.destructuredProperty, oldName, newName);
+//     event.interfaceProperty = renameIdentifier(event.interfaceProperty, oldName, newName);
 
-    return event;
-  });
+//     return event;
+//   });
 
-  metadata.methods = metadata.methods.map(method => {
-    if (method.name === oldName) {
-      method.name = newName;
-    }
+//   metadata.methods = metadata.methods.map(method => {
+//     if (method.name === oldName) {
+//       method.name = newName;
+//     }
 
-    method.statement = renameIdentifier(method.statement, oldName, newName);
-    method.dependencies = method.dependencies.map(dependency => {
-      if (dependency === oldName) {
-        dependency = newName;
-      }
+//     method.statement = renameIdentifier(method.statement, oldName, newName);
+//     method.dependencies = method.dependencies.map(dependency => {
+//       if (dependency === oldName) {
+//         dependency = newName;
+//       }
 
-      return dependency;
-    });
+//       return dependency;
+//     });
 
-    return method;
-  });
+//     return method;
+//   });
 
-  metadata.refs = metadata.refs.map(ref => {
-    if (ref.name === oldName) {
-      ref.name = newName;
-    }
+//   metadata.refs = metadata.refs.map(ref => {
+//     if (ref.name === oldName) {
+//       ref.name = newName;
+//     }
 
-    ref.statement = renameIdentifier(ref.statement, oldName, newName);
+//     ref.statement = renameIdentifier(ref.statement, oldName, newName);
 
-    return ref;
-  });
+//     return ref;
+//   });
 
-  metadata.providers = metadata.providers.map(provider => {
-    if (provider.name === oldName) {
-      provider.name = newName;
-    }
+//   metadata.providers = metadata.providers.map(provider => {
+//     if (provider.name === oldName) {
+//       provider.name = newName;
+//     }
 
-    provider.statement = renameIdentifier(provider.statement, oldName, newName);
+//     provider.statement = renameIdentifier(provider.statement, oldName, newName);
 
-    return provider;
-  });
+//     return provider;
+//   });
 
-  return metadata;
-}
+//   return metadata;
+// }

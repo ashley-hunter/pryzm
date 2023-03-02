@@ -1,5 +1,5 @@
 import { printNode } from '@pryzm/ast-utils';
-import { Printer, transform, TransformerResult } from '@pryzm/compiler';
+import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
 import { LitTranformer, transformer } from './transformer';
 
 export function print(source: string): string {
@@ -12,7 +12,7 @@ export class LitPrinter implements Printer<LitTranformer> {
     return name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   }
 
-  print(metadata: TransformerResult<LitTranformer>): string {
+  print(metadata: TransformerOutput<LitTranformer>): string {
     return `
     ${metadata.imports.map(printNode).join('\r\n')}
 

@@ -9,59 +9,162 @@ export type TransformerContext = {
   importHandler: ImportHandler;
 };
 
-type TransformerFn<T extends Transformer, K extends keyof Transformer> = T[K] extends (
-  ...args: any
-) => any
-  ? ReturnType<T[K]>
-  : any;
-
-export type TransformerResult<T extends Transformer> = {
-  props: TransformerFn<T, 'Prop'>[];
-  states: TransformerFn<T, 'State'>[];
-  computed: TransformerFn<T, 'Computed'>[];
-  events: TransformerFn<T, 'Event'>[];
-  methods: TransformerFn<T, 'Method'>[];
-  onInit?: TransformerFn<T, 'OnInit'>;
-  onDestroy?: TransformerFn<T, 'OnDestroy'>;
-  refs: TransformerFn<T, 'Ref'>[];
-  providers: TransformerFn<T, 'Provider'>[];
-  injects: TransformerFn<T, 'Inject'>[];
-  template: TransformerFn<T, 'Template'>;
+export type TransformerOutput<T extends Transformer> = {
+  props: ReturnType<T['Prop']>[];
+  states: ReturnType<T['State']>[];
+  computed: ReturnType<T['Computed']>[];
+  events: ReturnType<T['Event']>[];
+  refs: ReturnType<T['Ref']>[];
+  methods: ReturnType<T['Method']>[];
+  onInit?: ReturnType<T['OnInit']>;
+  onDestroy?: ReturnType<T['OnDestroy']>;
+  providers: ReturnType<T['Provider']>[];
+  injects: ReturnType<T['Inject']>[];
+  template: ReturnType<T['Template']>;
+  slots: ReturnType<T['Slots']>[];
   imports: ts.ImportDeclaration[];
-  slots: TransformerFn<T, 'Slots'>[];
   styles: string;
   name: string;
 };
 
-export interface Transformer {
-  Prop?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
-  State?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
-  Method?: (metadata: MethodTransformerMetadata, context: TransformerContext) => any;
-  OnInit?: (metadata: MethodTransformerMetadata, context: TransformerContext) => any;
-  OnDestroy?: (metadata: MethodTransformerMetadata, context: TransformerContext) => any;
-  Event?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
-  Ref?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
-  Computed?: (value: ts.GetAccessorDeclaration, context: TransformerContext) => any;
-  Provider?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
-  Inject?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
-  Template?: (
+export type TransformerResult<
+  TPropReturn,
+  TStateReturn,
+  TComputedReturn,
+  TEventReturn,
+  TRefReturn,
+  TMethodReturn,
+  TOnInitReturn,
+  TOnDestroyReturn,
+  TProviderReturn,
+  TInjectReturn,
+  TTemplateReturn,
+  TSlotsReturn
+> = {
+  props: TPropReturn[];
+  states: TStateReturn[];
+  computed: TComputedReturn[];
+  events: TEventReturn[];
+  refs: TRefReturn[];
+  methods: TMethodReturn[];
+  onInit?: TOnInitReturn;
+  onDestroy?: TOnDestroyReturn;
+  providers: TProviderReturn[];
+  injects: TInjectReturn[];
+  template: TTemplateReturn;
+  slots: TSlotsReturn[];
+  imports: ts.ImportDeclaration[];
+  styles: string;
+  name: string;
+};
+
+export interface Transformer<
+  TPropReturn = any,
+  TStateReturn = any,
+  TComputedReturn = any,
+  TEventReturn = any,
+  TRefReturn = any,
+  TMethodReturn = any,
+  TOnInitReturn = any,
+  TOnDestroyReturn = any,
+  TProviderReturn = any,
+  TInjectReturn = any,
+  TTemplateReturn = any,
+  TSlotsReturn = any
+> {
+  Prop: (metadata: PropertyTransformerMetadata, context: TransformerContext) => TPropReturn;
+  State: (metadata: PropertyTransformerMetadata, context: TransformerContext) => TStateReturn;
+  Method: (metadata: MethodTransformerMetadata, context: TransformerContext) => TMethodReturn;
+  OnInit: (metadata: MethodTransformerMetadata, context: TransformerContext) => TOnInitReturn;
+  OnDestroy: (metadata: MethodTransformerMetadata, context: TransformerContext) => TOnDestroyReturn;
+  Event: (value: ts.PropertyDeclaration, context: TransformerContext) => TEventReturn;
+  Ref: (value: ts.PropertyDeclaration, context: TransformerContext) => TRefReturn;
+  Computed: (value: ts.GetAccessorDeclaration, context: TransformerContext) => TComputedReturn;
+  Provider: (value: ts.PropertyDeclaration, context: TransformerContext) => TProviderReturn;
+  Inject: (value: ts.PropertyDeclaration, context: TransformerContext) => TInjectReturn;
+  Template: (
     value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
     styles: string,
     context: TransformerContext
-  ) => any;
-  Slots?: (slot: string, context: TransformerContext) => any;
-  Styles?: (value: string, context: TransformerContext) => any;
+  ) => TTemplateReturn;
+  Slots: (slot: string, context: TransformerContext) => TSlotsReturn;
+  Styles: (value: string, context: TransformerContext) => string;
   PreTransform?: (metadata: ComponentMetadata, context: TransformerContext) => void;
   PostTransform?: (
-    metadata: TransformerResult<Transformer>,
+    metadata: TransformerResult<
+      TPropReturn,
+      TStateReturn,
+      TComputedReturn,
+      TEventReturn,
+      TRefReturn,
+      TMethodReturn,
+      TOnInitReturn,
+      TOnDestroyReturn,
+      TProviderReturn,
+      TInjectReturn,
+      TTemplateReturn,
+      TSlotsReturn
+    >,
     context: TransformerContext
-  ) => TransformerResult<Transformer>;
+  ) => TransformerResult<
+    TPropReturn,
+    TStateReturn,
+    TComputedReturn,
+    TEventReturn,
+    TRefReturn,
+    TMethodReturn,
+    TOnInitReturn,
+    TOnDestroyReturn,
+    TProviderReturn,
+    TInjectReturn,
+    TTemplateReturn,
+    TSlotsReturn
+  >;
 }
 
-export function transform<T extends Transformer>(
+export function transform<
+  TPropReturn,
+  TStateReturn,
+  TComputedReturn,
+  TEventReturn,
+  TRefReturn,
+  TMethodReturn,
+  TOnInitReturn,
+  TOnDestroyReturn,
+  TProviderReturn,
+  TInjectReturn,
+  TTemplateReturn,
+  TSlotsReturn
+>(
   source: string,
-  transformer: T
-): TransformerResult<T> {
+  transformer: Transformer<
+    TPropReturn,
+    TStateReturn,
+    TComputedReturn,
+    TEventReturn,
+    TRefReturn,
+    TMethodReturn,
+    TOnInitReturn,
+    TOnDestroyReturn,
+    TProviderReturn,
+    TInjectReturn,
+    TTemplateReturn,
+    TSlotsReturn
+  >
+): TransformerResult<
+  TPropReturn,
+  TStateReturn,
+  TComputedReturn,
+  TEventReturn,
+  TRefReturn,
+  TMethodReturn,
+  TOnInitReturn,
+  TOnDestroyReturn,
+  TProviderReturn,
+  TInjectReturn,
+  TTemplateReturn,
+  TSlotsReturn
+> {
   const components = parseFile(source);
 
   if (components.length === 0) {
@@ -157,26 +260,54 @@ export function transform<T extends Transformer>(
   const slots = metadata.slots.map(slot => transformer.Slots?.(slot, context) ?? slot);
   const template = transformer.Template?.(metadata.template, styles, context) ?? metadata.template;
 
-  const result: TransformerResult<Transformer> = {
+  const result: TransformerResult<
+    TPropReturn,
+    TStateReturn,
+    TComputedReturn,
+    TEventReturn,
+    TRefReturn,
+    TMethodReturn,
+    TOnInitReturn,
+    TOnDestroyReturn,
+    TProviderReturn,
+    TInjectReturn,
+    TTemplateReturn,
+    TSlotsReturn
+  > = {
     ...metadata,
-    props,
-    states,
-    computed,
-    events,
-    methods,
-    onInit,
-    onDestroy,
-    refs,
-    providers,
-    injects,
+    props: props as TPropReturn[],
+    states: states as TStateReturn[],
+    computed: computed as TComputedReturn[],
+    events: events as TEventReturn[],
+    methods: methods as TMethodReturn[],
+    onInit: onInit as TOnInitReturn,
+    onDestroy: onDestroy as TOnDestroyReturn,
+    refs: refs as TRefReturn[],
+    providers: providers as TProviderReturn[],
+    injects: injects as TInjectReturn[],
+    template: template as TTemplateReturn,
+    slots: slots as TSlotsReturn[],
     styles,
-    template,
-    slots,
     imports: context.importHandler.getImportNodes(),
   };
 
   return transformer.PostTransform ? transformer.PostTransform(result, context) : result;
 }
+
+export type StringTransformer = Transformer<
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+>;
 
 export interface PropertyTransformerMetadata {
   name: string;

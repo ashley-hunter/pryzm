@@ -1,5 +1,5 @@
 import { printNode } from '@pryzm/ast-utils';
-import { Printer, transform, TransformerResult } from '@pryzm/compiler';
+import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
 import { ReactTransformer, transformer } from './transformer';
 import { propsName } from './utils/names';
 
@@ -9,7 +9,7 @@ export function print(source: string): string {
 }
 
 export class ReactPrinter implements Printer<ReactTransformer> {
-  private getInterfaceProperties(metadata: TransformerResult<ReactTransformer>): string {
+  private getInterfaceProperties(metadata: TransformerOutput<ReactTransformer>): string {
     return [
       ...metadata.props.map(prop => prop.interfaceProperty),
       ...metadata.events.map(prop => prop.interfaceProperty),
@@ -17,7 +17,7 @@ export class ReactPrinter implements Printer<ReactTransformer> {
     ].join('\n');
   }
 
-  private getDesctructuredProperties(metadata: TransformerResult<ReactTransformer>): string {
+  private getDesctructuredProperties(metadata: TransformerOutput<ReactTransformer>): string {
     return [
       ...metadata.props.map(prop => prop.destructuredProperty),
       ...metadata.events.map(prop => prop.destructuredProperty),
@@ -25,7 +25,7 @@ export class ReactPrinter implements Printer<ReactTransformer> {
     ].join(', ');
   }
 
-  print(metadata: TransformerResult<ReactTransformer>): string {
+  print(metadata: TransformerOutput<ReactTransformer>): string {
     return `
       ${metadata.imports.map(printNode).join('\n')}
 
@@ -45,9 +45,9 @@ export class ReactPrinter implements Printer<ReactTransformer> {
 
         ${metadata.methods.map(method => method.statement).join('\n\n')}
 
-        ${metadata.onInit?.statement ?? ''}
+        ${metadata.onInit ?? ''}
 
-        ${metadata.onDestroy?.statement ?? ''}
+        ${metadata.onDestroy ?? ''}
 
         return ${metadata.template};
       }

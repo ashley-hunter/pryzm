@@ -1,19 +1,5 @@
-import {
-  getDecorator,
-  getDecoratorParameter,
-  getPropertyName,
-  inferType,
-  printNode,
-  stripThis,
-} from '@pryzm/ast-utils';
-import {
-  MethodTransformerMetadata,
-  PropertyTransformerMetadata,
-  Transformer,
-  TransformerContext,
-  TransformerResult,
-  transformTemplate,
-} from '@pryzm/compiler';
+import { getPropertyName, inferType, printNode, stripThis } from '@pryzm/ast-utils';
+import { Transformer, transformTemplate } from '@pryzm/compiler';
 import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
@@ -25,103 +11,51 @@ import {
 } from './ast/misc';
 import { templateTransformer } from './template-transformer';
 import { findDependencies } from './utils/find-dependencies';
-import { eventName, setterName } from './utils/names';
-import { renameIdentifierOccurences } from './utils/rename';
+import { setterName } from './utils/names';
 
-export interface ReactTransformer extends Transformer {
-  State(
-    metadata: PropertyTransformerMetadata,
-    context: TransformerContext
-  ): {
-    getter: string;
-    setter: string;
-    statement: string;
-  };
-  Prop(
-    metadata: PropertyTransformerMetadata,
-    context: TransformerContext
-  ): {
-    name: string;
-    interfaceProperty: string;
-    destructuredProperty: string;
-  };
-  Computed(
-    computed: ts.GetAccessorDeclaration,
-    context: TransformerContext
-  ): {
-    name: string;
-    dependencies: string[];
-    statement: string;
-  };
-  Ref(
-    ref: ts.PropertyDeclaration,
-    context: TransformerContext
-  ): {
-    name: string;
-    statement: string;
-  };
-  Method(
-    method: MethodTransformerMetadata,
-    context: TransformerContext
-  ): {
-    name: string;
-    dependencies: string[];
-    statement: string;
-  };
-  OnInit(
-    metadata: MethodTransformerMetadata,
-    context: TransformerContext
-  ): {
-    statement: string;
-  };
-  OnDestroy(
-    metadata: MethodTransformerMetadata,
-    context: TransformerContext
-  ): {
-    statement: string;
-  };
-  Event(
-    event: ts.PropertyDeclaration,
-    context: TransformerContext
-  ): {
-    name: string;
-    interfaceProperty: string;
-    destructuredProperty: string;
-  };
-  Provider(
-    provider: ts.PropertyDeclaration,
-    context: TransformerContext
-  ): {
-    name: string;
-    token: string;
-    statement: string;
-  };
-  Inject(
-    inject: ts.PropertyDeclaration,
-    context: TransformerContext
-  ): {
-    name: string;
-    token: string;
-    type: string | undefined;
-  };
-  Slots(
-    slot: string,
-    context: TransformerContext
-  ): {
-    name: string;
-    interfaceProperty: string;
-    destructuredProperty: string;
-  };
-  Styles(style: string, context: TransformerContext): string;
-  Template?: (
-    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
-    styles: string,
-    context: TransformerContext
-  ) => string;
-  PostTransform: (
-    metadata: TransformerResult<ReactTransformer>
-  ) => TransformerResult<ReactTransformer>;
-}
+type ReactState = {
+  getter: string;
+  setter: string;
+  statement: string;
+};
+
+type ReactProp = {
+  name: string;
+  interfaceProperty: string;
+  destructuredProperty: string;
+};
+
+type ReactComputed = {
+  name: string;
+  dependencies: string[];
+  statement: string;
+};
+
+type ReactRef = {
+  name: string;
+  statement: string;
+};
+
+type ReactMethod = {
+  name: string;
+  dependencies: string[];
+  statement: string;
+};
+
+export type ReactTransformer = Transformer<
+  ReactProp,
+  ReactState,
+  ReactComputed,
+  ReactProp,
+  ReactRef,
+  ReactMethod,
+  string,
+  string,
+  string,
+  string,
+  string,
+  ReactProp
+>;
 
 export const transformer: ReactTransformer = {
   Computed(computed, context) {
@@ -231,37 +165,10 @@ export const transformer: ReactTransformer = {
     };
   },
   Inject(value) {
-    // get the name of the inject
-    const name = getPropertyName(value);
-
-    // get the type
-    const type = printNode(value.type);
-
-    // get the token from the decorator
-    const decorator = getDecorator(value, 'Inject')!;
-    const token = getDecoratorParameter(decorator);
-
-    if (!token || !ts.isIdentifier(token)) {
-      throw new Error('Inject must have a token');
-    }
-
-    return { name, token: printNode(token), type };
+    throw new Error('Inject is not supported in React');
   },
   Provider(value) {
-    // get the name of the provider
-    const name = getPropertyName(value);
-
-    const decorator = getDecorator(value, 'Provider')!;
-    const token = getDecoratorParameter(decorator);
-
-    if (!token || !ts.isIdentifier(token)) {
-      throw new Error('Provider must have a token');
-    }
-
-    // wrap the initializer in a useRef hook
-    const statement = useRef(name, value.initializer!);
-
-    return { name, statement, token: printNode(token) };
+    throw new Error('Provider is not supported in React');
   },
   Ref(value, context) {
     context.importHandler.addNamedImport('useRef', 'react');
@@ -296,9 +203,7 @@ export const transformer: ReactTransformer = {
 
     // convert a method to a useEffect hook
     // e.g. onInit() { return 'test'; } => useEffect(() => { return 'test'; }, []);
-    const statement = useEffect(method.body!, []);
-
-    return { statement };
+    return useEffect(method.body!, []);
   },
   OnDestroy(method, context) {
     context.importHandler.addNamedImport('useEffect', 'react');
@@ -318,9 +223,7 @@ export const transformer: ReactTransformer = {
     ]);
 
     // convert a method to a useEffect hook with a cleanup function
-    const statement = useEffect(returnStatement, []);
-
-    return { statement };
+    return useEffect(returnStatement, []);
   },
   Styles(style, context) {
     if (style === '') {
@@ -360,12 +263,12 @@ export const transformer: ReactTransformer = {
   },
   PostTransform(metadata) {
     // find all events and rename to include the on prefix
-    const eventsToRename = metadata.events.filter(event => event.name !== eventName(event.name));
+    // const eventsToRename = metadata.events.filter(event => event.name !== eventName(event.name));
 
     // rename all events
-    eventsToRename.forEach(event =>
-      renameIdentifierOccurences(metadata, event.name, eventName(event.name))
-    );
+    // eventsToRename.forEach(event =>
+    //   renameIdentifierOccurences(metadata, event.name, eventName(event.name))
+    // );
 
     return metadata;
   },

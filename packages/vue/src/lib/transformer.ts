@@ -5,54 +5,35 @@ import {
   printNode,
   stripThis,
 } from '@pryzm/ast-utils';
-import {
-  MethodTransformerMetadata,
-  PropertyTransformerMetadata,
-  Transformer,
-  TransformerContext,
-  transformTemplate,
-} from '@pryzm/compiler';
+import { Transformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { templateTransformer } from './template-transformer';
 
-export interface VueTranformer extends Transformer {
-  State(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
-  Prop(
-    metadata: PropertyTransformerMetadata,
-    context: TransformerContext
-  ): {
-    name: string;
-    type: string | undefined;
-    initializer: string | undefined;
-  };
-  Computed(computed: ts.GetAccessorDeclaration, context: TransformerContext): string;
-  Ref(ref: ts.PropertyDeclaration, context: TransformerContext): string;
-  Method(metadata: MethodTransformerMetadata): string;
-  OnInit(metadata: MethodTransformerMetadata, context: TransformerContext): string;
-  OnDestroy(metadata: MethodTransformerMetadata, context: TransformerContext): string;
-  Event(
-    event: ts.PropertyDeclaration,
-    context: TransformerContext
-  ): {
-    name: string;
-    type: ts.TypeNode | undefined;
-  };
-  Provider(provider: ts.PropertyDeclaration): {
-    name: string;
-    token: ts.Identifier;
-    statement: ts.VariableStatement;
-  };
-  Inject(inject: ts.PropertyDeclaration): {
-    name: string;
-    token: ts.Identifier;
-    type: ts.TypeNode | undefined;
-  };
-  Template?: (
-    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
-    styles: string,
-    context: TransformerContext
-  ) => string;
-}
+type VueProp = {
+  name: string;
+  type: string | undefined;
+  initializer: string | undefined;
+};
+
+type VueEvent = {
+  name: string;
+  type: ts.TypeNode | undefined;
+};
+
+export type VueTranformer = Transformer<
+  VueProp,
+  string,
+  string,
+  VueEvent,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+>;
 
 export const transformer: VueTranformer = {
   Computed(computed, context) {
@@ -126,5 +107,11 @@ export const transformer: VueTranformer = {
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);
+  },
+  Slots(slot, context) {
+    return slot;
+  },
+  Styles(styles) {
+    return styles;
   },
 };

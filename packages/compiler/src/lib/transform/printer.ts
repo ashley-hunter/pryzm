@@ -1,5 +1,5 @@
-import { Transformer, TransformerResult } from './transformer';
+import { Transformer, TransformerOutput } from './transformer';
 
 export interface Printer<T extends Transformer> {
-  print(metadata: TransformerResult<T>): string;
+  print(metadata: TransformerOutput<T>): string;
 }

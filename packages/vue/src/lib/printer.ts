@@ -1,5 +1,5 @@
 import { printNode } from '@pryzm/ast-utils';
-import { Printer, transform, TransformerResult } from '@pryzm/compiler';
+import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
 import { transformer, VueTranformer } from './transformer';
 
 export function print(source: string): string {
@@ -8,7 +8,7 @@ export function print(source: string): string {
 }
 
 export class VuePrinter implements Printer<VueTranformer> {
-  private getEventEmitters(metadata: TransformerResult<VueTranformer>): string {
+  private getEventEmitters(metadata: TransformerOutput<VueTranformer>): string {
     if (metadata.events.length === 0) {
       return '';
     }
@@ -23,7 +23,7 @@ export class VuePrinter implements Printer<VueTranformer> {
     `;
   }
 
-  private getStyle(metadata: TransformerResult<VueTranformer>): string {
+  private getStyle(metadata: TransformerOutput<VueTranformer>): string {
     if (metadata.styles.length === 0) {
       return '';
     }
@@ -34,7 +34,7 @@ export class VuePrinter implements Printer<VueTranformer> {
     `;
   }
 
-  print(metadata: TransformerResult<VueTranformer>): string {
+  print(metadata: TransformerOutput<VueTranformer>): string {
     return `
     <script setup lang="ts">
       ${metadata.imports.map(imp => printNode(imp)).join('\n')}

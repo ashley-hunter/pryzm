@@ -1,46 +1,8 @@
 import { getPropertyName, getReturnExpression, printNode, stripThis } from '@pryzm/ast-utils';
-import {
-  MethodTransformerMetadata,
-  PropertyTransformerMetadata,
-  Transformer,
-  TransformerContext,
-  TransformerResult,
-  transformTemplate,
-} from '@pryzm/compiler';
-import * as ts from 'typescript';
+import { StringTransformer, transformTemplate } from '@pryzm/compiler';
 import { templateTransformer } from './template-transformer';
 
-export interface SvelteTranformer extends Transformer {
-  State(metadata: PropertyTransformerMetadata): string;
-  Prop(metadata: PropertyTransformerMetadata): string;
-  Computed(computed: ts.GetAccessorDeclaration): string;
-  Ref(ref: ts.PropertyDeclaration): string;
-  Method(method: MethodTransformerMetadata): string;
-  Event(
-    event: ts.PropertyDeclaration,
-    context: TransformerContext
-  ): {
-    name: string;
-  };
-  Provider(provider: ts.PropertyDeclaration): {
-    name: string;
-    token: ts.Identifier;
-    statement: ts.VariableStatement;
-  };
-  Inject(inject: ts.PropertyDeclaration): {
-    name: string;
-    token: ts.Identifier;
-    type: ts.TypeNode | undefined;
-  };
-  Template?: (
-    value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
-    styles: string,
-    context: TransformerContext
-  ) => string;
-  PostTransform?: (
-    metadata: TransformerResult<SvelteTranformer>
-  ) => TransformerResult<SvelteTranformer>;
-}
+export type SvelteTranformer = StringTransformer;
 
 export const transformer: SvelteTranformer = {
   Computed(computed) {
@@ -65,7 +27,7 @@ export const transformer: SvelteTranformer = {
   Event(event, context) {
     context.importHandler.addNamedImport('createEventDispatcher', 'svelte');
 
-    return { name: getPropertyName(event) };
+    return getPropertyName(event);
   },
   Inject(value) {
     throw new Error('Method not implemented.');
@@ -83,5 +45,17 @@ export const transformer: SvelteTranformer = {
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);
+  },
+  OnInit(metadata, context) {
+    throw new Error('Method not implemented.');
+  },
+  OnDestroy(metadata, context) {
+    throw new Error('Method not implemented.');
+  },
+  Slots(slot, context) {
+    return slot;
+  },
+  Styles(value, context) {
+    return value;
   },
 };
