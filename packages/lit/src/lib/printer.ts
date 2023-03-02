@@ -19,17 +19,21 @@ export class LitPrinter implements Printer<LitTranformer> {
       @customElement('${this.selector(metadata.name)}')
       class ${metadata.name} extends LitElement {
 
-        ${metadata.refs.map(printNode).join('\r\n')}
+        ${metadata.refs.join('\n\n')}
 
-        ${metadata.props.map(printNode).join('\r\n')}
+        ${metadata.props.join('\n\n')}
 
-        ${metadata.states.map(printNode).join('\r\n')}
+        ${metadata.states.join('\n\n')}
 
-        ${metadata.computed.map(printNode).join('\r\n')}
+        ${metadata.computed.join('\n\n')}
 
         ${metadata.styles ? 'static get styles() { return css`' + metadata.styles + '`; }' : ''}
 
-        ${metadata.methods.map(printNode).join('\r\n')}
+        ${metadata.onInit ? metadata.onInit : ''}
+
+        ${metadata.onDestroy ? metadata.onDestroy : ''}
+
+        ${metadata.methods.join('\n\n')}
 
         render() {
           return html\`${metadata.template}\`;
