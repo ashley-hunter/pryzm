@@ -234,7 +234,7 @@ export const transformer: ReactTransformer = {
     const name = getPropertyName(value);
 
     // get the type
-    const type = value.type ? printNode(value.type) : undefined;
+    const type = printNode(value.type);
 
     // get the token from the decorator
     const decorator = getDecorator(value, 'Inject')!;

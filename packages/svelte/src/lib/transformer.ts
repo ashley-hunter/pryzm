@@ -53,11 +53,11 @@ export const transformer: SvelteTranformer = {
     const name = getPropertyName(computed);
     const initializer = getReturnExpression(computed);
 
-    return `$: ${name} = ${printNode(stripThis(initializer)!)};`;
+    return `$: ${name} = ${printNode(stripThis(initializer))};`;
   },
   Prop({ name, initializer }) {
     return initializer
-      ? `export let ${name} = ${printNode(stripThis(initializer)!)};`
+      ? `export let ${name} = ${printNode(stripThis(initializer))};`
       : `export let ${name};`;
   },
   State(state) {
@@ -89,7 +89,7 @@ export const transformer: SvelteTranformer = {
   Method(method) {
     return `function ${getPropertyName(method)}(${method.parameters.map(printNode).join(', ')})${
       method.type ? `: ${method.type}` : ''
-    } ${printNode(stripThis(method.body)!)}`;
+    } ${printNode(stripThis(method.body))}`;
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

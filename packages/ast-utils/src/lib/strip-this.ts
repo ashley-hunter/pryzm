@@ -2,16 +2,16 @@ import * as ts from 'typescript';
 import { stripParentNode } from './strip-parent-node';
 import { isThisExpression } from './typing';
 
-export function stripThis<T extends ts.Node, R extends ts.Node = T>(
-  node: T | undefined
-): R | undefined {
-  if (!node) {
-    return node;
+export function stripThis<T extends ts.Node | undefined>(
+  node: T
+): T extends ts.Node ? T : undefined {
+  if (node === undefined) {
+    return undefined as T extends ts.Node ? T : undefined;
   }
 
   // run the ts transformer
   return ts.transform(stripParentNode(node), [stripThisTransformer()])
-    .transformed[0] as unknown as R;
+    .transformed[0] as T extends ts.Node ? T : undefined;
 }
 
 // create a ts transformer factory

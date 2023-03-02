@@ -60,13 +60,13 @@ export const transformer: VueTranformer = {
     const name = getPropertyName(computed);
     const initializer = getReturnExpression(computed);
 
-    return `const ${name} = computed(() => ${printNode(stripThis(initializer)!)});`;
+    return `const ${name} = computed(() => ${printNode(stripThis(initializer))});`;
   },
   Prop({ name, type, initializer }) {
     return {
       name,
-      type: type ? printNode(type) : undefined,
-      initializer: initializer ? printNode(initializer) : undefined,
+      type: printNode(type),
+      initializer: printNode(initializer),
     };
   },
   State(state, context) {
@@ -81,7 +81,7 @@ export const transformer: VueTranformer = {
 
     context.importHandler.addNamedImport(createReactive, 'vue');
 
-    return `const ${name} = ${createReactive}(${initializer ? printNode(initializer) : 'null'});`;
+    return `const ${name} = ${createReactive}(${printNode(initializer) ?? 'null'});`;
   },
   Event(event) {
     // get the default value of the prop if it exists
@@ -109,7 +109,7 @@ export const transformer: VueTranformer = {
     const type = getPropertyType(value);
 
     return `const ${getPropertyName(value)} = ref${type ? `<${printNode(type)}>` : ''}(${
-      value.initializer ? printNode(value.initializer) : 'null'
+      printNode(value.initializer) ?? 'null'
     });`;
   },
   Method(method) {
@@ -119,17 +119,17 @@ export const transformer: VueTranformer = {
 
     return `function ${name}(${method.parameters.map(printNode).join(', ')})${
       returnType ? `: ${printNode(returnType)}` : ''
-    } ${printNode(stripThis(method.body)!)};`;
+    } ${printNode(stripThis(method.body))};`;
   },
   OnInit(method, context) {
     context.importHandler.addNamedImport('onMounted', 'vue');
 
-    return `onMounted(() => ${printNode(stripThis(method.body)!)});`;
+    return `onMounted(() => ${printNode(stripThis(method.body))});`;
   },
   OnDestroy(method, context) {
     context.importHandler.addNamedImport('onUnmounted', 'vue');
 
-    return `onUnmounted(() => ${printNode(stripThis(method.body)!)});`;
+    return `onUnmounted(() => ${printNode(stripThis(method.body))});`;
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

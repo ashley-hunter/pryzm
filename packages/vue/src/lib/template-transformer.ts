@@ -40,12 +40,12 @@ export const templateTransformer: TemplateTransformer = {
       name = `@${name[2].toLowerCase()}${name.slice(3)}`;
     }
 
-    return `${name}="${printNode(stripThis(value)!)}"`;
+    return `${name}="${printNode(stripThis(value))}"`;
   },
   Ref(attribute) {
     const value = getAttributeValue(attribute);
 
-    return `ref="${printNode(stripThis(value)!)}"`;
+    return `ref="${printNode(stripThis(value))}"`;
   },
   Show(node, children) {
     const condition = getAttribute(node.openingElement.attributes, 'when');
@@ -62,11 +62,11 @@ export const templateTransformer: TemplateTransformer = {
     }
 
     return `
-    <template v-if="${sanitizeAttribute(printNode(stripThis(when)!))}">
+    <template v-if="${sanitizeAttribute(printNode(stripThis(when)))}">
       ${children.join('')}
     </template>
     `;
   },
-  Expression: value => `{{${printNode(stripThis(value.expression)!)}}}`,
+  Expression: value => `{{${printNode(stripThis(value.expression))}}}`,
   Text: value => value.text,
 };

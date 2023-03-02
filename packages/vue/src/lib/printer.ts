@@ -16,10 +16,7 @@ export class VuePrinter implements Printer<VueTranformer> {
     return `const emit = defineEmits<{
       ${metadata.events
         .map(
-          event =>
-            `(e: '${event.name}', ${event.name}: ${
-              event.type ? printNode(event.type) : 'any'
-            }): void;`
+          event => `(e: '${event.name}', ${event.name}: ${printNode(event.type) ?? 'any'}): void;`
         )
         .join('\n')}
     }>()

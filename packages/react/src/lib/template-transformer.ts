@@ -48,7 +48,7 @@ export const templateTransformer: TemplateTransformer = {
       return `${attributeName}="${attributeValue.text}"`;
     }
 
-    return `${attributeName}={${printNode(stripThis(attributeValue)!)}}`;
+    return `${attributeName}={${printNode(stripThis(attributeValue))}}`;
   },
   Show: node => {
     const condition = getAttribute(node.openingElement.attributes, 'when');
@@ -66,8 +66,8 @@ export const templateTransformer: TemplateTransformer = {
 
     const child = getChildOrFragment(node);
 
-    return `{ ${printNode(stripThis(when)!)} && ${printNode(child)} }`;
+    return `{ ${printNode(stripThis(when))} && ${printNode(child)} }`;
   },
-  Expression: value => printNode(stripThis(value)!),
+  Expression: value => printNode(stripThis(value)),
   Text: value => value.text,
 };

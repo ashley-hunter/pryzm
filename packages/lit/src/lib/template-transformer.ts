@@ -31,11 +31,11 @@ export const templateTransformer: TemplateTransformer = {
     const name = getAttributeName(attribute);
     const value = getAttributeValue(attribute);
 
-    return `${name}={${printNode(value!)}}`;
+    return `${name}={${printNode(value)}}`;
   },
   Ref(attribute) {
     const value = getAttributeValue(attribute);
-    return `\${ref(${printNode(value!)})}`;
+    return `\${ref(${printNode(value)})}`;
   },
   Show(node, children, context) {
     context.importHandler.addNamedImport('when', 'lit/directives/when.js');
@@ -55,6 +55,6 @@ export const templateTransformer: TemplateTransformer = {
 
     return `\${when(${printNode(when)}, () => html\`${children.join('\n').trim()}\`)}`;
   },
-  Expression: value => `\${${printNode(value.expression!)}}`,
+  Expression: value => `\${${printNode(value.expression)}}`,
   Text: value => value.text,
 };

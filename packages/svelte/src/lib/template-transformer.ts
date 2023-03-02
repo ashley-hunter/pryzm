@@ -32,11 +32,11 @@ export const templateTransformer: TemplateTransformer = {
     const name = getAttributeName(attribute);
     const value = getAttributeValue(attribute);
 
-    return `${name}={${printNode(stripThis(value)!)}}`;
+    return `${name}={${printNode(stripThis(value))}}`;
   },
   Ref(attribute) {
     const value = getAttributeValue(attribute);
-    return `bind:this={${printNode(stripThis(value)!)}}`;
+    return `bind:this={${printNode(stripThis(value))}}`;
   },
   Show(node, children) {
     const condition = getAttribute(node.openingElement.attributes, 'when');
@@ -53,11 +53,11 @@ export const templateTransformer: TemplateTransformer = {
     }
 
     return `
-    {#if ${printNode(stripThis(when)!)}}
+    {#if ${printNode(stripThis(when))}}
       ${children.join('')}
     {/if}
     `;
   },
-  Expression: value => `{${printNode(stripThis(value.expression)!)}}`,
+  Expression: value => `{${printNode(stripThis(value.expression))}}`,
   Text: value => value.text,
 };
