@@ -22,6 +22,8 @@ export interface VueTranformer extends Transformer {
   Computed(computed: ts.GetAccessorDeclaration, context: TransformerContext): string;
   Ref(ref: ts.PropertyDeclaration, context: TransformerContext): string;
   Method(method: ts.MethodDeclaration): string;
+  OnInit(method: ts.MethodDeclaration, context: TransformerContext): string;
+  OnDestroy(method: ts.MethodDeclaration, context: TransformerContext): string;
   Event(
     event: ts.PropertyDeclaration,
     context: TransformerContext
@@ -113,7 +115,17 @@ export const transformer: VueTranformer = {
 
     return `function ${name}(${method.parameters.map(printNode).join(', ')})${
       returnType ? `: ${printNode(returnType)}` : ''
-    } ${printNode(method.body!)};`;
+    } ${printNode(stripThis(method.body)!)};`;
+  },
+  OnInit(method, context) {
+    context.importHandler.addNamedImport('onMounted', 'vue');
+
+    return `onMounted(() => ${printNode(stripThis(method.body)!)});`;
+  },
+  OnDestroy(method, context) {
+    context.importHandler.addNamedImport('onUnmounted', 'vue');
+
+    return `onUnmounted(() => ${printNode(stripThis(method.body)!)});`;
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

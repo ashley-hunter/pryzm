@@ -56,6 +56,10 @@ export class VuePrinter implements Printer<VueTranformer> {
 
       ${this.getEventEmitters(metadata)}
 
+      ${metadata.onInit ? metadata.onInit : ''}
+
+      ${metadata.onDestroy ? metadata.onDestroy : ''}
+
       ${metadata.methods.join('\n')}
 
     </script>
