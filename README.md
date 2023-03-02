@@ -13,6 +13,7 @@
 | **Styles**                      | ✅    | ✅     | ✅  | ✅  |
 | **Refs**                        | ✅    | ✅     | ✅  | ✅  |
 | **Slots**                       | ✅    | ✅     | ✅  | ✅  |
+| **Retain Imports**              | ✅    | ✅     | ✅  | ✅  |
 | **Comment Extraction**          | ❌    | ❌     | ❌  | ❌  |
 | **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |

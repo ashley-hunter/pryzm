@@ -3,6 +3,29 @@ import * as ts from 'typescript';
 export class ImportHandler {
   private imports: Record<string, string[]> = {};
 
+  constructor(importDeclarations: ts.ImportDeclaration[]) {
+    importDeclarations.forEach(importDeclaration => {
+      const library = importDeclaration.moduleSpecifier.getText().replace(/['"]/g, '');
+
+      // if the library is @prysm/core, skip it as they are compile time constructs only
+      if (library === '@pryzm/core') {
+        return;
+      }
+
+      const namedBindings = importDeclaration.importClause?.namedBindings;
+
+      if (namedBindings?.kind === ts.SyntaxKind.NamespaceImport) {
+        this.addDefaultImport(namedBindings.name.getText(), library);
+      } else if (namedBindings?.kind === ts.SyntaxKind.NamedImports) {
+        namedBindings.elements.forEach(element => {
+          this.addNamedImport(element.name.getText(), library);
+        });
+      } else if (importDeclaration.importClause?.name) {
+        this.addDefaultImport(importDeclaration.importClause.name.getText(), library);
+      }
+    });
+  }
+
   addNamedImport(importName: string, library: string): void {
     if (!this.imports[library]) {
       this.imports[library] = [importName];

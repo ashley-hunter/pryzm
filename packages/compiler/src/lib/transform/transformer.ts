@@ -177,7 +177,7 @@ export function transform<
 
   const context: TransformerContext = {
     data: new Map(),
-    importHandler: new ImportHandler(),
+    importHandler: new ImportHandler(components[0].imports),
   };
 
   const metadata = components[0];
