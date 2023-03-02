@@ -16,7 +16,7 @@
 | **Comment Extraction**          | ❌    | ❌     | ❌  | ❌  |
 | **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
-| **Conditional Classes**         | ❌    | ❌     | ❌  | ❌  |
+| **Conditional Classes**         | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Styles**          | ❌    | ❌     | ❌  | ❌  |
 | **Loops**                       | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Render**          | ✅    | ✅     | ✅  | ✅  |

@@ -1,4 +1,10 @@
-import { getTagName, getText, stripParentNode } from '@pryzm/ast-utils';
+import {
+  getAttributeName,
+  getAttributeValue,
+  getTagName,
+  getText,
+  stripParentNode,
+} from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { TransformerContext } from './transformer';
 
@@ -21,6 +27,14 @@ export interface TemplateTransformer {
   Text: (value: ts.JsxText, context: TransformerContext) => string;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => string;
   Show: (value: ts.JsxElement, children: string[], context: TransformerContext) => string;
+  Class: (name: string, context: TransformerContext) => string;
+  ConditionalClasses: (
+    metadata: {
+      classes: Record<string, ts.Expression>;
+      node: ts.ObjectLiteralExpression;
+    },
+    context: TransformerContext
+  ) => string;
 }
 
 export function transformTemplate(
@@ -103,7 +117,37 @@ export class TemplateVisitor {
       throw new Error('Spread attributes are not supported as they cannot be statically analyzed');
     }
 
-    if (value.name.escapedText === 'ref' && this.transformer.Ref) {
+    if (getAttributeName(value) === 'class') {
+      const classValue = getAttributeValue(value);
+
+      if (!classValue) {
+        return '';
+      }
+
+      if (ts.isStringLiteral(classValue)) {
+        return this.visitClass(classValue.text);
+      }
+
+      if (ts.isObjectLiteralExpression(classValue)) {
+        const classes: Record<string, ts.Expression> = {};
+
+        classValue.properties.forEach(p => {
+          if (ts.isPropertyAssignment(p)) {
+            const name = getText(p.name);
+
+            if (name) {
+              classes[name] = p.initializer;
+            }
+          }
+        });
+
+        return this.visitConditionalClasses(classes, classValue);
+      }
+
+      throw new Error('Invalid class attribute');
+    }
+
+    if (getAttributeName(value) === 'ref' && this.transformer.Ref) {
       return this.visitRef(value);
     }
 
@@ -124,6 +168,17 @@ export class TemplateVisitor {
 
   visitShow(value: ts.JsxElement, children: string[]): string {
     return this.transformer.Show(value, children, this.context);
+  }
+
+  visitClass(name: string): string {
+    return this.transformer.Class(name, this.context);
+  }
+
+  visitConditionalClasses(
+    classes: Record<string, ts.Expression>,
+    node: ts.ObjectLiteralExpression
+  ): string {
+    return this.transformer.ConditionalClasses({ classes, node }, this.context);
   }
 
   visitSlot(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement): string {

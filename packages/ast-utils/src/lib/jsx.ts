@@ -79,3 +79,10 @@ export function sanitizeAttribute(value: string): string {
   // replace double quotes with single quotes
   return value.replace(/"/g, "'");
 }
+
+/**
+ * Remove any surrounding quotes from a string literal
+ */
+export function stripQuotes(value: string): string {
+  return value.replace(/^['"]|['"]$/g, '');
+}

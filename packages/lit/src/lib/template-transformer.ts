@@ -55,6 +55,14 @@ export const templateTransformer: TemplateTransformer = {
 
     return `\${when(${printNode(when)}, () => html\`${children.join('\n').trim()}\`)}`;
   },
+  Class(name, context) {
+    return `class="${name}"`;
+  },
+  ConditionalClasses({ node }, context) {
+    context.importHandler.addNamedImport('classMap', 'lit/directives/class-map.js');
+
+    return `\${classMap(${printNode(node)})}`;
+  },
   Expression: value => `\${${printNode(value.expression)}}`,
   Text: value => value.text,
 };

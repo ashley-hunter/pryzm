@@ -4,6 +4,7 @@ import {
   getAttributeValue,
   getTagName,
   printNode,
+  stripQuotes,
   stripThis,
 } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
@@ -57,6 +58,16 @@ export const templateTransformer: TemplateTransformer = {
       ${children.join('')}
     {/if}
     `;
+  },
+  Class(name) {
+    return `class="${name}"`;
+  },
+  ConditionalClasses({ classes }) {
+    return Object.entries(classes)
+      .map(([name, condition]) => {
+        return `class:${stripQuotes(name)}={${printNode(stripThis(condition))}}`;
+      })
+      .join(' ');
   },
   Expression: value => `{${printNode(stripThis(value.expression))}}`,
   Text: value => value.text,

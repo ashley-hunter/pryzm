@@ -35,11 +35,6 @@ export const templateTransformer: TemplateTransformer = {
     let attributeName = getAttributeName(value);
     const attributeValue = getAttributeValue(value);
 
-    // if the attribute is called "class", we need to rename it to "className"
-    if (attributeName === 'class') {
-      attributeName = 'className';
-    }
-
     // ensure the name is in camelCase
     attributeName = attributeName.replace(/-([a-z])/g, g => g[1].toUpperCase());
 
@@ -67,6 +62,23 @@ export const templateTransformer: TemplateTransformer = {
     const child = getChildOrFragment(node);
 
     return `{ ${printNode(stripThis(when))} && ${printNode(child)} }`;
+  },
+  Class(name) {
+    return `className="${name}"`;
+  },
+  ConditionalClasses({ classes }, context) {
+    // if classes is empty, we can just return an empty string
+    if (Object.keys(classes).length === 0) {
+      return '';
+    }
+
+    context.importHandler.addDefaultImport('clsx', 'clsx');
+
+    const properties = Object.entries(classes).map(([name, condition]) => {
+      return `${name}: ${printNode(stripThis(condition))}`;
+    });
+
+    return `className={clsx({${properties.join(', ')}})}`;
   },
   Expression: value => printNode(stripThis(value)),
   Text: value => value.text,

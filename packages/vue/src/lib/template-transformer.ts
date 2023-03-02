@@ -67,6 +67,19 @@ export const templateTransformer: TemplateTransformer = {
     </template>
     `;
   },
+  Class(name, context) {
+    return `class="${name}"`;
+  },
+  ConditionalClasses({ classes }, context) {
+    const properties = Object.entries(classes)
+      .map(([name, value]) => {
+        const condition = printNode(stripThis(value));
+        return `${sanitizeAttribute(name)}: ${sanitizeAttribute(condition)}`;
+      })
+      .join(', ');
+
+    return `:class="{${properties}}"`;
+  },
   Expression: value => `{{${printNode(stripThis(value.expression))}}}`,
   Text: value => value.text,
 };
