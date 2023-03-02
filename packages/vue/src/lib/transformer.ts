@@ -6,7 +6,7 @@ import {
   stripThis,
 } from '@pryzm/ast-utils';
 import {
-  PropTransformerMetadata,
+  PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
   transformTemplate,
@@ -15,9 +15,9 @@ import * as ts from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface VueTranformer extends Transformer {
-  State(state: ts.PropertyDeclaration, context: TransformerContext): string;
+  State(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
   Prop(
-    metadata: PropTransformerMetadata,
+    metadata: PropertyTransformerMetadata,
     context: TransformerContext
   ): {
     name: string;
@@ -69,19 +69,14 @@ export const transformer: VueTranformer = {
       initializer: printNode(initializer),
     };
   },
-  State(state, context) {
-    // state is a property declaration, we need to convert it to a variable statement
-    const name = getPropertyName(state);
-    const type = getPropertyType(state);
-    const initializer = state.initializer;
-
+  State({ name, type, initializer }, context) {
     // if the type is a primitive, we use `ref` to create a reactive variable
     // otherwise, we use `reactive` to create a reactive object
-    const createReactive = ts.isTypeReferenceNode(type!) ? 'reactive' : 'ref';
+    const reactiveFn = ts.isTypeReferenceNode(type!) ? 'reactive' : 'ref';
 
-    context.importHandler.addNamedImport(createReactive, 'vue');
+    context.importHandler.addNamedImport(reactiveFn, 'vue');
 
-    return `const ${name} = ${createReactive}(${printNode(initializer) ?? 'null'});`;
+    return `const ${name} = ${reactiveFn}(${printNode(stripThis(initializer)) ?? 'null'});`;
   },
   Event(event) {
     // get the default value of the prop if it exists

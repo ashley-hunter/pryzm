@@ -7,7 +7,7 @@ import {
   stripThis,
 } from '@pryzm/ast-utils';
 import {
-  PropTransformerMetadata,
+  PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
   TransformerResult,
@@ -29,7 +29,7 @@ import { renameIdentifierOccurences } from './utils/rename';
 
 export interface ReactTransformer extends Transformer {
   State(
-    state: ts.PropertyDeclaration,
+    metadata: PropertyTransformerMetadata,
     context: TransformerContext
   ): {
     getter: string;
@@ -37,7 +37,7 @@ export interface ReactTransformer extends Transformer {
     statement: string;
   };
   Prop(
-    metadata: PropTransformerMetadata,
+    metadata: PropertyTransformerMetadata,
     context: TransformerContext
   ): {
     name: string;
@@ -179,20 +179,20 @@ export const transformer: ReactTransformer = {
       destructuredProperty: printNode(destructuredProperty),
     };
   },
-  State(state, context) {
+  State({ name, type, initializer }, context) {
     context.importHandler.addNamedImport('useState', 'react');
 
     // get the name of the state
-    const getter = getPropertyName(state);
+    const getter = name;
 
     // create a new name for the prop setter
     const setter = setterName(getter);
 
     // get the initializer of the prop if it exists
-    const initializer = stripThis(state.initializer);
+    initializer = stripThis(initializer);
 
     // get the type of the prop if it exists
-    const type = state.type ?? inferType(initializer, false);
+    type ??= inferType(initializer, false);
 
     // convert the property to a useState hook
     const statement = useState(getter, setter, initializer, type);

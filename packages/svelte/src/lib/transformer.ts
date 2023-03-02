@@ -1,12 +1,6 @@
+import { getPropertyName, getReturnExpression, printNode, stripThis } from '@pryzm/ast-utils';
 import {
-  getPropertyName,
-  getReturnExpression,
-  isPropertyReadonly,
-  printNode,
-  stripThis,
-} from '@pryzm/ast-utils';
-import {
-  PropTransformerMetadata,
+  PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
   TransformerResult,
@@ -16,8 +10,8 @@ import * as ts from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface SvelteTranformer extends Transformer {
-  State(state: ts.PropertyDeclaration): string;
-  Prop(metadata: PropTransformerMetadata): string;
+  State(metadata: PropertyTransformerMetadata): string;
+  Prop(metadata: PropertyTransformerMetadata): string;
   Computed(computed: ts.GetAccessorDeclaration): string;
   Ref(ref: ts.PropertyDeclaration): string;
   Method(method: ts.MethodDeclaration): string;
@@ -60,17 +54,12 @@ export const transformer: SvelteTranformer = {
       ? `export let ${name} = ${printNode(stripThis(initializer))};`
       : `export let ${name};`;
   },
-  State(state) {
-    // state is a property declaration, we need to convert it to a variable statement
-    const name = getPropertyName(state);
-    const isReadonly = isPropertyReadonly(state);
-    const initializer = stripThis(state.initializer);
+  State({ name, isReadonly, initializer }) {
+    initializer = stripThis(initializer);
 
-    if (initializer) {
-      return `${isReadonly ? 'const' : 'let'} ${name} = ${printNode(initializer)};`;
-    }
-
-    return `${isReadonly ? 'const' : 'let'} ${name};`;
+    return initializer
+      ? `${isReadonly ? 'const' : 'let'} ${name} = ${printNode(initializer)};`
+      : `${isReadonly ? 'const' : 'let'} ${name};`;
   },
   Event(event, context) {
     context.importHandler.addNamedImport('createEventDispatcher', 'svelte');

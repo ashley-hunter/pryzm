@@ -1,6 +1,6 @@
 import { getPropertyName, getPropertyType, printNode } from '@pryzm/ast-utils';
 import {
-  PropTransformerMetadata,
+  PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
   TransformerResult,
@@ -11,8 +11,8 @@ import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface LitTranformer extends Transformer {
-  State(state: ts.PropertyDeclaration, context: TransformerContext): string;
-  Prop(metadata: PropTransformerMetadata, context: TransformerContext): string;
+  State(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
+  Prop(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
   Computed(computed: ts.GetAccessorDeclaration): string;
   Method(method: ts.MethodDeclaration): string;
   OnInit(method: ts.MethodDeclaration): string;
@@ -62,22 +62,22 @@ export const transformer: LitTranformer = {
       )
     );
   },
-  State(state, context) {
+  State({ name, type, initializer, isReadonly }, context) {
     context.importHandler.addNamedImport('state', 'lit/decorators.js');
 
+    const modifiers: ts.ModifierLike[] = [
+      factory.createDecorator(
+        factory.createCallExpression(factory.createIdentifier('state'), undefined, [])
+      ),
+      factory.createToken(ts.SyntaxKind.PrivateKeyword),
+    ];
+
+    if (isReadonly) {
+      modifiers.push(factory.createToken(ts.SyntaxKind.ReadonlyKeyword));
+    }
+
     return printNode(
-      factory.createPropertyDeclaration(
-        [
-          factory.createDecorator(
-            factory.createCallExpression(factory.createIdentifier('state'), undefined, [])
-          ),
-          factory.createToken(ts.SyntaxKind.PrivateKeyword),
-        ],
-        state.name,
-        undefined,
-        state.type,
-        state.initializer
-      )
+      factory.createPropertyDeclaration(modifiers, name, undefined, type, initializer)
     );
   },
   Method(method) {

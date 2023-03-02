@@ -1,4 +1,4 @@
-import { getPropertyName, getPropertyType } from '@pryzm/ast-utils';
+import { getPropertyName, getPropertyType, isPropertyReadonly } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { ComponentMetadata } from '../parser/component-metadata';
 import { parseFile } from '../parser/parser';
@@ -34,8 +34,8 @@ export type TransformerResult<T extends Transformer> = {
 };
 
 export interface Transformer {
-  Prop?: (metadata: PropTransformerMetadata, context: TransformerContext) => any;
-  State?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  Prop?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
+  State?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
   Method?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
   OnInit?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
   OnDestroy?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
@@ -86,16 +86,27 @@ export function transform<T extends Transformer>(
   styles = styles.replace(/(\r\n|\n|\r)/gm, '');
 
   const props = metadata.props.map(prop => {
-    const propMetadata: PropTransformerMetadata = {
+    const metadata: PropertyTransformerMetadata = {
       name: getPropertyName(prop),
       type: getPropertyType(prop),
+      isReadonly: isPropertyReadonly(prop),
       initializer: prop.initializer,
       node: prop,
     };
 
-    return transformer.Prop?.(propMetadata, context) ?? prop;
+    return transformer.Prop?.(metadata, context) ?? prop;
   });
-  const states = metadata.state.map(state => transformer.State?.(state, context) ?? state);
+  const states = metadata.state.map(state => {
+    const metadata: PropertyTransformerMetadata = {
+      name: getPropertyName(state),
+      type: getPropertyType(state),
+      isReadonly: isPropertyReadonly(state),
+      initializer: state.initializer,
+      node: state,
+    };
+
+    return transformer.State?.(metadata, context) ?? state;
+  });
   const computed = metadata.computed.map(
     computed => transformer.Computed?.(computed, context) ?? computed
   );
@@ -136,9 +147,10 @@ export function transform<T extends Transformer>(
   return transformer.PostTransform ? transformer.PostTransform(result, context) : result;
 }
 
-export interface PropTransformerMetadata {
+export interface PropertyTransformerMetadata {
   name: string;
   type?: ts.TypeNode;
+  isReadonly: boolean;
   initializer?: ts.Expression;
   node: ts.PropertyDeclaration;
 }
