@@ -1,5 +1,6 @@
 import { getPropertyName, getPropertyType, printNode } from '@pryzm/ast-utils';
 import {
+  MethodTransformerMetadata,
   PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
@@ -14,7 +15,7 @@ export interface LitTranformer extends Transformer {
   State(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
   Prop(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
   Computed(computed: ts.GetAccessorDeclaration): string;
-  Method(method: ts.MethodDeclaration): string;
+  Method(method: MethodTransformerMetadata): string;
   OnInit(method: ts.MethodDeclaration): string;
   OnDestroy(method: ts.MethodDeclaration): string;
   Ref(ref: ts.PropertyDeclaration, context: TransformerContext): string;
@@ -80,8 +81,8 @@ export const transformer: LitTranformer = {
       factory.createPropertyDeclaration(modifiers, name, undefined, type, initializer)
     );
   },
-  Method(method) {
-    return printNode(method);
+  Method({ node }) {
+    return printNode(node);
   },
   OnInit(method) {
     // create a method called connectedCallback and insert the method body into it

@@ -1,5 +1,6 @@
 import { getPropertyName, getReturnExpression, printNode, stripThis } from '@pryzm/ast-utils';
 import {
+  MethodTransformerMetadata,
   PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
@@ -14,7 +15,7 @@ export interface SvelteTranformer extends Transformer {
   Prop(metadata: PropertyTransformerMetadata): string;
   Computed(computed: ts.GetAccessorDeclaration): string;
   Ref(ref: ts.PropertyDeclaration): string;
-  Method(method: ts.MethodDeclaration): string;
+  Method(method: MethodTransformerMetadata): string;
   Event(
     event: ts.PropertyDeclaration,
     context: TransformerContext
@@ -75,10 +76,10 @@ export const transformer: SvelteTranformer = {
   Ref(value) {
     return `let ${getPropertyName(value)};`;
   },
-  Method(method) {
-    return `function ${getPropertyName(method)}(${method.parameters.map(printNode).join(', ')})${
-      method.type ? `: ${method.type}` : ''
-    } ${printNode(stripThis(method.body))}`;
+  Method({ name, parameters, body }) {
+    return `function ${name}(${parameters.map(printNode).join(', ')}) ${printNode(
+      stripThis(body)
+    )}`;
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

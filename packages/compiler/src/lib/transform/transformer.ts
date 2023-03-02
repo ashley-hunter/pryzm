@@ -36,7 +36,7 @@ export type TransformerResult<T extends Transformer> = {
 export interface Transformer {
   Prop?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
   State?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
-  Method?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
+  Method?: (value: MethodTransformerMetadata, context: TransformerContext) => any;
   OnInit?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
   OnDestroy?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
   Event?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
@@ -111,7 +111,17 @@ export function transform<T extends Transformer>(
     computed => transformer.Computed?.(computed, context) ?? computed
   );
   const events = metadata.events.map(event => transformer.Event?.(event, context) ?? event);
-  const methods = metadata.methods.map(method => transformer.Method?.(method, context) ?? method);
+  const methods = metadata.methods.map(method => {
+    const metadata: MethodTransformerMetadata = {
+      name: getPropertyName(method),
+      returnType: method.type,
+      parameters: method.parameters,
+      body: method.body,
+      node: method,
+    };
+
+    return transformer.Method?.(metadata, context) ?? method;
+  });
   const onInit = metadata.onInit
     ? transformer.OnInit?.(metadata.onInit, context) ?? metadata.onInit
     : undefined;
@@ -153,4 +163,12 @@ export interface PropertyTransformerMetadata {
   isReadonly: boolean;
   initializer?: ts.Expression;
   node: ts.PropertyDeclaration;
+}
+
+export interface MethodTransformerMetadata {
+  name: string;
+  returnType?: ts.TypeNode;
+  parameters: ts.NodeArray<ts.ParameterDeclaration>;
+  body?: ts.Block;
+  node: ts.MethodDeclaration;
 }

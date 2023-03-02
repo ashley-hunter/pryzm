@@ -6,6 +6,7 @@ import {
   stripThis,
 } from '@pryzm/ast-utils';
 import {
+  MethodTransformerMetadata,
   PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
@@ -26,7 +27,7 @@ export interface VueTranformer extends Transformer {
   };
   Computed(computed: ts.GetAccessorDeclaration, context: TransformerContext): string;
   Ref(ref: ts.PropertyDeclaration, context: TransformerContext): string;
-  Method(method: ts.MethodDeclaration): string;
+  Method(method: MethodTransformerMetadata): string;
   OnInit(method: ts.MethodDeclaration, context: TransformerContext): string;
   OnDestroy(method: ts.MethodDeclaration, context: TransformerContext): string;
   Event(
@@ -107,14 +108,11 @@ export const transformer: VueTranformer = {
       printNode(value.initializer) ?? 'null'
     });`;
   },
-  Method(method) {
+  Method({ name, returnType, parameters, body }) {
     // convert a method to a function declaration
-    const name = getPropertyName(method);
-    const returnType = method.type;
-
-    return `function ${name}(${method.parameters.map(printNode).join(', ')})${
+    return `function ${name}(${parameters.map(printNode).join(', ')})${
       returnType ? `: ${printNode(returnType)}` : ''
-    } ${printNode(stripThis(method.body))};`;
+    } ${printNode(stripThis(body))};`;
   },
   OnInit(method, context) {
     context.importHandler.addNamedImport('onMounted', 'vue');

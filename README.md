@@ -27,6 +27,7 @@
 | **Exporting**                   | ❌    | ❌     | ❌  | ❌  |
 | **Attribute Inheritance**       | ❌    | ❌     | ❌  | ❌  |
 | **Async Methods**               | ❌    | ❌     | ❌  | ❌  |
+| **Methods Generics**            | ❌    | ❌     | ❌  | ❌  |
 | **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
 
 \* Only `onInit` and `onDestroy` are currently supported

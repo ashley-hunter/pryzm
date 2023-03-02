@@ -7,6 +7,7 @@ import {
   stripThis,
 } from '@pryzm/ast-utils';
 import {
+  MethodTransformerMetadata,
   PropertyTransformerMetadata,
   Transformer,
   TransformerContext,
@@ -60,7 +61,7 @@ export interface ReactTransformer extends Transformer {
     statement: string;
   };
   Method(
-    method: ts.MethodDeclaration,
+    method: MethodTransformerMetadata,
     context: TransformerContext
   ): {
     name: string;
@@ -278,17 +279,15 @@ export const transformer: ReactTransformer = {
 
     return { name, statement };
   },
-  Method(method, context) {
+  Method({ name, body, parameters }, context) {
     context.importHandler.addNamedImport('useCallback', 'react');
 
-    const name = getPropertyName(method);
-
     // scan the body for any dependencies
-    const dependencies = findDependencies(method.body!);
+    const dependencies = findDependencies(body!);
 
     // convert a method to a useCallback hook
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
-    const statement = useCallback(name, method.parameters, method.body!, dependencies);
+    const statement = useCallback(name, parameters, body!, dependencies);
 
     return { name, statement, dependencies };
   },
