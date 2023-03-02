@@ -7,6 +7,7 @@ import {
   stripThis,
 } from '@pryzm/ast-utils';
 import {
+  PropTransformerMetadata,
   Transformer,
   TransformerContext,
   TransformerResult,
@@ -36,7 +37,7 @@ export interface ReactTransformer extends Transformer {
     statement: string;
   };
   Prop(
-    prop: ts.PropertyDeclaration,
+    metadata: PropTransformerMetadata,
     context: TransformerContext
   ): {
     name: string;
@@ -136,18 +137,15 @@ export const transformer: ReactTransformer = {
 
     return { name, statement, dependencies };
   },
-  Prop(prop) {
-    // get the name of the prop
-    const name = getPropertyName(prop);
-
+  Prop({ name, type, initializer, node }) {
     // get the default value of the prop if it exists
-    const initializer = stripThis(prop.initializer);
+    initializer = stripThis(initializer);
 
     // get the type of the prop if it exists
-    const type = prop.type ?? inferType(initializer, true);
+    type ??= inferType(initializer, true);
 
     // create the interface property with the type attached
-    const interfaceProperty = createInterfaceProperty(name, type, prop);
+    const interfaceProperty = createInterfaceProperty(name, type, node);
 
     // create the destructured property with the default value attached
     const destructuredProperty = createDestructuredProperty(name, initializer);

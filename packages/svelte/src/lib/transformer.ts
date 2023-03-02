@@ -6,6 +6,7 @@ import {
   stripThis,
 } from '@pryzm/ast-utils';
 import {
+  PropTransformerMetadata,
   Transformer,
   TransformerContext,
   TransformerResult,
@@ -16,7 +17,7 @@ import { templateTransformer } from './template-transformer';
 
 export interface SvelteTranformer extends Transformer {
   State(state: ts.PropertyDeclaration): string;
-  Prop(prop: ts.PropertyDeclaration): string;
+  Prop(metadata: PropTransformerMetadata): string;
   Computed(computed: ts.GetAccessorDeclaration): string;
   Ref(ref: ts.PropertyDeclaration): string;
   Method(method: ts.MethodDeclaration): string;
@@ -54,16 +55,10 @@ export const transformer: SvelteTranformer = {
 
     return `$: ${name} = ${printNode(stripThis(initializer)!)};`;
   },
-  Prop(prop) {
-    // prop is a property declaration, we need to convert it to a variable statement
-    const name = getPropertyName(prop);
-    const initializer = stripThis(prop.initializer);
-
-    if (initializer) {
-      return `export let ${name} = ${printNode(initializer)};`;
-    }
-
-    return `export let ${name};`;
+  Prop({ name, initializer }) {
+    return initializer
+      ? `export let ${name} = ${printNode(stripThis(initializer)!)};`
+      : `export let ${name};`;
   },
   State(state) {
     // state is a property declaration, we need to convert it to a variable statement

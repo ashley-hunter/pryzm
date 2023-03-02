@@ -1,5 +1,6 @@
 import { getPropertyName, getPropertyType, printNode } from '@pryzm/ast-utils';
 import {
+  PropTransformerMetadata,
   Transformer,
   TransformerContext,
   TransformerResult,
@@ -11,7 +12,7 @@ import { templateTransformer } from './template-transformer';
 
 export interface LitTranformer extends Transformer {
   State(state: ts.PropertyDeclaration, context: TransformerContext): string;
-  Prop(prop: ts.PropertyDeclaration, context: TransformerContext): string;
+  Prop(metadata: PropTransformerMetadata, context: TransformerContext): string;
   Computed(computed: ts.GetAccessorDeclaration): string;
   Method(method: ts.MethodDeclaration): string;
   OnInit(method: ts.MethodDeclaration): string;
@@ -44,7 +45,7 @@ export const transformer: LitTranformer = {
       factory.createGetAccessorDeclaration(undefined, computed.name, [], undefined, computed.body)
     );
   },
-  Prop(prop, context) {
+  Prop({ name, type, initializer }, context) {
     context.importHandler.addNamedImport('property', 'lit/decorators.js');
 
     return printNode(
@@ -54,10 +55,10 @@ export const transformer: LitTranformer = {
             factory.createCallExpression(factory.createIdentifier('property'), undefined, [])
           ),
         ],
-        prop.name,
+        name,
         undefined,
-        prop.type,
-        prop.initializer
+        type,
+        initializer
       )
     );
   },

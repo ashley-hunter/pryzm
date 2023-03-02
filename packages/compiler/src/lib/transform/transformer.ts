@@ -1,3 +1,4 @@
+import { getPropertyName, getPropertyType } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { ComponentMetadata } from '../parser/component-metadata';
 import { parseFile } from '../parser/parser';
@@ -33,7 +34,7 @@ export type TransformerResult<T extends Transformer> = {
 };
 
 export interface Transformer {
-  Prop?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
+  Prop?: (metadata: PropTransformerMetadata, context: TransformerContext) => any;
   State?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
   Method?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
   OnInit?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
@@ -84,7 +85,16 @@ export function transform<T extends Transformer>(
   // remove any new line characters from styles
   styles = styles.replace(/(\r\n|\n|\r)/gm, '');
 
-  const props = metadata.props.map(prop => transformer.Prop?.(prop, context) ?? prop);
+  const props = metadata.props.map(prop => {
+    const propMetadata: PropTransformerMetadata = {
+      name: getPropertyName(prop),
+      type: getPropertyType(prop),
+      initializer: prop.initializer,
+      node: prop,
+    };
+
+    return transformer.Prop?.(propMetadata, context) ?? prop;
+  });
   const states = metadata.state.map(state => transformer.State?.(state, context) ?? state);
   const computed = metadata.computed.map(
     computed => transformer.Computed?.(computed, context) ?? computed
@@ -124,4 +134,11 @@ export function transform<T extends Transformer>(
   };
 
   return transformer.PostTransform ? transformer.PostTransform(result, context) : result;
+}
+
+export interface PropTransformerMetadata {
+  name: string;
+  type?: ts.TypeNode;
+  initializer?: ts.Expression;
+  node: ts.PropertyDeclaration;
 }

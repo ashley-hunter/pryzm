@@ -5,14 +5,19 @@ import {
   printNode,
   stripThis,
 } from '@pryzm/ast-utils';
-import { Transformer, TransformerContext, transformTemplate } from '@pryzm/compiler';
+import {
+  PropTransformerMetadata,
+  Transformer,
+  TransformerContext,
+  transformTemplate,
+} from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export interface VueTranformer extends Transformer {
   State(state: ts.PropertyDeclaration, context: TransformerContext): string;
   Prop(
-    prop: ts.PropertyDeclaration,
+    metadata: PropTransformerMetadata,
     context: TransformerContext
   ): {
     name: string;
@@ -57,13 +62,12 @@ export const transformer: VueTranformer = {
 
     return `const ${name} = computed(() => ${printNode(stripThis(initializer)!)});`;
   },
-  Prop(prop) {
-    // prop is a property declaration, we need to convert it to a variable statement
-    const name = getPropertyName(prop);
-    const type = getPropertyType(prop);
-    const initializer = prop.initializer ? printNode(prop.initializer) : undefined;
-
-    return { name, type: type ? printNode(type) : undefined, initializer };
+  Prop({ name, type, initializer }) {
+    return {
+      name,
+      type: type ? printNode(type) : undefined,
+      initializer: initializer ? printNode(initializer) : undefined,
+    };
   },
   State(state, context) {
     // state is a property declaration, we need to convert it to a variable statement
