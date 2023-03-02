@@ -15,9 +15,9 @@ export interface LitTranformer extends Transformer {
   State(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
   Prop(metadata: PropertyTransformerMetadata, context: TransformerContext): string;
   Computed(computed: ts.GetAccessorDeclaration): string;
-  Method(method: MethodTransformerMetadata): string;
-  OnInit(method: ts.MethodDeclaration): string;
-  OnDestroy(method: ts.MethodDeclaration): string;
+  Method(metadata: MethodTransformerMetadata): string;
+  OnInit(metadata: MethodTransformerMetadata): string;
+  OnDestroy(metadata: MethodTransformerMetadata): string;
   Ref(ref: ts.PropertyDeclaration, context: TransformerContext): string;
   Event(event: ts.PropertyDeclaration): {
     name: string;
@@ -84,32 +84,32 @@ export const transformer: LitTranformer = {
   Method({ node }) {
     return printNode(node);
   },
-  OnInit(method) {
+  OnInit({ node }) {
     // create a method called connectedCallback and insert the method body into it
     const connectedCallback = factory.createMethodDeclaration(
-      method.modifiers,
-      method.asteriskToken,
+      node.modifiers,
+      node.asteriskToken,
       factory.createIdentifier('connectedCallback'),
-      method.questionToken,
-      method.typeParameters,
+      node.questionToken,
+      node.typeParameters,
       [],
-      method.type,
-      method.body
+      node.type,
+      node.body
     );
 
     return printNode(connectedCallback);
   },
-  OnDestroy(method) {
+  OnDestroy({ node }) {
     // create a method called disconnectedCallback and insert the method body into it
     const disconnectedCallback = factory.createMethodDeclaration(
-      method.modifiers,
-      method.asteriskToken,
+      node.modifiers,
+      node.asteriskToken,
       factory.createIdentifier('disconnectedCallback'),
-      method.questionToken,
-      method.typeParameters,
+      node.questionToken,
+      node.typeParameters,
       [],
-      method.type,
-      method.body
+      node.type,
+      node.body
     );
 
     return printNode(disconnectedCallback);

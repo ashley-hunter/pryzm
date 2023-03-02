@@ -69,13 +69,13 @@ export interface ReactTransformer extends Transformer {
     statement: string;
   };
   OnInit(
-    method: ts.MethodDeclaration,
+    metadata: MethodTransformerMetadata,
     context: TransformerContext
   ): {
     statement: string;
   };
   OnDestroy(
-    method: ts.MethodDeclaration,
+    metadata: MethodTransformerMetadata,
     context: TransformerContext
   ): {
     statement: string;

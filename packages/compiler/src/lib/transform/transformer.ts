@@ -36,9 +36,9 @@ export type TransformerResult<T extends Transformer> = {
 export interface Transformer {
   Prop?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
   State?: (metadata: PropertyTransformerMetadata, context: TransformerContext) => any;
-  Method?: (value: MethodTransformerMetadata, context: TransformerContext) => any;
-  OnInit?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
-  OnDestroy?: (value: ts.MethodDeclaration, context: TransformerContext) => any;
+  Method?: (metadata: MethodTransformerMetadata, context: TransformerContext) => any;
+  OnInit?: (metadata: MethodTransformerMetadata, context: TransformerContext) => any;
+  OnDestroy?: (metadata: MethodTransformerMetadata, context: TransformerContext) => any;
   Event?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
   Ref?: (value: ts.PropertyDeclaration, context: TransformerContext) => any;
   Computed?: (value: ts.GetAccessorDeclaration, context: TransformerContext) => any;
@@ -122,12 +122,33 @@ export function transform<T extends Transformer>(
 
     return transformer.Method?.(metadata, context) ?? method;
   });
+
   const onInit = metadata.onInit
-    ? transformer.OnInit?.(metadata.onInit, context) ?? metadata.onInit
+    ? transformer.OnInit?.(
+        {
+          name: 'onInit',
+          returnType: metadata.onInit.type,
+          parameters: metadata.onInit.parameters,
+          body: metadata.onInit.body,
+          node: metadata.onInit,
+        },
+        context
+      ) ?? metadata.onInit
     : undefined;
+
   const onDestroy = metadata.onDestroy
-    ? transformer.OnDestroy?.(metadata.onDestroy, context) ?? metadata.onDestroy
+    ? transformer.OnDestroy?.(
+        {
+          name: 'onDestroy',
+          returnType: metadata.onDestroy.type,
+          parameters: metadata.onDestroy.parameters,
+          body: metadata.onDestroy.body,
+          node: metadata.onDestroy,
+        },
+        context
+      ) ?? metadata.onDestroy
     : undefined;
+
   const refs = metadata.refs.map(ref => transformer.Ref?.(ref, context) ?? ref);
   const providers = metadata.providers.map(
     provider => transformer.Provider?.(provider, context) ?? provider
