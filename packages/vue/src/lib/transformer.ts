@@ -108,7 +108,4 @@ export const transformer: VueTranformer = {
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);
   },
-  Slots(slot) {
-    return slot;
-  },
 };

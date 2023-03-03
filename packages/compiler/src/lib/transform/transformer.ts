@@ -10,18 +10,57 @@ export type TransformerContext = {
 };
 
 export type TransformerOutput<T extends Transformer> = {
-  props: ReturnType<T['Prop']>[];
-  states: ReturnType<T['State']>[];
-  computed: ReturnType<T['Computed']>[];
-  events: ReturnType<T['Event']>[];
-  refs: ReturnType<T['Ref']>[];
-  methods: ReturnType<T['Method']>[];
-  onInit?: ReturnType<T['OnInit']>;
-  onDestroy?: ReturnType<T['OnDestroy']>;
-  providers: ReturnType<T['Provider']>[];
-  injects: ReturnType<T['Inject']>[];
-  template: ReturnType<T['Template']>;
-  slots: ReturnType<T['Slots']>[];
+  props: T extends Transformer<infer TPropReturn> ? TPropReturn[] : never;
+  states: T extends Transformer<any, infer TStateReturn> ? TStateReturn[] : never;
+  computed: T extends Transformer<any, any, infer TComputedReturn> ? TComputedReturn[] : never;
+  events: T extends Transformer<any, any, any, infer TEventReturn> ? TEventReturn[] : never;
+  refs: T extends Transformer<any, any, any, any, infer TRefReturn> ? TRefReturn[] : never;
+  methods: T extends Transformer<any, any, any, any, any, infer TMethodReturn>
+    ? TMethodReturn[]
+    : never;
+  onInit?: T extends Transformer<any, any, any, any, any, any, infer TOnInitReturn>
+    ? TOnInitReturn
+    : never;
+  onDestroy?: T extends Transformer<any, any, any, any, any, any, any, infer TOnDestroyReturn>
+    ? TOnDestroyReturn
+    : never;
+  providers: T extends Transformer<any, any, any, any, any, any, any, any, infer TProviderReturn>
+    ? TProviderReturn[]
+    : never;
+  injects: T extends Transformer<any, any, any, any, any, any, any, any, any, infer TInjectReturn>
+    ? TInjectReturn[]
+    : never;
+  template: T extends Transformer<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    infer TTemplateReturn
+  >
+    ? TTemplateReturn
+    : never;
+  slots: T extends Transformer<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    infer TSlotsReturn
+  >
+    ? TSlotsReturn[]
+    : never;
   imports: ts.ImportDeclaration[];
   styles: string;
   name: string;
@@ -57,7 +96,7 @@ export interface Transformer<
     styles: string,
     context: TransformerContext
   ) => TTemplateReturn;
-  Slots: (slot: string, context: TransformerContext) => TSlotsReturn;
+  Slots?: (slot: string, context: TransformerContext) => TSlotsReturn;
   Styles?: (value: string, context: TransformerContext) => string;
   PreTransform?: (metadata: ComponentMetadata, context: TransformerContext) => void;
   PostTransform?: (
@@ -197,18 +236,18 @@ export function transform<T extends Transformer>(
 
   const result: TransformerOutput<T> = {
     ...metadata,
-    props,
-    states,
-    computed,
-    events,
-    methods,
+    props: props as TransformerOutput<T>['props'],
+    states: states as TransformerOutput<T>['states'],
+    computed: computed as TransformerOutput<T>['computed'],
+    events: events as TransformerOutput<T>['events'],
+    methods: methods as TransformerOutput<T>['methods'],
     onInit,
     onDestroy,
-    refs,
-    providers,
-    injects,
-    template,
-    slots,
+    refs: refs as TransformerOutput<T>['refs'],
+    providers: providers as TransformerOutput<T>['providers'],
+    injects: injects as TransformerOutput<T>['injects'],
+    template: template as TransformerOutput<T>['template'],
+    slots: slots as TransformerOutput<T>['slots'],
     styles,
     selector: metadata.selector,
     imports: context.importHandler.getImportNodes(),

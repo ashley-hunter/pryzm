@@ -114,9 +114,6 @@ export const transformer: LitTranformer = {
     context.importHandler.addNamedImport('html', 'lit');
     return transformTemplate(value, templateTransformer, context);
   },
-  Slots(slot) {
-    return slot;
-  },
   PreTransform(metadata, context) {
     // if there is no selector then throw an error
     if (!metadata.selector) {

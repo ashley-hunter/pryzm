@@ -56,7 +56,4 @@ export const transformer: SvelteTranformer = {
 
     return `onDestroy(() => ${printNode(stripThis(body))});`;
   },
-  Slots(slot) {
-    return slot;
-  },
 };
