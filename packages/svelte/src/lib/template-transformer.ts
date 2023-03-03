@@ -14,9 +14,6 @@ export const templateTransformer: TemplateTransformer = {
     }
     return `<slot name="${name}" />`;
   },
-  Fragment(value, children) {
-    return children;
-  },
   Attribute({ name, value }) {
     return `${name}={${printNode(stripThis(value))}}`;
   },

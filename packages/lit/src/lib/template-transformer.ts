@@ -11,9 +11,6 @@ export const templateTransformer: TemplateTransformer = {
   Slot(name) {
     return name === 'default' ? `<slot />` : `<slot name="${name}" />`;
   },
-  Fragment(value, children) {
-    return children;
-  },
   Attribute({ name, value }) {
     return `${name}={${printNode(value)}}`;
   },

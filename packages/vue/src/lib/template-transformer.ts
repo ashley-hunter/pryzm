@@ -14,9 +14,6 @@ export const templateTransformer: TemplateTransformer = {
     }
     return `<slot name="${name}"></slot>`;
   },
-  Fragment(value, children) {
-    return children;
-  },
   Attribute({ name, value }) {
     // if the attribute name starts with `on` then it is an event and we need to convert it to `@`
     // the first letter may then be upper case which we need to convert to lower case

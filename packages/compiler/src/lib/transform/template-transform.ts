@@ -28,7 +28,7 @@ export interface TemplateTransformer {
     context: TransformerContext
   ) => string;
   Slot(name: string, context: TransformerContext): string;
-  Fragment: (value: ts.JsxFragment, children: string, context: TransformerContext) => string;
+  Fragment?: (value: ts.JsxFragment, children: string, context: TransformerContext) => string;
   Attribute: (
     metadata: { name: string; value: ts.Expression | undefined; node: ts.JsxAttribute },
     context: TransformerContext
@@ -129,7 +129,7 @@ export class TemplateVisitor {
 
   visitFragment(value: ts.JsxFragment) {
     const children = value.children.map(this.visit.bind(this)).join('');
-    return this.transformer.Fragment(value, children, this.context);
+    return this.transformer.Fragment?.(value, children, this.context) ?? children;
   }
 
   visitAttribute(node: ts.JsxAttributeLike): string {
