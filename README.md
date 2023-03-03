@@ -31,4 +31,10 @@
 | **Define Selector**             | –     | –      | –   | ✅  |
 | **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
 
+### Core and Compiler
+
+| Feature         | Compiler | Runtime |
+| --------------- | -------- | ------- |
+| **JSX Runtime** | –        | ❌      |
+
 \* Only `onInit` and `onDestroy` are currently supported
