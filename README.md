@@ -13,6 +13,7 @@
 | **Refs**                        | ✅    | ✅     | ✅  | ✅  |
 | **Slots**                       | ✅    | ✅     | ✅  | ✅  |
 | **Retain Imports**              | ✅    | ✅     | ✅  | ✅  |
+| **Component Ref**               | ❌    | –      | –   | –   |
 | **Comment Extraction**          | ❌    | ❌     | ❌  | ❌  |
 | **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
@@ -27,6 +28,7 @@
 | **Exporting**                   | ❌    | ❌     | ❌  | ❌  |
 | **Attribute Inheritance**       | ❌    | ❌     | ❌  | ❌  |
 | **Async Methods**               | ❌    | ❌     | ❌  | ❌  |
+| **Component Generics**          | ❌    | ❌     | ❌  | ❌  |
 | **Methods Generics**            | ❌    | ❌     | ❌  | ❌  |
 | **Define Selector**             | –     | –      | –   | ✅  |
 | **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
