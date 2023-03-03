@@ -10,7 +10,7 @@ import * as ts from 'typescript';
 import { TransformerContext } from './transformer';
 
 export interface TemplateTransformer {
-  Element: (
+  Element?: (
     metadata: {
       node: ts.JsxElement;
       tagName: string;
@@ -19,7 +19,7 @@ export interface TemplateTransformer {
     },
     context: TransformerContext
   ) => string;
-  SelfClosingElement: (
+  SelfClosingElement?: (
     metadata: {
       tagName: string;
       node: ts.JsxSelfClosingElement;
@@ -37,13 +37,13 @@ export interface TemplateTransformer {
     metadata: { node: ts.JsxAttribute; ref: ts.Expression | undefined },
     context: TransformerContext
   ) => string;
-  Text: (value: ts.JsxText, context: TransformerContext) => string;
+  Text?: (value: ts.JsxText, context: TransformerContext) => string;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => string;
   Show: (
     metadata: { node: ts.JsxElement; children: string; fallback?: string; when: ts.Expression },
     context: TransformerContext
   ) => string;
-  Class: (name: string, context: TransformerContext) => string;
+  Class?: (name: string, context: TransformerContext) => string;
   ConditionalClasses: (
     metadata: {
       classes: Record<string, ts.Expression>;
@@ -91,7 +91,7 @@ export class TemplateVisitor {
   }
 
   visitText(value: ts.JsxText) {
-    return this.transformer.Text(value, this.context);
+    return this.transformer.Text?.(value, this.context) ?? value.text;
   }
 
   visitElement(node: ts.JsxElement) {
@@ -112,7 +112,10 @@ export class TemplateVisitor {
       return this.visitShow(node, children);
     }
 
-    return this.transformer.Element({ node, attributes, children, tagName }, this.context);
+    return (
+      this.transformer.Element?.({ node, attributes, children, tagName }, this.context) ??
+      `<${tagName} ${attributes}>${children}</${tagName}>`
+    );
   }
 
   visitSelfClosingElement(node: ts.JsxSelfClosingElement) {
@@ -124,7 +127,10 @@ export class TemplateVisitor {
     }
 
     const attributes = node.attributes.properties.map(this.visitAttribute.bind(this)).join(' ');
-    return this.transformer.SelfClosingElement({ tagName, node, attributes }, this.context);
+    return (
+      this.transformer.SelfClosingElement?.({ tagName, node, attributes }, this.context) ??
+      `<${tagName} ${attributes} />`
+    );
   }
 
   visitFragment(value: ts.JsxFragment) {
@@ -159,7 +165,9 @@ export class TemplateVisitor {
     }
 
     if (ts.isStringLiteral(classValue)) {
-      return this.transformer.Class(classValue.text, this.context);
+      return (
+        this.transformer.Class?.(classValue.text, this.context) ?? `class="${classValue.text}"`
+      );
     }
 
     if (ts.isObjectLiteralExpression(classValue)) {

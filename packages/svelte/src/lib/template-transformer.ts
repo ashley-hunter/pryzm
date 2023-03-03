@@ -2,12 +2,6 @@ import { printNode, stripQuotes, stripThis } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
-  Element({ tagName, attributes, children }) {
-    return `<${tagName} ${attributes}>${children}</${tagName}>`;
-  },
-  SelfClosingElement({ tagName, attributes }) {
-    return `<${tagName} ${attributes} />`;
-  },
   Slot(name) {
     if (name === 'default') {
       return `<slot />`;
@@ -28,9 +22,6 @@ export const templateTransformer: TemplateTransformer = {
       {/if}
       `;
   },
-  Class(name) {
-    return `class="${name}"`;
-  },
   ConditionalClasses({ classes }) {
     return Object.entries(classes)
       .map(([name, condition]) => {
@@ -39,5 +30,4 @@ export const templateTransformer: TemplateTransformer = {
       .join(' ');
   },
   Expression: value => `{${printNode(stripThis(value.expression))}}`,
-  Text: value => value.text,
 };

@@ -2,12 +2,6 @@ import { printNode, sanitizeAttribute, stripQuotes, stripThis } from '@pryzm/ast
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
-  Element({ tagName, attributes, children }) {
-    return `<${tagName} ${attributes}>${children}</${tagName}>`;
-  },
-  SelfClosingElement({ tagName, attributes }) {
-    return `<${tagName} ${attributes} />`;
-  },
   Slot(name) {
     if (name === 'default') {
       return `<slot></slot>`;
@@ -35,9 +29,6 @@ export const templateTransformer: TemplateTransformer = {
     ${fallback ? `<template v-else>${fallback}</template>` : ''}
     `;
   },
-  Class(name) {
-    return `class="${name}"`;
-  },
   ConditionalClasses({ classes }) {
     const properties = Object.entries(classes)
       .map(([name, value]) => {
@@ -49,5 +40,4 @@ export const templateTransformer: TemplateTransformer = {
     return `:class="{${properties}}"`;
   },
   Expression: value => `{{${printNode(stripThis(value.expression))}}}`,
-  Text: value => value.text,
 };
