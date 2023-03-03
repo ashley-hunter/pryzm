@@ -1,5 +1,4 @@
 import {
-  getAttribute,
   getAttributeName,
   getAttributeValue,
   getTagName,
@@ -27,7 +26,7 @@ export const templateTransformer: TemplateTransformer = {
     return `<slot name="${name}"></slot>`;
   },
   Fragment: (value, children) => {
-    return children.join('\n');
+    return children.join('');
   },
   Attribute: attribute => {
     let name = getAttributeName(attribute);
@@ -47,33 +46,21 @@ export const templateTransformer: TemplateTransformer = {
 
     return `ref="${printNode(stripThis(value))}"`;
   },
-  Show(node, children) {
-    const condition = getAttribute(node.openingElement.attributes, 'when');
-
-    if (!condition) {
-      throw new Error('Missing "when" attribute on <Show> element');
-    }
-
-    const when = getAttributeValue(condition);
-
-    // check that the condition is an expression
-    if (!when) {
-      throw new Error('The "when" attribute on <Show> element must be an expression');
-    }
-
+  Show({ children, when, fallback }) {
     return `
     <template v-if="${sanitizeAttribute(printNode(stripThis(when)))}">
       ${children.join('')}
     </template>
+    ${fallback ? `<template v-else>${fallback}</template>` : ''}
     `;
   },
-  Class(name, context) {
+  Class(name) {
     return `class="${name}"`;
   },
-  ConditionalClasses({ classes }, context) {
+  ConditionalClasses({ classes }) {
     const properties = Object.entries(classes)
       .map(([name, value]) => {
-        const condition = printNode(stripThis(value));
+        const condition: string = printNode(stripThis(value));
         return `${sanitizeAttribute(name)}: ${sanitizeAttribute(condition)}`;
       })
       .join(', ');

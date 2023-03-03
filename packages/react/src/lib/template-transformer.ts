@@ -1,8 +1,6 @@
 import {
-  getAttribute,
   getAttributeName,
   getAttributeValue,
-  getChildOrFragment,
   getTagName,
   printNode,
   stripThis,
@@ -29,7 +27,7 @@ export const templateTransformer: TemplateTransformer = {
     return `{${name === 'default' ? 'children' : name}}`;
   },
   Fragment: (_, children) => {
-    return `<>${children.join('\n')}</>`;
+    return `<>${children.join('')}</>`;
   },
   Attribute: value => {
     let attributeName = getAttributeName(value);
@@ -45,23 +43,10 @@ export const templateTransformer: TemplateTransformer = {
 
     return `${attributeName}={${printNode(stripThis(attributeValue))}}`;
   },
-  Show: node => {
-    const condition = getAttribute(node.openingElement.attributes, 'when');
-
-    if (!condition) {
-      throw new Error('Missing "when" attribute on <Show> element');
-    }
-
-    const when = getAttributeValue(condition);
-
-    // check that the condition is an expression
-    if (!when) {
-      throw new Error('The "when" attribute on <Show> element must be an expression');
-    }
-
-    const child = getChildOrFragment(node);
-
-    return `{ ${printNode(stripThis(when))} && ${printNode(child)} }`;
+  Show: ({ when, fallback, children }) => {
+    return fallback
+      ? `{${printNode(stripThis(when))} ? <>${children.join('')}</> : ${fallback}}`
+      : `{${printNode(stripThis(when))} && <>${children.join('')}</>}`;
   },
   Class(name) {
     return `className="${name}"`;

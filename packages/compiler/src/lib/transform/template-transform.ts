@@ -1,4 +1,5 @@
 import {
+  getAttribute,
   getAttributeName,
   getAttributeValue,
   getTagName,
@@ -26,7 +27,10 @@ export interface TemplateTransformer {
   Ref?: (value: ts.JsxAttribute, context: TransformerContext) => string;
   Text: (value: ts.JsxText, context: TransformerContext) => string;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => string;
-  Show: (value: ts.JsxElement, children: string[], context: TransformerContext) => string;
+  Show: (
+    metadata: { node: ts.JsxElement; children: string[]; fallback?: string; when: ts.Expression },
+    context: TransformerContext
+  ) => string;
   Class: (name: string, context: TransformerContext) => string;
   ConditionalClasses: (
     metadata: {
@@ -166,8 +170,43 @@ export class TemplateVisitor {
     return this.transformer.Ref!(attribute, this.context);
   }
 
-  visitShow(value: ts.JsxElement, children: string[]): string {
-    return this.transformer.Show(value, children, this.context);
+  visitShow(node: ts.JsxElement, children: string[]): string {
+    const condition = getAttribute(node.openingElement.attributes, 'when');
+
+    if (!condition) {
+      throw new Error('Missing "when" attribute on <Show> element');
+    }
+
+    const when = getAttributeValue(condition);
+
+    // check that the condition is an expression
+    if (!when) {
+      throw new Error('The "when" attribute on <Show> element must be an expression');
+    }
+
+    const fallbackAttr = getAttribute(node.openingElement.attributes, 'fallback');
+
+    let fallback: string | undefined;
+
+    if (fallbackAttr) {
+      const fallbackValue = getAttributeValue(fallbackAttr);
+
+      if (!fallbackValue) {
+        throw new Error('Fallback attribute must have a value');
+      }
+
+      if (
+        !ts.isJsxElement(fallbackValue) &&
+        !ts.isJsxSelfClosingElement(fallbackValue) &&
+        !ts.isJsxFragment(fallbackValue)
+      ) {
+        throw new Error('Fallback attribute must be a JSX element');
+      }
+
+      fallback = this.visit(fallbackValue!);
+    }
+
+    return this.transformer.Show({ node, children, when, fallback }, this.context);
   }
 
   visitClass(name: string): string {

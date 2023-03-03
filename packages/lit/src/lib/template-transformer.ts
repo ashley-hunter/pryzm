@@ -1,10 +1,4 @@
-import {
-  getAttribute,
-  getAttributeName,
-  getAttributeValue,
-  getTagName,
-  printNode,
-} from '@pryzm/ast-utils';
+import { getAttributeName, getAttributeValue, getTagName, printNode } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
@@ -25,7 +19,7 @@ export const templateTransformer: TemplateTransformer = {
     return `<slot name="${name}"></slot>`;
   },
   Fragment: (value, children) => {
-    return children.join('\n');
+    return children.join('');
   },
   Attribute: attribute => {
     const name = getAttributeName(attribute);
@@ -37,25 +31,16 @@ export const templateTransformer: TemplateTransformer = {
     const value = getAttributeValue(attribute);
     return `\${ref(${printNode(value)})}`;
   },
-  Show(node, children, context) {
+  Show({ when, children, fallback }, context) {
     context.importHandler.addNamedImport('when', 'lit/directives/when.js');
 
-    const condition = getAttribute(node.openingElement.attributes, 'when');
-
-    if (!condition) {
-      throw new Error('Missing "when" attribute on <Show> element');
-    }
-
-    const when = getAttributeValue(condition);
-
-    // check that the condition is an expression
-    if (!when) {
-      throw new Error('Missing expression in "when" attribute on <Show> element');
-    }
-
-    return `\${when(${printNode(when)}, () => html\`${children.join('\n').trim()}\`)}`;
+    return fallback
+      ? `\${when(${printNode(when)}, () => html\`${children
+          .join('')
+          .trim()}\`, () => html\`${fallback}\`)}`
+      : `\${when(${printNode(when)}, () => html\`${children.join('').trim()}\`)}`;
   },
-  Class(name, context) {
+  Class(name) {
     return `class="${name}"`;
   },
   ConditionalClasses({ node }, context) {

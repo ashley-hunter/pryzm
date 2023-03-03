@@ -1,5 +1,4 @@
 import {
-  getAttribute,
   getAttributeName,
   getAttributeValue,
   getTagName,
@@ -27,7 +26,7 @@ export const templateTransformer: TemplateTransformer = {
     return `<slot name="${name}" />`;
   },
   Fragment: (value, children) => {
-    return children.join('\n');
+    return children.join('');
   },
   Attribute: attribute => {
     const name = getAttributeName(attribute);
@@ -39,18 +38,15 @@ export const templateTransformer: TemplateTransformer = {
     const value = getAttributeValue(attribute);
     return `bind:this={${printNode(stripThis(value))}}`;
   },
-  Show(node, children) {
-    const condition = getAttribute(node.openingElement.attributes, 'when');
-
-    if (!condition) {
-      throw new Error('Missing "when" attribute on <Show> element');
-    }
-
-    const when = getAttributeValue(condition);
-
-    // check that the condition is an expression
-    if (!when) {
-      throw new Error('The "when" attribute on <Show> element must be an expression');
+  Show({ when, children, fallback }) {
+    if (fallback) {
+      return `
+      {#if ${printNode(stripThis(when))}}
+        ${children.join('')}
+      {:else}
+        ${fallback}
+      {/if}
+      `;
     }
 
     return `

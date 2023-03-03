@@ -20,7 +20,7 @@
 | **Conditional Styles**          | ❌    | ❌     | ❌  | ❌  |
 | **Loops**                       | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Render**          | ✅    | ✅     | ✅  | ✅  |
-| **Conditional Render Fallback** | ❌    | ❌     | ❌  | ❌  |
+| **Conditional Render Fallback** | ✅    | ✅     | ✅  | ✅  |
 | **Two Way Binding**             | ❌    | ❌     | ❌  | ❌  |
 | **Child Components**            | ❌    | ❌     | ❌  | ❌  |
 | **Multiple Files**              | ❌    | ❌     | ❌  | ❌  |
