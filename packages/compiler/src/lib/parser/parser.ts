@@ -58,6 +58,7 @@ function collectComponentMetadata(
     onDestroy: methods.find(method => method.name.getText() === 'onDestroy'),
     template: getTemplate(component),
     styles: getStyles(component),
+    selector: getSelector(component),
     slots: getSlots(component),
   };
 
@@ -170,6 +171,27 @@ function getMethods(component: ts.ClassDeclaration): ts.MethodDeclaration[] {
   ts.forEachChild(component, visitor);
 
   return methods;
+}
+
+function getSelector(component: ts.ClassDeclaration): string | undefined {
+  // find the component decorator on the component class and extract the value of the selector property
+  const componentDecorator = getDecorator(component, 'Component');
+
+  if (!componentDecorator) {
+    return undefined;
+  }
+
+  const selectorProperty = getDecoratorProperty(componentDecorator, 'selector');
+
+  if (!selectorProperty || !ts.isPropertyAssignment(selectorProperty)) {
+    return undefined;
+  }
+
+  if (ts.isStringLiteral(selectorProperty.initializer)) {
+    return selectorProperty.initializer.text;
+  }
+
+  throw new Error(`Invalid selector value for component ${getComponentName(component)}`);
 }
 
 function getStyles(component: ts.ClassDeclaration): string {

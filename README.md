@@ -28,6 +28,7 @@
 | **Attribute Inheritance**       | ❌    | ❌     | ❌  | ❌  |
 | **Async Methods**               | ❌    | ❌     | ❌  | ❌  |
 | **Methods Generics**            | ❌    | ❌     | ❌  | ❌  |
+| **Define Selector**             | –     | –      | –   | ✅  |
 | **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
 
 \* Only `onInit` and `onDestroy` are currently supported

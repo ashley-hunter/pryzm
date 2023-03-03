@@ -1,3 +1,5 @@
+import { JSX } from '../../jsx-runtime';
+
 export interface Renderable {
-  render(): unknown;
+  render(): JSX.Element;
 }

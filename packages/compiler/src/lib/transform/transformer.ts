@@ -25,6 +25,7 @@ export type TransformerOutput<T extends Transformer> = {
   imports: ts.ImportDeclaration[];
   styles: string;
   name: string;
+  selector: string | undefined;
 };
 
 export type TransformerResult<
@@ -55,6 +56,7 @@ export type TransformerResult<
   slots: TSlotsReturn[];
   imports: ts.ImportDeclaration[];
   styles: string;
+  selector: string | undefined;
   name: string;
 };
 
@@ -288,6 +290,7 @@ export function transform<
     template: template as TTemplateReturn,
     slots: slots as TSlotsReturn[],
     styles,
+    selector: metadata.selector,
     imports: context.importHandler.getImportNodes(),
   };
 

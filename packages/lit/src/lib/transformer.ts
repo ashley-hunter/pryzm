@@ -118,6 +118,11 @@ export const transformer: LitTranformer = {
     return slot;
   },
   PreTransform(metadata, context) {
+    // if there is no selector then throw an error
+    if (!metadata.selector) {
+      throw new Error('Missing selector');
+    }
+
     context.importHandler.addNamedImport('LitElement', 'lit');
     context.importHandler.addNamedImport('customElement', 'lit/decorators.js');
     return metadata;

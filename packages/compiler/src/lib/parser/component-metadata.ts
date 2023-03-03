@@ -16,4 +16,5 @@ export interface ComponentMetadata {
   imports: ts.ImportDeclaration[];
   slots: string[];
   styles: string;
+  selector: string | undefined;
 }
