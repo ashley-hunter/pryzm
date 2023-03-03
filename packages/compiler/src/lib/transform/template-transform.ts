@@ -14,7 +14,7 @@ export interface TemplateTransformer {
     metadata: {
       node: ts.JsxElement;
       tagName: string;
-      attributes: string[];
+      attributes: string;
       children: string;
     },
     context: TransformerContext
@@ -23,7 +23,7 @@ export interface TemplateTransformer {
     metadata: {
       tagName: string;
       node: ts.JsxSelfClosingElement;
-      attributes: string[];
+      attributes: string;
     },
     context: TransformerContext
   ) => string;
@@ -99,9 +99,9 @@ export class TemplateVisitor {
       return this.visitSlot(node.openingElement);
     }
 
-    const attributes = node.openingElement.attributes.properties.map(
-      this.visitAttribute.bind(this)
-    );
+    const attributes = node.openingElement.attributes.properties
+      .map(this.visitAttribute.bind(this))
+      .join(' ');
     const children = node.children.map(this.visit.bind(this)).join('');
 
     // if the element is a show, we need to transform it into a show element
@@ -120,7 +120,7 @@ export class TemplateVisitor {
       return this.visitSlot(node);
     }
 
-    const attributes = node.attributes.properties.map(this.visitAttribute.bind(this));
+    const attributes = node.attributes.properties.map(this.visitAttribute.bind(this)).join(' ');
     return this.transformer.SelfClosingElement({ tagName, node, attributes }, this.context);
   }
 

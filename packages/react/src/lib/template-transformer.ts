@@ -4,12 +4,10 @@ import * as ts from 'typescript';
 
 export const templateTransformer: TemplateTransformer = {
   Element({ tagName, attributes, children }, context) {
-    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes.join(
-      ' '
-    )}>${children}</${tagName}>`;
+    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes}>${children}</${tagName}>`;
   },
   SelfClosingElement({ tagName, attributes }, context) {
-    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes.join(' ')} />`;
+    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes} />`;
   },
   Slot: name => {
     return `{${name === 'default' ? 'children' : name}}`;

@@ -3,10 +3,10 @@ import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
   Element({ tagName, attributes, children }) {
-    return `<${tagName} ${attributes.join(' ')}>${children}</${tagName}>`;
+    return `<${tagName} ${attributes}>${children}</${tagName}>`;
   },
   SelfClosingElement({ tagName, attributes }) {
-    return `<${tagName} ${attributes.join(' ')} />`;
+    return `<${tagName} ${attributes} />`;
   },
   Slot(name) {
     if (name === 'default') {
