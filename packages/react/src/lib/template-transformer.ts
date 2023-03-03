@@ -34,6 +34,9 @@ export const templateTransformer: TemplateTransformer = {
   Class(name) {
     return `className="${name}"`;
   },
+  Ref({ ref }) {
+    return `ref={${printNode(stripThis(ref))}}`;
+  },
   ConditionalClasses({ classes }, context) {
     // if classes is empty, we can just return an empty string
     if (Object.keys(classes).length === 0) {

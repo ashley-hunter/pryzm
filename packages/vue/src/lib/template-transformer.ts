@@ -1,4 +1,4 @@
-import { getAttributeValue, printNode, sanitizeAttribute, stripThis } from '@pryzm/ast-utils';
+import { printNode, sanitizeAttribute, stripQuotes, stripThis } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
@@ -25,12 +25,10 @@ export const templateTransformer: TemplateTransformer = {
       name = `@${name[2].toLowerCase()}${name.slice(3)}`;
     }
 
-    return `${name}="${printNode(stripThis(value))}"`;
+    return `${name}="${stripQuotes(printNode(stripThis(value))!)}"`;
   },
-  Ref(attribute) {
-    const value = getAttributeValue(attribute);
-
-    return `ref="${printNode(stripThis(value))}"`;
+  Ref({ ref }) {
+    return `ref="${printNode(stripThis(ref))}"`;
   },
   Show({ children, when, fallback }) {
     return `

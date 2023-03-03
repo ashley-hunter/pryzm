@@ -33,7 +33,10 @@ export interface TemplateTransformer {
     metadata: { name: string; value: ts.Expression | undefined; node: ts.JsxAttribute },
     context: TransformerContext
   ) => string;
-  Ref?: (value: ts.JsxAttribute, context: TransformerContext) => string;
+  Ref?: (
+    metadata: { node: ts.JsxAttribute; ref: ts.Expression | undefined },
+    context: TransformerContext
+  ) => string;
   Text: (value: ts.JsxText, context: TransformerContext) => string;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => string;
   Show: (
@@ -186,8 +189,8 @@ export class TemplateVisitor {
     return this.transformer.Expression(value, this.context);
   }
 
-  visitRef(attribute: ts.JsxAttribute): string {
-    return this.transformer.Ref!(attribute, this.context);
+  visitRef(node: ts.JsxAttribute): string {
+    return this.transformer.Ref!({ node, ref: getAttributeValue(node) }, this.context);
   }
 
   visitShow(node: ts.JsxElement, children: string): string {

@@ -1,4 +1,4 @@
-import { getAttributeValue, printNode } from '@pryzm/ast-utils';
+import { printNode } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
@@ -9,10 +9,7 @@ export const templateTransformer: TemplateTransformer = {
     return `<${tagName} ${attributes} />`;
   },
   Slot(name) {
-    if (name === 'default') {
-      return `<slot></slot>`;
-    }
-    return `<slot name="${name}"></slot>`;
+    return name === 'default' ? `<slot />` : `<slot name="${name}" />`;
   },
   Fragment(value, children) {
     return children;
@@ -20,9 +17,8 @@ export const templateTransformer: TemplateTransformer = {
   Attribute({ name, value }) {
     return `${name}={${printNode(value)}}`;
   },
-  Ref(attribute) {
-    const value = getAttributeValue(attribute);
-    return `\${ref(${printNode(value)})}`;
+  Ref({ ref }) {
+    return `\${ref(${printNode(ref)})}`;
   },
   Show({ when, children, fallback }, context) {
     context.importHandler.addNamedImport('when', 'lit/directives/when.js');
