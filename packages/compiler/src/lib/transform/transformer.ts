@@ -165,7 +165,7 @@ export function transform<T extends Transformer>(
   const props = metadata.props.map(prop => {
     const metadata: PropertyTransformerMetadata = {
       name: getPropertyName(prop),
-      type: getPropertyType(prop),
+      type: getPropertyType(prop, true),
       isReadonly: isPropertyReadonly(prop),
       initializer: prop.initializer,
       node: prop,

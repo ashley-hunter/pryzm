@@ -19,7 +19,8 @@
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Classes**         | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Styles**          | ❌    | ❌     | ❌  | ❌  |
-| **Loops**                       | ❌    | ❌     | ❌  | ❌  |
+| **Loops**                       | ✅    | ✅     | ✅  | ✅  |
+| **Keyed Loops**                 | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Render**          | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Render Fallback** | ✅    | ✅     | ✅  | ✅  |
 | **Two Way Binding**             | ❌    | ❌     | ❌  | ❌  |

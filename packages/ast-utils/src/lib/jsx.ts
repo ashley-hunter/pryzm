@@ -25,7 +25,11 @@ export function getAttributeName(node: ts.JsxAttribute): string {
   return getText(node.name);
 }
 
-export function getAttributeValue(node: ts.JsxAttribute): ts.Expression | undefined {
+export function getAttributeValue(node: ts.JsxAttribute | undefined): ts.Expression | undefined {
+  if (!node) {
+    return;
+  }
+
   if (node.initializer && ts.isJsxExpression(node.initializer)) {
     return node.initializer.expression;
   }

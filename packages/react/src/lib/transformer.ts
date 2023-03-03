@@ -1,4 +1,4 @@
-import { getPropertyName, inferType, printNode, stripThis } from '@pryzm/ast-utils';
+import { getPropertyName, printNode, stripThis } from '@pryzm/ast-utils';
 import { Transformer, transformTemplate } from '@pryzm/compiler';
 import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
@@ -76,9 +76,6 @@ export const transformer: ReactTransformer = {
     // get the default value of the prop if it exists
     initializer = stripThis(initializer);
 
-    // get the type of the prop if it exists
-    type ??= inferType(initializer, true);
-
     // create the interface property with the type attached
     const interfaceProperty = createInterfaceProperty(name, type, node);
 
@@ -125,9 +122,6 @@ export const transformer: ReactTransformer = {
 
     // get the initializer of the prop if it exists
     initializer = stripThis(initializer);
-
-    // get the type of the prop if it exists
-    type ??= inferType(initializer, false);
 
     // convert the property to a useState hook
     const statement = useState(getter, setter, initializer, type);

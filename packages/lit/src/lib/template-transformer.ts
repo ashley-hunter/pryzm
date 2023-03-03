@@ -18,6 +18,13 @@ export const templateTransformer: TemplateTransformer = {
       ? `\${when(${printNode(when)}, () => html\`${children}\`, () => html\`${fallback}\`)}`
       : `\${when(${printNode(when)}, () => html\`${children}\`)}`;
   },
+  For({ each, itemName, indexName, children }, context) {
+    context.importHandler.addNamedImport('repeat', 'lit/directives/repeat.js');
+
+    return `\${repeat(${printNode(each)}, (${itemName}${
+      indexName ? `, ${indexName}` : ''
+    }) => html\`${children}\`)}`;
+  },
   ConditionalClasses({ node }, context) {
     context.importHandler.addNamedImport('classMap', 'lit/directives/class-map.js');
 

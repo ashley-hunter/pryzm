@@ -22,6 +22,13 @@ export const templateTransformer: TemplateTransformer = {
       {/if}
       `;
   },
+  For({ each, itemName, indexName, children }) {
+    return `
+      {#each ${printNode(stripThis(each))} as ${itemName}${indexName ? `, ${indexName}` : ''}}
+        ${children}
+      {/each}
+      `;
+  },
   ConditionalClasses({ classes }) {
     return Object.entries(classes)
       .map(([name, condition]) => {

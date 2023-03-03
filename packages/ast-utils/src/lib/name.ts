@@ -5,13 +5,16 @@ export function getPropertyName(node: ts.PropertyLikeDeclaration): string {
   return getText(node.name);
 }
 
-export function getPropertyType(node: ts.PropertyLikeDeclaration): ts.TypeNode | undefined {
+export function getPropertyType(
+  node: ts.PropertyLikeDeclaration,
+  infer = false
+): ts.TypeNode | undefined {
   if (ts.isPropertyDeclaration(node)) {
-    return node.type ?? inferType(node.initializer);
+    return node.type ?? (infer ? inferType(node.initializer) : undefined);
   }
 
   if (ts.isGetAccessorDeclaration(node)) {
-    return node.type;
+    return node.type ?? (infer ? inferType(getReturnExpression(node)) : undefined);
   }
 
   return undefined;

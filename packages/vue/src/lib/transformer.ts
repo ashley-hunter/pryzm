@@ -2,6 +2,7 @@ import {
   getPropertyName,
   getPropertyType,
   getReturnExpression,
+  inferType,
   printNode,
   stripThis,
 } from '@pryzm/ast-utils';
@@ -54,7 +55,10 @@ export const transformer: VueTranformer = {
   State({ name, type, initializer }, context) {
     // if the type is a primitive, we use `ref` to create a reactive variable
     // otherwise, we use `reactive` to create a reactive object
-    const reactiveFn = ts.isTypeReferenceNode(type!) ? 'reactive' : 'ref';
+    type ??= inferType(initializer!);
+
+    const reactiveFn =
+      type && (ts.isArrayTypeNode(type) || ts.isTypeLiteralNode(type)) ? 'reactive' : 'ref';
 
     context.importHandler.addNamedImport(reactiveFn, 'vue');
 

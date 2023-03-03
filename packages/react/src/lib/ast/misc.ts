@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 
 export function createInterfaceProperty(
   name: string,
-  type: ts.TypeNode | ts.FunctionTypeNode,
+  type?: ts.TypeNode | ts.FunctionTypeNode,
   source?: ts.PropertyDeclaration
 ): ts.PropertySignature {
   // determine if the property is optional

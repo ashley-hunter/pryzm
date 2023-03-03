@@ -29,6 +29,15 @@ export const templateTransformer: TemplateTransformer = {
     ${fallback ? `<template v-else>${fallback}</template>` : ''}
     `;
   },
+  For({ each, itemName, indexName, children }) {
+    return `
+    <template v-for="(${itemName}${indexName ? `, ${indexName}` : ''}) in ${sanitizeAttribute(
+      printNode(stripThis(each))
+    )}">
+      ${children}
+    </template>
+    `;
+  },
   ConditionalClasses({ classes }) {
     const properties = Object.entries(classes)
       .map(([name, value]) => {

@@ -51,6 +51,11 @@ export const templateTransformer: TemplateTransformer = {
 
     return `className={clsx({${properties.join(', ')}})}`;
   },
+  For({ each, itemName, indexName, children }) {
+    return `{${printNode(stripThis(each))}.map((${itemName}${
+      indexName ? `, ${indexName}` : ''
+    }) => ${children})}`;
+  },
   Expression: value => printNode(stripThis(value)),
   Text: value => value.text,
 };

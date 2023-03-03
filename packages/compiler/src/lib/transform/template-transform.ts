@@ -43,6 +43,19 @@ export interface TemplateTransformer {
     metadata: { node: ts.JsxElement; children: string; fallback?: string; when: ts.Expression },
     context: TransformerContext
   ) => string;
+  For: (
+    metadata: {
+      each: ts.Expression;
+      itemName: string;
+      indexName?: string;
+      children: string;
+      key?: string;
+      node: ts.JsxElement;
+      params: ts.NodeArray<ts.ParameterDeclaration>;
+      body: ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment;
+    },
+    context: TransformerContext
+  ) => string;
   Class?: (name: string, context: TransformerContext) => string;
   ConditionalClasses: (
     metadata: {
@@ -110,6 +123,11 @@ export class TemplateVisitor {
     // if the element is a show, we need to transform it into a show element
     if (tagName === 'Show') {
       return this.visitShow(node, children);
+    }
+
+    // if the element is a for, we need to transform it into a for element
+    if (tagName === 'For') {
+      return this.visitFor(node);
     }
 
     return (
@@ -238,6 +256,61 @@ export class TemplateVisitor {
     }
 
     return this.transformer.Show({ node, children, when, fallback }, this.context);
+  }
+
+  visitFor(node: ts.JsxElement): string {
+    const each = getAttributeValue(getAttribute(node.openingElement.attributes, 'each'));
+
+    // if there is no each attribute, throw an error
+    if (!each) {
+      throw new Error('Missing "each" attribute on <For> element');
+    }
+
+    // find children that are not whitespace
+    const nonWhitespaceChildren = node.children.filter(
+      child => !(ts.isJsxText(child) && child.containsOnlyTriviaWhiteSpaces)
+    );
+
+    // if there is more than one child, throw an error
+    if (nonWhitespaceChildren.length > 1) {
+      throw new Error('<For> element can only have one child');
+    }
+
+    // if the child is not a JSX expression that contains an arrow function, throw an error
+    const repeater = nonWhitespaceChildren[0];
+
+    if (!ts.isJsxExpression(repeater)) {
+      throw new Error('<For> element can only have one child');
+    }
+
+    if (!repeater.expression || !ts.isArrowFunction(repeater.expression)) {
+      throw new Error('<For> element must have an arrow function as its child');
+    }
+
+    // get the parameters of the arrow function
+    const params = repeater.expression.parameters;
+
+    // get the name of the first parameter and use it as the item name
+    const itemName = getText(params[0]);
+
+    // if there is a second parameter, use it as the index name
+    const indexName = params[1] ? getText(params[1]) : undefined;
+
+    // get the body of the arrow function
+    const body = repeater.expression.body;
+
+    // if the body is not a jsx element, a jsx self closing element, or a jsx fragment, throw an error
+    if (!ts.isJsxElement(body) && !ts.isJsxSelfClosingElement(body) && !ts.isJsxFragment(body)) {
+      throw new Error('The body of the arrow function must be a JSX element');
+    }
+
+    // run the body through the transformer
+    const children = this.visit(body);
+
+    return this.transformer.For(
+      { each, itemName, indexName, children, node, body, params },
+      this.context
+    );
   }
 
   visitConditionalClasses(
