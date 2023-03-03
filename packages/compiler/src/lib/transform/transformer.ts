@@ -58,7 +58,7 @@ export interface Transformer<
     context: TransformerContext
   ) => TTemplateReturn;
   Slots: (slot: string, context: TransformerContext) => TSlotsReturn;
-  Styles: (value: string, context: TransformerContext) => string;
+  Styles?: (value: string, context: TransformerContext) => string;
   PreTransform?: (metadata: ComponentMetadata, context: TransformerContext) => void;
   PostTransform?: (
     metadata: TransformerOutput<
