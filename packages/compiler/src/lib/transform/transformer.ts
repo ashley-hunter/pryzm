@@ -28,38 +28,6 @@ export type TransformerOutput<T extends Transformer> = {
   selector: string | undefined;
 };
 
-export type TransformerResult<
-  TPropReturn,
-  TStateReturn,
-  TComputedReturn,
-  TEventReturn,
-  TRefReturn,
-  TMethodReturn,
-  TOnInitReturn,
-  TOnDestroyReturn,
-  TProviderReturn,
-  TInjectReturn,
-  TTemplateReturn,
-  TSlotsReturn
-> = {
-  props: TPropReturn[];
-  states: TStateReturn[];
-  computed: TComputedReturn[];
-  events: TEventReturn[];
-  refs: TRefReturn[];
-  methods: TMethodReturn[];
-  onInit?: TOnInitReturn;
-  onDestroy?: TOnDestroyReturn;
-  providers: TProviderReturn[];
-  injects: TInjectReturn[];
-  template: TTemplateReturn;
-  slots: TSlotsReturn[];
-  imports: ts.ImportDeclaration[];
-  styles: string;
-  selector: string | undefined;
-  name: string;
-};
-
 export interface Transformer<
   TPropReturn = any,
   TStateReturn = any,
@@ -93,7 +61,25 @@ export interface Transformer<
   Styles: (value: string, context: TransformerContext) => string;
   PreTransform?: (metadata: ComponentMetadata, context: TransformerContext) => void;
   PostTransform?: (
-    metadata: TransformerResult<
+    metadata: TransformerOutput<
+      Transformer<
+        TPropReturn,
+        TStateReturn,
+        TComputedReturn,
+        TEventReturn,
+        TRefReturn,
+        TMethodReturn,
+        TOnInitReturn,
+        TOnDestroyReturn,
+        TProviderReturn,
+        TInjectReturn,
+        TTemplateReturn,
+        TSlotsReturn
+      >
+    >,
+    context: TransformerContext
+  ) => TransformerOutput<
+    Transformer<
       TPropReturn,
       TStateReturn,
       TComputedReturn,
@@ -106,67 +92,14 @@ export interface Transformer<
       TInjectReturn,
       TTemplateReturn,
       TSlotsReturn
-    >,
-    context: TransformerContext
-  ) => TransformerResult<
-    TPropReturn,
-    TStateReturn,
-    TComputedReturn,
-    TEventReturn,
-    TRefReturn,
-    TMethodReturn,
-    TOnInitReturn,
-    TOnDestroyReturn,
-    TProviderReturn,
-    TInjectReturn,
-    TTemplateReturn,
-    TSlotsReturn
+    >
   >;
 }
 
-export function transform<
-  TPropReturn,
-  TStateReturn,
-  TComputedReturn,
-  TEventReturn,
-  TRefReturn,
-  TMethodReturn,
-  TOnInitReturn,
-  TOnDestroyReturn,
-  TProviderReturn,
-  TInjectReturn,
-  TTemplateReturn,
-  TSlotsReturn
->(
+export function transform<T extends Transformer>(
   source: string,
-  transformer: Transformer<
-    TPropReturn,
-    TStateReturn,
-    TComputedReturn,
-    TEventReturn,
-    TRefReturn,
-    TMethodReturn,
-    TOnInitReturn,
-    TOnDestroyReturn,
-    TProviderReturn,
-    TInjectReturn,
-    TTemplateReturn,
-    TSlotsReturn
-  >
-): TransformerResult<
-  TPropReturn,
-  TStateReturn,
-  TComputedReturn,
-  TEventReturn,
-  TRefReturn,
-  TMethodReturn,
-  TOnInitReturn,
-  TOnDestroyReturn,
-  TProviderReturn,
-  TInjectReturn,
-  TTemplateReturn,
-  TSlotsReturn
-> {
+  transformer: T
+): TransformerOutput<T> {
   const components = parseFile(source);
 
   if (components.length === 0) {
@@ -262,33 +195,20 @@ export function transform<
   const slots = metadata.slots.map(slot => transformer.Slots?.(slot, context) ?? slot);
   const template = transformer.Template?.(metadata.template, styles, context) ?? metadata.template;
 
-  const result: TransformerResult<
-    TPropReturn,
-    TStateReturn,
-    TComputedReturn,
-    TEventReturn,
-    TRefReturn,
-    TMethodReturn,
-    TOnInitReturn,
-    TOnDestroyReturn,
-    TProviderReturn,
-    TInjectReturn,
-    TTemplateReturn,
-    TSlotsReturn
-  > = {
+  const result: TransformerOutput<T> = {
     ...metadata,
-    props: props as TPropReturn[],
-    states: states as TStateReturn[],
-    computed: computed as TComputedReturn[],
-    events: events as TEventReturn[],
-    methods: methods as TMethodReturn[],
-    onInit: onInit as TOnInitReturn,
-    onDestroy: onDestroy as TOnDestroyReturn,
-    refs: refs as TRefReturn[],
-    providers: providers as TProviderReturn[],
-    injects: injects as TInjectReturn[],
-    template: template as TTemplateReturn,
-    slots: slots as TSlotsReturn[],
+    props,
+    states,
+    computed,
+    events,
+    methods,
+    onInit,
+    onDestroy,
+    refs,
+    providers,
+    injects,
+    template,
+    slots,
     styles,
     selector: metadata.selector,
     imports: context.importHandler.getImportNodes(),
