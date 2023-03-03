@@ -13,7 +13,7 @@
 | **Refs**                        | ✅    | ✅     | ✅  | ✅  |
 | **Slots**                       | ✅    | ✅     | ✅  | ✅  |
 | **Retain Imports**              | ✅    | ✅     | ✅  | ✅  |
-| **Component Ref**               | ❌    | –      | –   | –   |
+| **Forward Ref**                 | ❌    | –      | –   | –   |
 | **Comment Extraction**          | ❌    | ❌     | ❌  | ❌  |
 | **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
@@ -24,8 +24,6 @@
 | **Conditional Render**          | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Render Fallback** | ✅    | ✅     | ✅  | ✅  |
 | **Child Components**            | ❌    | ❌     | ❌  | ❌  |
-| **Multiple Files**              | ❌    | ❌     | ❌  | ❌  |
-| **Exporting**                   | ❌    | ❌     | ❌  | ❌  |
 | **Attribute Inheritance**       | ❌    | ❌     | ❌  | ❌  |
 | **Async Methods**               | ❌    | ❌     | ❌  | ❌  |
 | **Component Generics**          | ❌    | ❌     | ❌  | ❌  |
@@ -35,8 +33,10 @@
 
 ### Core and Compiler
 
-| Feature         | Compiler | Runtime |
-| --------------- | -------- | ------- |
-| **JSX Runtime** | –        | ❌      |
+| Feature                   | Compiler | Runtime |
+| ------------------------- | -------- | ------- |
+| **JSX Runtime**           | –        | ❌      |
+| **Writing to FileSystem** | ❌       | –       |
+| **Multiple Files**        | ❌       | ❌      |
 
 \* Only `onInit` and `onDestroy` are currently supported
