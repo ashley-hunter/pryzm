@@ -76,7 +76,7 @@ export class App {
       case 'react':
         return 'react-ts';
       case 'vue':
-        return 'vue-ts';
+        return 'vite-vue';
       case 'svelte':
         return 'vite-svelte';
       case 'lit':

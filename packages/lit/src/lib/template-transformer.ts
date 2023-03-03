@@ -6,6 +6,11 @@ export const templateTransformer: TemplateTransformer = {
     return name === 'default' ? `<slot />` : `<slot name="${name}" />`;
   },
   Attribute({ name, value }) {
+    // if the attribute is named "key" then do no render it
+    if (name === 'key') {
+      return '';
+    }
+
     return `${name}={${printNode(value)}}`;
   },
   Ref({ ref }) {
@@ -18,10 +23,12 @@ export const templateTransformer: TemplateTransformer = {
       ? `\${when(${printNode(when)}, () => html\`${children}\`, () => html\`${fallback}\`)}`
       : `\${when(${printNode(when)}, () => html\`${children}\`)}`;
   },
-  For({ each, itemName, indexName, children }, context) {
+  For({ each, itemName, indexName, children, key }, context) {
     context.importHandler.addNamedImport('repeat', 'lit/directives/repeat.js');
 
-    return `\${repeat(${printNode(each)}, (${itemName}${
+    const keyFn = key ? `, (${itemName}) => ${key}` : '';
+
+    return `\${repeat(${printNode(each)} ${keyFn}, (${itemName}${
       indexName ? `, ${indexName}` : ''
     }) => html\`${children}\`)}`;
   },

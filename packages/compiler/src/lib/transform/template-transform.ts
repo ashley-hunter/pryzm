@@ -4,6 +4,7 @@ import {
   getAttributeValue,
   getTagName,
   getText,
+  printNode,
   stripParentNode,
 } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
@@ -30,7 +31,11 @@ export interface TemplateTransformer {
   Slot(name: string, context: TransformerContext): string;
   Fragment?: (value: ts.JsxFragment, children: string, context: TransformerContext) => string;
   Attribute: (
-    metadata: { name: string; value: ts.Expression | undefined; node: ts.JsxAttribute },
+    metadata: {
+      name: string;
+      value: ts.Expression | undefined;
+      node: ts.JsxAttribute;
+    },
     context: TransformerContext
   ) => string;
   Ref?: (
@@ -53,6 +58,7 @@ export interface TemplateTransformer {
       node: ts.JsxElement;
       params: ts.NodeArray<ts.ParameterDeclaration>;
       body: ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment;
+      keyNode?: ts.Expression;
     },
     context: TransformerContext
   ) => string;
@@ -307,8 +313,20 @@ export class TemplateVisitor {
     // run the body through the transformer
     const children = this.visit(body);
 
+    // find the root element of the body and check if it has a key attribute
+    let key: string | undefined;
+    let keyNode: ts.Expression | undefined;
+
+    if (ts.isJsxElement(body)) {
+      keyNode = getAttributeValue(getAttribute(body.openingElement.attributes, 'key'));
+      key = printNode(keyNode);
+    } else if (ts.isJsxSelfClosingElement(body)) {
+      keyNode = getAttributeValue(getAttribute(body.attributes, 'key'));
+      key = printNode(keyNode);
+    }
+
     return this.transformer.For(
-      { each, itemName, indexName, children, node, body, params },
+      { each, itemName, indexName, children, node, body, params, key, keyNode },
       this.context
     );
   }

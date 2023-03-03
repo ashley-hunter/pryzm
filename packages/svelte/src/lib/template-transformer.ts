@@ -9,6 +9,11 @@ export const templateTransformer: TemplateTransformer = {
     return `<slot name="${name}" />`;
   },
   Attribute({ name, value }) {
+    // if the attribute is named "key" then do no render it
+    if (name === 'key') {
+      return '';
+    }
+
     return `${name}={${printNode(stripThis(value))}}`;
   },
   Ref({ ref }) {
@@ -22,9 +27,11 @@ export const templateTransformer: TemplateTransformer = {
       {/if}
       `;
   },
-  For({ each, itemName, indexName, children }) {
+  For({ each, itemName, indexName, children, key }) {
     return `
-      {#each ${printNode(stripThis(each))} as ${itemName}${indexName ? `, ${indexName}` : ''}}
+      {#each ${printNode(stripThis(each))} as ${itemName}${indexName ? `, ${indexName}` : ''}${
+      key ? ` (${key})` : ''
+    }}
         ${children}
       {/each}
       `;

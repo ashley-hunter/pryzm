@@ -20,10 +20,9 @@
 | **Conditional Classes**         | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Styles**          | ❌    | ❌     | ❌  | ❌  |
 | **Loops**                       | ✅    | ✅     | ✅  | ✅  |
-| **Keyed Loops**                 | ❌    | ❌     | ❌  | ❌  |
+| **Keyed Loops**                 | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Render**          | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Render Fallback** | ✅    | ✅     | ✅  | ✅  |
-| **Two Way Binding**             | ❌    | ❌     | ❌  | ❌  |
 | **Child Components**            | ❌    | ❌     | ❌  | ❌  |
 | **Multiple Files**              | ❌    | ❌     | ❌  | ❌  |
 | **Exporting**                   | ❌    | ❌     | ❌  | ❌  |
