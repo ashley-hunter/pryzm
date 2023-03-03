@@ -15,7 +15,7 @@ export interface TemplateTransformer {
       node: ts.JsxElement;
       tagName: string;
       attributes: string[];
-      children: string[];
+      children: string;
     },
     context: TransformerContext
   ) => string;
@@ -28,13 +28,13 @@ export interface TemplateTransformer {
     context: TransformerContext
   ) => string;
   Slot(name: string, context: TransformerContext): string;
-  Fragment: (value: ts.JsxFragment, children: string[], context: TransformerContext) => string;
+  Fragment: (value: ts.JsxFragment, children: string, context: TransformerContext) => string;
   Attribute: (value: ts.JsxAttribute, context: TransformerContext) => string;
   Ref?: (value: ts.JsxAttribute, context: TransformerContext) => string;
   Text: (value: ts.JsxText, context: TransformerContext) => string;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => string;
   Show: (
-    metadata: { node: ts.JsxElement; children: string[]; fallback?: string; when: ts.Expression },
+    metadata: { node: ts.JsxElement; children: string; fallback?: string; when: ts.Expression },
     context: TransformerContext
   ) => string;
   Class: (name: string, context: TransformerContext) => string;
@@ -99,7 +99,7 @@ export class TemplateVisitor {
     const attributes = node.openingElement.attributes.properties.map(
       this.visitAttribute.bind(this)
     );
-    const children = node.children.map(this.visit.bind(this));
+    const children = node.children.map(this.visit.bind(this)).join('');
 
     // if the element is a show, we need to transform it into a show element
     if (tagName === 'Show') {
@@ -122,7 +122,7 @@ export class TemplateVisitor {
   }
 
   visitFragment(value: ts.JsxFragment) {
-    const children = value.children.map(this.visit.bind(this));
+    const children = value.children.map(this.visit.bind(this)).join('');
     return this.transformer.Fragment(value, children, this.context);
   }
 
@@ -180,7 +180,7 @@ export class TemplateVisitor {
     return this.transformer.Ref!(attribute, this.context);
   }
 
-  visitShow(node: ts.JsxElement, children: string[]): string {
+  visitShow(node: ts.JsxElement, children: string): string {
     const condition = getAttribute(node.openingElement.attributes, 'when');
 
     if (!condition) {

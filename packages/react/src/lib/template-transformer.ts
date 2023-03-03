@@ -4,9 +4,9 @@ import * as ts from 'typescript';
 
 export const templateTransformer: TemplateTransformer = {
   Element({ tagName, attributes, children }, context) {
-    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes.join(' ')}>${children.join(
-      ''
-    )}</${tagName}>`;
+    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes.join(
+      ' '
+    )}>${children}</${tagName}>`;
   },
   SelfClosingElement({ tagName, attributes }, context) {
     return `<${tagName} ${context.data.get('id') ?? ''} ${attributes.join(' ')} />`;
@@ -15,7 +15,7 @@ export const templateTransformer: TemplateTransformer = {
     return `{${name === 'default' ? 'children' : name}}`;
   },
   Fragment(_, children) {
-    return `<>${children.join('')}</>`;
+    return `<>${children}</>`;
   },
   Attribute(value) {
     let attributeName = getAttributeName(value);
@@ -33,8 +33,8 @@ export const templateTransformer: TemplateTransformer = {
   },
   Show({ when, fallback, children }) {
     return fallback
-      ? `{${printNode(stripThis(when))} ? <>${children.join('')}</> : ${fallback}}`
-      : `{${printNode(stripThis(when))} && <>${children.join('')}</>}`;
+      ? `{${printNode(stripThis(when))} ? <>${children}</> : ${fallback}}`
+      : `{${printNode(stripThis(when))} && <>${children}</>}`;
   },
   Class(name) {
     return `className="${name}"`;

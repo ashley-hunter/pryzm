@@ -9,7 +9,7 @@ import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
   Element({ tagName, attributes, children }) {
-    return `<${tagName} ${attributes.join(' ')}>${children.join('')}</${tagName}>`;
+    return `<${tagName} ${attributes.join(' ')}>${children}</${tagName}>`;
   },
   SelfClosingElement({ tagName, attributes }) {
     return `<${tagName} ${attributes.join(' ')} />`;
@@ -21,7 +21,7 @@ export const templateTransformer: TemplateTransformer = {
     return `<slot name="${name}"></slot>`;
   },
   Fragment(value, children) {
-    return children.join('');
+    return children;
   },
   Attribute(attribute) {
     let name = getAttributeName(attribute);
@@ -44,7 +44,7 @@ export const templateTransformer: TemplateTransformer = {
   Show({ children, when, fallback }) {
     return `
     <template v-if="${sanitizeAttribute(printNode(stripThis(when)))}">
-      ${children.join('')}
+      ${children}
     </template>
     ${fallback ? `<template v-else>${fallback}</template>` : ''}
     `;

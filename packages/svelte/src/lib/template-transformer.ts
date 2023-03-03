@@ -9,7 +9,7 @@ import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
   Element({ tagName, attributes, children }) {
-    return `<${tagName} ${attributes.join(' ')}>${children.join('')}</${tagName}>`;
+    return `<${tagName} ${attributes.join(' ')}>${children}</${tagName}>`;
   },
   SelfClosingElement({ tagName, attributes }) {
     return `<${tagName} ${attributes.join(' ')} />`;
@@ -21,7 +21,7 @@ export const templateTransformer: TemplateTransformer = {
     return `<slot name="${name}" />`;
   },
   Fragment(value, children) {
-    return children.join('');
+    return children;
   },
   Attribute(attribute) {
     const name = getAttributeName(attribute);
@@ -34,21 +34,12 @@ export const templateTransformer: TemplateTransformer = {
     return `bind:this={${printNode(stripThis(value))}}`;
   },
   Show({ when, children, fallback }) {
-    if (fallback) {
-      return `
+    return `
       {#if ${printNode(stripThis(when))}}
-        ${children.join('')}
-      {:else}
-        ${fallback}
+        ${children}
+        ${fallback ? `{:else}\n${fallback}` : ``}
       {/if}
       `;
-    }
-
-    return `
-    {#if ${printNode(stripThis(when))}}
-      ${children.join('')}
-    {/if}
-    `;
   },
   Class(name) {
     return `class="${name}"`;

@@ -3,7 +3,7 @@ import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
   Element({ tagName, attributes, children }) {
-    return `<${tagName} ${attributes.join(' ')}>${children.join('')}</${tagName}>`;
+    return `<${tagName} ${attributes.join(' ')}>${children}</${tagName}>`;
   },
   SelfClosingElement({ tagName, attributes }) {
     return `<${tagName} ${attributes.join(' ')} />`;
@@ -15,7 +15,7 @@ export const templateTransformer: TemplateTransformer = {
     return `<slot name="${name}"></slot>`;
   },
   Fragment(value, children) {
-    return children.join('');
+    return children;
   },
   Attribute(attribute) {
     const name = getAttributeName(attribute);
@@ -31,10 +31,8 @@ export const templateTransformer: TemplateTransformer = {
     context.importHandler.addNamedImport('when', 'lit/directives/when.js');
 
     return fallback
-      ? `\${when(${printNode(when)}, () => html\`${children
-          .join('')
-          .trim()}\`, () => html\`${fallback}\`)}`
-      : `\${when(${printNode(when)}, () => html\`${children.join('').trim()}\`)}`;
+      ? `\${when(${printNode(when)}, () => html\`${children}\`, () => html\`${fallback}\`)}`
+      : `\${when(${printNode(when)}, () => html\`${children}\`)}`;
   },
   Class(name) {
     return `class="${name}"`;
