@@ -1,4 +1,4 @@
-import { getAttributeName, getAttributeValue, printNode } from '@pryzm/ast-utils';
+import { getAttributeValue, printNode } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
@@ -17,10 +17,7 @@ export const templateTransformer: TemplateTransformer = {
   Fragment(value, children) {
     return children;
   },
-  Attribute(attribute) {
-    const name = getAttributeName(attribute);
-    const value = getAttributeValue(attribute);
-
+  Attribute({ name, value }) {
     return `${name}={${printNode(value)}}`;
   },
   Ref(attribute) {

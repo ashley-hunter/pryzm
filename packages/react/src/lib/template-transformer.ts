@@ -1,4 +1,4 @@
-import { getAttributeName, getAttributeValue, printNode, stripThis } from '@pryzm/ast-utils';
+import { printNode, stripThis } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
 
@@ -17,19 +17,16 @@ export const templateTransformer: TemplateTransformer = {
   Fragment(_, children) {
     return `<>${children}</>`;
   },
-  Attribute(value) {
-    let attributeName = getAttributeName(value);
-    const attributeValue = getAttributeValue(value);
-
+  Attribute({ name, value }) {
     // ensure the name is in camelCase
-    attributeName = attributeName.replace(/-([a-z])/g, g => g[1].toUpperCase());
+    name = name.replace(/-([a-z])/g, g => g[1].toUpperCase());
 
-    // if the attribute value is a string literal, we can just print it
-    if (attributeValue && ts.isStringLiteral(attributeValue)) {
-      return `${attributeName}="${attributeValue.text}"`;
+    // if the attribute value is a string literal, we can just print it - this remove unneeded braces
+    if (value && ts.isStringLiteral(value)) {
+      return `${name}="${value.text}"`;
     }
 
-    return `${attributeName}={${printNode(stripThis(attributeValue))}}`;
+    return `${name}={${printNode(stripThis(value))}}`;
   },
   Show({ when, fallback, children }) {
     return fallback

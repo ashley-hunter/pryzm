@@ -29,7 +29,10 @@ export interface TemplateTransformer {
   ) => string;
   Slot(name: string, context: TransformerContext): string;
   Fragment: (value: ts.JsxFragment, children: string, context: TransformerContext) => string;
-  Attribute: (value: ts.JsxAttribute, context: TransformerContext) => string;
+  Attribute: (
+    metadata: { name: string; value: ts.Expression | undefined; node: ts.JsxAttribute },
+    context: TransformerContext
+  ) => string;
   Ref?: (value: ts.JsxAttribute, context: TransformerContext) => string;
   Text: (value: ts.JsxText, context: TransformerContext) => string;
   Expression: (value: ts.JsxExpression, context: TransformerContext) => string;
@@ -126,46 +129,53 @@ export class TemplateVisitor {
     return this.transformer.Fragment(value, children, this.context);
   }
 
-  visitAttribute(value: ts.JsxAttributeLike): string {
-    if (ts.isJsxSpreadAttribute(value)) {
+  visitAttribute(node: ts.JsxAttributeLike): string {
+    if (ts.isJsxSpreadAttribute(node)) {
       throw new Error('Spread attributes are not supported as they cannot be statically analyzed');
     }
 
-    if (getAttributeName(value) === 'class') {
-      const classValue = getAttributeValue(value);
+    if (getAttributeName(node) === 'class') {
+      this.visitClass(node);
+    }
 
-      if (!classValue) {
-        return '';
-      }
+    if (getAttributeName(node) === 'ref' && this.transformer.Ref) {
+      return this.visitRef(node);
+    }
 
-      if (ts.isStringLiteral(classValue)) {
-        return this.visitClass(classValue.text);
-      }
+    const name = getAttributeName(node);
+    const value = getAttributeValue(node);
 
-      if (ts.isObjectLiteralExpression(classValue)) {
-        const classes: Record<string, ts.Expression> = {};
+    return this.transformer.Attribute({ node, name, value }, this.context);
+  }
 
-        classValue.properties.forEach(p => {
-          if (ts.isPropertyAssignment(p)) {
-            const name = getText(p.name);
+  visitClass(node: ts.JsxAttribute) {
+    const classValue = getAttributeValue(node);
 
-            if (name) {
-              classes[name] = p.initializer;
-            }
+    if (!classValue) {
+      return '';
+    }
+
+    if (ts.isStringLiteral(classValue)) {
+      return this.transformer.Class(classValue.text, this.context);
+    }
+
+    if (ts.isObjectLiteralExpression(classValue)) {
+      const classes: Record<string, ts.Expression> = {};
+
+      classValue.properties.forEach(p => {
+        if (ts.isPropertyAssignment(p)) {
+          const name = getText(p.name);
+
+          if (name) {
+            classes[name] = p.initializer;
           }
-        });
+        }
+      });
 
-        return this.visitConditionalClasses(classes, classValue);
-      }
-
-      throw new Error('Invalid class attribute');
+      return this.visitConditionalClasses(classes, classValue);
     }
 
-    if (getAttributeName(value) === 'ref' && this.transformer.Ref) {
-      return this.visitRef(value);
-    }
-
-    return this.transformer.Attribute(value, this.context);
+    throw new Error('Invalid class attribute');
   }
 
   visitChildren(value: ts.NodeArray<ts.JsxChild>) {
@@ -217,10 +227,6 @@ export class TemplateVisitor {
     }
 
     return this.transformer.Show({ node, children, when, fallback }, this.context);
-  }
-
-  visitClass(name: string): string {
-    return this.transformer.Class(name, this.context);
   }
 
   visitConditionalClasses(

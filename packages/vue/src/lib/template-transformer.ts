@@ -1,10 +1,4 @@
-import {
-  getAttributeName,
-  getAttributeValue,
-  printNode,
-  sanitizeAttribute,
-  stripThis,
-} from '@pryzm/ast-utils';
+import { getAttributeValue, printNode, sanitizeAttribute, stripThis } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
@@ -23,10 +17,7 @@ export const templateTransformer: TemplateTransformer = {
   Fragment(value, children) {
     return children;
   },
-  Attribute(attribute) {
-    let name = getAttributeName(attribute);
-    const value = getAttributeValue(attribute);
-
+  Attribute({ name, value }) {
     // if the attribute name starts with `on` then it is an event and we need to convert it to `@`
     // the first letter may then be upper case which we need to convert to lower case
     // e.g `onClick` becomes `@click`
