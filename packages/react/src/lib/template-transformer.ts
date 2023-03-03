@@ -1,35 +1,23 @@
-import {
-  getAttributeName,
-  getAttributeValue,
-  getTagName,
-  printNode,
-  stripThis,
-} from '@pryzm/ast-utils';
+import { getAttributeName, getAttributeValue, printNode, stripThis } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
 
 export const templateTransformer: TemplateTransformer = {
-  Element: (value, attributes, children, context) => {
-    const id = context.data.get('id') ?? '';
-
-    const tagName = getTagName(value);
-
-    return `<${tagName} ${id} ${attributes.join(' ')}>${children.join('\n')}</${tagName}>`;
+  Element({ tagName, attributes, children }, context) {
+    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes.join(' ')}>${children.join(
+      ''
+    )}</${tagName}>`;
   },
-  SelfClosingElement: (value, attributes, context) => {
-    const id = context.data.get('id') ?? '';
-
-    const tagName = getTagName(value);
-
-    return `<${tagName} ${id} ${attributes.join(' ')} />`;
+  SelfClosingElement({ tagName, attributes }, context) {
+    return `<${tagName} ${context.data.get('id') ?? ''} ${attributes.join(' ')} />`;
   },
   Slot: name => {
     return `{${name === 'default' ? 'children' : name}}`;
   },
-  Fragment: (_, children) => {
+  Fragment(_, children) {
     return `<>${children.join('')}</>`;
   },
-  Attribute: value => {
+  Attribute(value) {
     let attributeName = getAttributeName(value);
     const attributeValue = getAttributeValue(value);
 
@@ -43,7 +31,7 @@ export const templateTransformer: TemplateTransformer = {
 
     return `${attributeName}={${printNode(stripThis(attributeValue))}}`;
   },
-  Show: ({ when, fallback, children }) => {
+  Show({ when, fallback, children }) {
     return fallback
       ? `{${printNode(stripThis(when))} ? <>${children.join('')}</> : ${fallback}}`
       : `{${printNode(stripThis(when))} && <>${children.join('')}</>}`;

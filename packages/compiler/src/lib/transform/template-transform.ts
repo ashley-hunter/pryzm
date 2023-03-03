@@ -11,14 +11,20 @@ import { TransformerContext } from './transformer';
 
 export interface TemplateTransformer {
   Element: (
-    value: ts.JsxElement,
-    attributes: string[],
-    children: string[],
+    metadata: {
+      node: ts.JsxElement;
+      tagName: string;
+      attributes: string[];
+      children: string[];
+    },
     context: TransformerContext
   ) => string;
   SelfClosingElement: (
-    value: ts.JsxSelfClosingElement,
-    attributes: string[],
+    metadata: {
+      tagName: string;
+      node: ts.JsxSelfClosingElement;
+      attributes: string[];
+    },
     context: TransformerContext
   ) => string;
   Slot(name: string, context: TransformerContext): string;
@@ -82,33 +88,37 @@ export class TemplateVisitor {
     return this.transformer.Text(value, this.context);
   }
 
-  visitElement(value: ts.JsxElement) {
+  visitElement(node: ts.JsxElement) {
+    const tagName = getTagName(node);
+
     // if the element is a slot, we need to transform it into a slot element
-    if (getTagName(value) === 'slot') {
-      return this.visitSlot(value.openingElement);
+    if (tagName === 'slot') {
+      return this.visitSlot(node.openingElement);
     }
 
-    const attributes = value.openingElement.attributes.properties.map(
+    const attributes = node.openingElement.attributes.properties.map(
       this.visitAttribute.bind(this)
     );
-    const children = value.children.map(this.visit.bind(this));
+    const children = node.children.map(this.visit.bind(this));
 
     // if the element is a show, we need to transform it into a show element
-    if (getTagName(value) === 'Show') {
-      return this.visitShow(value, children);
+    if (tagName === 'Show') {
+      return this.visitShow(node, children);
     }
 
-    return this.transformer.Element(value, attributes, children, this.context);
+    return this.transformer.Element({ node, attributes, children, tagName }, this.context);
   }
 
-  visitSelfClosingElement(value: ts.JsxSelfClosingElement) {
+  visitSelfClosingElement(node: ts.JsxSelfClosingElement) {
+    const tagName = getTagName(node);
+
     // if the element is a slot, we need to transform it into a slot element
-    if (getTagName(value) === 'slot') {
-      return this.visitSlot(value);
+    if (tagName === 'slot') {
+      return this.visitSlot(node);
     }
 
-    const attributes = value.attributes.properties.map(this.visitAttribute.bind(this));
-    return this.transformer.SelfClosingElement(value, attributes, this.context);
+    const attributes = node.attributes.properties.map(this.visitAttribute.bind(this));
+    return this.transformer.SelfClosingElement({ tagName, node, attributes }, this.context);
   }
 
   visitFragment(value: ts.JsxFragment) {

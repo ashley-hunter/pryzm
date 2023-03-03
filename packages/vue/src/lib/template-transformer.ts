@@ -1,7 +1,6 @@
 import {
   getAttributeName,
   getAttributeValue,
-  getTagName,
   printNode,
   sanitizeAttribute,
   stripThis,
@@ -9,14 +8,10 @@ import {
 import { TemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer: TemplateTransformer = {
-  Element: (value, attributes, children) => {
-    const tagName = getTagName(value);
-
-    return `<${tagName} ${attributes.join(' ')}>${children.join('\n')}</${tagName}>`;
+  Element({ tagName, attributes, children }) {
+    return `<${tagName} ${attributes.join(' ')}>${children.join('')}</${tagName}>`;
   },
-  SelfClosingElement: (value, attributes) => {
-    const tagName = getTagName(value);
-
+  SelfClosingElement({ tagName, attributes }) {
     return `<${tagName} ${attributes.join(' ')} />`;
   },
   Slot(name) {
@@ -25,10 +20,10 @@ export const templateTransformer: TemplateTransformer = {
     }
     return `<slot name="${name}"></slot>`;
   },
-  Fragment: (value, children) => {
+  Fragment(value, children) {
     return children.join('');
   },
-  Attribute: attribute => {
+  Attribute(attribute) {
     let name = getAttributeName(attribute);
     const value = getAttributeValue(attribute);
 
