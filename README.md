@@ -11,7 +11,8 @@
 | **Events**                      | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Styles**                      | ✅    | ✅     | ✅  | ✅  |
 | **Refs**                        | ✅    | ✅     | ✅  | ✅  |
-| **Slots/Content Projection**    | ✅    | ✅     | ✅  | ✅  |
+| **Slots**                       | ✅    | ✅     | ✅  | ✅  |
+| **Named Slots**                 | ✅    | ✅     | ✅  | ✅  |
 | **Retain Imports**              | ✅    | ✅     | ✅  | ✅  |
 | **Forward Ref**                 | ❌    | –      | –   | –   |
 | **Comment Extraction**          | ❌    | ❌     | ❌  | ❌  |
