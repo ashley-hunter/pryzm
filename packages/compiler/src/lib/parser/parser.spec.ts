@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { parseFile } from './parser';
 
 describe('Parser', () => {
@@ -271,7 +270,7 @@ describe('Parser', () => {
     `;
 
     expect(() => parseFile(code)).toThrowError(
-      'Cannot use @Computed() on a setter, use a getter instead.'
+      'Cannot use @Computed() on a setter. Use a getter instead.'
     );
   });
 
@@ -288,7 +287,7 @@ describe('Parser', () => {
     `;
 
     expect(() => parseFile(code)).toThrowError(
-      'Cannot use @Computed() on a property, use a getter instead.'
+      'Cannot use @Computed() on a property. Use a getter instead.'
     );
   });
 
@@ -741,5 +740,65 @@ describe('Parser', () => {
     `;
 
     expect(() => parseFile(code)).toThrowError('Dependency "service" must be readonly');
+  });
+
+  it('should find a self closing slot with no name', () => {
+    const code = `
+      @Component()
+      export class Button {
+        render() {
+          return <button><slot /></button>;
+        }
+      }
+    `;
+
+    const metadata = parseFile(code);
+    expect(metadata[0].slots.length).toBe(1);
+    expect(metadata[0].slots[0]).toBe('default');
+  });
+
+  it('should find a self closing slot with a name', () => {
+    const code = `
+      @Component()
+      export class Button {
+        render() {
+          return <button><slot name="icon" /></button>;
+        }
+      }
+    `;
+
+    const metadata = parseFile(code);
+    expect(metadata[0].slots.length).toBe(1);
+    expect(metadata[0].slots[0]).toBe('icon');
+  });
+
+  it('should find a slot with no name', () => {
+    const code = `
+      @Component()
+      export class Button {
+        render() {
+          return <button><slot></slot></button>;
+        }
+      }
+    `;
+
+    const metadata = parseFile(code);
+    expect(metadata[0].slots.length).toBe(1);
+    expect(metadata[0].slots[0]).toBe('default');
+  });
+
+  it('should find a slot with a name', () => {
+    const code = `
+      @Component()
+      export class Button {
+        render() {
+          return <button><slot name="icon"></slot></button>;
+        }
+      }
+    `;
+
+    const metadata = parseFile(code);
+    expect(metadata[0].slots.length).toBe(1);
+    expect(metadata[0].slots[0]).toBe('icon');
   });
 });

@@ -30,10 +30,17 @@
       }
     },
     "test": {
-      "executor": "@nrwl/vite:test",
-      "outputs": ["{projectRoot}/coverage"],
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
+        "jestConfig": "packages/compiler/jest.config.ts",
         "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
       }
     }
   },

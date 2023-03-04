@@ -1,10 +1,11 @@
+import { tsquery } from '@phenomnomnominal/tsquery';
 import { getDecorator, getDecoratorProperty, getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { toLowerCamelCase } from '../utils/names';
 import { ComponentMetadata } from './component-metadata';
 
 export function parseFile(code: string): ComponentMetadata[] {
-  const sourceFile = ts.createSourceFile('', code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const sourceFile = tsquery.ast(code, undefined, ts.ScriptKind.TSX);
 
   return parseSourceFile(sourceFile);
 }
@@ -17,17 +18,10 @@ export function parseSourceFile(sourceFile: ts.SourceFile): ComponentMetadata[] 
 
 function getComponents(ast: ts.Node): ts.ClassDeclaration[] {
   // find all the nodes that are classes with a Component decorator
-  const classes: ts.ClassDeclaration[] = [];
-
-  const visitor = (node: ts.Node) => {
-    if (ts.isClassDeclaration(node) && hasDecorator(node, 'Component')) {
-      classes.push(node);
-    }
-
-    ts.forEachChild(node, visitor);
-  };
-
-  ts.forEachChild(ast, visitor);
+  const classes = tsquery(
+    ast,
+    'ClassDeclaration:has(Decorator:has(CallExpression[expression.name="Component"]))'
+  ) as ts.ClassDeclaration[];
 
   return classes;
 }
@@ -44,7 +38,7 @@ function collectComponentMetadata(
   const lifecycleMethods = ['onInit', 'onDestroy'];
 
   const metadata: ComponentMetadata = {
-    imports: getImports(sourceFile),
+    imports: tsquery<ts.ImportDeclaration>(sourceFile, 'ImportDeclaration'),
     name: getComponentName(component),
     props: getPropertiesWithDecorator(component, 'Prop'),
     state: getPropertiesWithDecorator(component, 'State'),
@@ -79,48 +73,35 @@ function getComponentName(component: ts.ClassDeclaration): string {
   return getText(component.name);
 }
 
-function getImports(sourceFile: ts.SourceFile): ts.ImportDeclaration[] {
-  const imports: ts.ImportDeclaration[] = [];
-
-  const visitor = (node: ts.Node) => {
-    if (ts.isImportDeclaration(node)) {
-      imports.push(node);
-    }
-
-    ts.forEachChild(node, visitor);
-  };
-
-  ts.forEachChild(sourceFile, visitor);
-
-  return imports;
-}
-
 function getPropertiesWithDecorator(
   component: ts.ClassDeclaration,
   decoratorName: string
 ): ts.PropertyDeclaration[] {
   // find all the nodes that are properties with a Prop decorator
-  const properties: ts.PropertyDeclaration[] = [];
+  const properties = tsquery<ts.PropertyDeclaration>(
+    component,
+    `PropertyDeclaration:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
+  );
 
-  const visitor = (node: ts.Node) => {
-    if (ts.isPropertyDeclaration(node) && hasDecorator(node, decoratorName)) {
-      properties.push(node);
-    }
+  // find any get accessor that has a Prop decorator and report an error
+  const getters = tsquery<ts.GetAccessorDeclaration>(
+    component,
+    `GetAccessor:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
+  );
 
-    // find any get accessor that has a Prop decorator and report an error
-    if (ts.isGetAccessor(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(`Cannot use @${decoratorName}() on a getter. Use a property instead.`);
-    }
+  if (getters.length > 0) {
+    throw new Error(`Cannot use @${decoratorName}() on a getter. Use a property instead.`);
+  }
 
-    // find any set accessor that has a Prop decorator and report an error
-    if (ts.isSetAccessor(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(`Cannot use @${decoratorName}() on a setter. Use a property instead.`);
-    }
+  // find any set accessor that has a Prop decorator and report an error
+  const setters = tsquery<ts.SetAccessorDeclaration>(
+    component,
+    `SetAccessor:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
+  );
 
-    ts.forEachChild(node, visitor);
-  };
-
-  ts.forEachChild(component, visitor);
+  if (setters.length > 0) {
+    throw new Error(`Cannot use @${decoratorName}() on a setter. Use a property instead.`);
+  }
 
   return properties;
 }
@@ -130,45 +111,40 @@ function getAccessorsWithDecorator(
   decoratorName: string
 ): ts.GetAccessorDeclaration[] {
   // find all the nodes that are properties with a Prop decorator
-  const accessors: ts.GetAccessorDeclaration[] = [];
+  const accessors = tsquery<ts.GetAccessorDeclaration>(
+    component,
+    `GetAccessor:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
+  );
 
-  const visitor = (node: ts.Node) => {
-    if (ts.isGetAccessor(node) && hasDecorator(node, decoratorName)) {
-      accessors.push(node);
-    }
+  // find any property that has a Prop decorator and report an error
+  const properties = tsquery<ts.PropertyDeclaration>(
+    component,
+    `PropertyDeclaration:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
+  );
 
-    if (ts.isSetAccessor(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(`Cannot use @${decoratorName}() on a setter, use a getter instead.`);
-    }
+  if (properties.length > 0) {
+    throw new Error(`Cannot use @${decoratorName}() on a property. Use a getter instead.`);
+  }
 
-    if (ts.isPropertyDeclaration(node) && hasDecorator(node, decoratorName)) {
-      throw new Error(`Cannot use @${decoratorName}() on a property, use a getter instead.`);
-    }
+  // find any set accessor that has a Prop decorator and report an error
+  const setters = tsquery<ts.SetAccessorDeclaration>(
+    component,
+    `SetAccessor:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
+  );
 
-    ts.forEachChild(node, visitor);
-  };
-
-  ts.forEachChild(component, visitor);
+  if (setters.length > 0) {
+    throw new Error(`Cannot use @${decoratorName}() on a setter. Use a getter instead.`);
+  }
 
   return accessors;
 }
 
 function getMethods(component: ts.ClassDeclaration): ts.MethodDeclaration[] {
-  // find all methods that are not getters or setters
-  const methods: ts.MethodDeclaration[] = [];
-
-  const visitor = (node: ts.Node) => {
-    if (ts.isMethodDeclaration(node)) {
-      // if the method name is `render` then skip it
-      if (getText(node.name) !== 'render') {
-        methods.push(node);
-      }
-    }
-
-    ts.forEachChild(node, visitor);
-  };
-
-  ts.forEachChild(component, visitor);
+  // find all methods except the render method
+  const methods = tsquery<ts.MethodDeclaration>(
+    component,
+    'MethodDeclaration:not([name.name="render"])'
+  );
 
   return methods;
 }
@@ -219,52 +195,24 @@ function getStyles(component: ts.ClassDeclaration): string {
 }
 
 function getSlots(component: ts.ClassDeclaration): string[] {
-  const slots: string[] = [];
+  // find all jsx elements or self closing elements that have a tag name of "slot"
+  const slots = tsquery<ts.JsxElement | ts.JsxSelfClosingElement>(
+    component,
+    'JsxElement > JsxOpeningElement:has(JsxOpeningElement > Identifier[name="slot"]), JsxSelfClosingElement:has(Identifier[name="slot"])'
+  );
 
-  const visitor = (node: ts.Node) => {
-    // if the element is a JSX element or JSX self closing element and the tag name is "slot"
-    // the add the name attribute to the list of slots if the name attribute exists, otherwise
-    // add the default slot
-    if (ts.isJsxElement(node) && node.openingElement.tagName.getText() === 'slot') {
-      const nameAttr = node.openingElement.attributes.properties.find(
-        attr => ts.isJsxAttribute(attr) && attr.name.getText() === 'name'
-      );
+  return slots.map(slot => {
+    // find the name attribute on the slot element using tsquery
+    const nameAttr = tsquery<ts.JsxAttribute>(slot, 'JsxAttribute:has(Identifier[name="name"])')[0];
 
-      if (
-        nameAttr &&
-        ts.isJsxAttribute(nameAttr) &&
-        nameAttr.initializer &&
-        ts.isStringLiteral(nameAttr.initializer)
-      ) {
-        slots.push(nameAttr.initializer.text);
-      } else {
-        slots.push('default');
-      }
+    // if the name attribute exists, return the value of the name attribute
+    if (nameAttr && nameAttr.initializer && ts.isStringLiteral(nameAttr.initializer)) {
+      return toLowerCamelCase(nameAttr.initializer.text);
     }
 
-    if (ts.isJsxSelfClosingElement(node) && node.tagName.getText() === 'slot') {
-      const nameAttr = node.attributes.properties.find(
-        attr => ts.isJsxAttribute(attr) && attr.name.getText() === 'name'
-      );
-
-      if (
-        nameAttr &&
-        ts.isJsxAttribute(nameAttr) &&
-        nameAttr.initializer &&
-        ts.isStringLiteral(nameAttr.initializer)
-      ) {
-        slots.push(nameAttr.initializer.text);
-      } else {
-        slots.push('default');
-      }
-    }
-
-    ts.forEachChild(node, visitor);
-  };
-
-  ts.forEachChild(component, visitor);
-
-  return slots.map(toLowerCamelCase);
+    // otherwise return the default slot
+    return 'default';
+  });
 }
 
 function getTemplate(
@@ -329,18 +277,8 @@ function hasDecorator(
   node: ts.ClassDeclaration | ts.PropertyLikeDeclaration,
   decoratorName: string
 ): boolean {
-  for (const modifier of node.modifiers ?? []) {
-    if (
-      ts.isDecorator(modifier) &&
-      ts.isCallExpression(modifier.expression) &&
-      ts.isIdentifier(modifier.expression.expression) &&
-      modifier.expression.expression.text === decoratorName
-    ) {
-      return true;
-    }
-  }
-
-  return false;
+  // if the decorator exists, then return true
+  return !!getDecorator(node, decoratorName);
 }
 
 function hasAnyDecorator(node: ts.ClassDeclaration | ts.PropertyLikeDeclaration): boolean {
@@ -350,47 +288,37 @@ function hasAnyDecorator(node: ts.ClassDeclaration | ts.PropertyLikeDeclaration)
 }
 
 function ensureNoStaticMembers(component: ts.ClassDeclaration): void {
-  const visitor = (node: ts.Node) => {
-    if (
-      ts.isPropertyDeclaration(node) &&
-      node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)
-    ) {
-      throw new Error('Static properties are not supported');
-    }
+  // use tsquery to find all static properties and methods
+  const staticProperties = tsquery(component, 'PropertyDeclaration > StaticKeyword');
 
-    if (
-      ts.isMethodDeclaration(node) &&
-      node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)
-    ) {
-      throw new Error('Static methods are not supported');
-    }
+  if (staticProperties.length > 0) {
+    throw new Error('Static properties are not supported');
+  }
 
-    ts.forEachChild(node, visitor);
-  };
+  const staticMethods = tsquery(component, 'MethodDeclaration > StaticKeyword');
 
-  ts.forEachChild(component, visitor);
+  if (staticMethods.length > 0) {
+    throw new Error('Static methods are not supported');
+  }
 }
 
 function ensureNoUndecoratedProperties(component: ts.ClassDeclaration): void {
-  const visitor = (node: ts.Node) => {
-    // if the node is a property or accessor then check that it has a decorator
-    if (
-      (ts.isPropertyDeclaration(node) || ts.isGetAccessor(node) || ts.isSetAccessor(node)) &&
-      !hasAnyDecorator(node)
-    ) {
-      throw new Error(
-        `All properties and accessors must be decorated with @Prop(), @State(), @Event(), @Computed(), @Provider(), @Inject() or @Ref().`
-      );
-    }
+  // find all properties and accessors that do not have a decorator
+  const undecoratedProperties = tsquery<ts.PropertyLikeDeclaration>(
+    component,
+    'PropertyDeclaration, GetAccessor, SetAccessor'
+  );
 
-    ts.forEachChild(node, visitor);
-  };
-
-  ts.forEachChild(component, visitor);
+  if (undecoratedProperties.filter(prop => !hasAnyDecorator(prop)).length > 0) {
+    throw new Error(
+      `All properties and accessors must be decorated with @Prop(), @State(), @Event(), @Computed(), @Provider(), @Inject() or @Ref().`
+    );
+  }
 }
 
 function ensureNoPrivateMembers(metadata: ComponentMetadata): void {
-  // check that all props and events are public (i.e. not private or protected)
+  // check that all props are public (i.e. not private or protected)
+
   metadata.props.forEach(prop => {
     if (prop.modifiers?.some(m => m.kind === ts.SyntaxKind.PrivateKeyword)) {
       throw new Error(`Prop "${getText(prop.name)}" cannot be private`);
