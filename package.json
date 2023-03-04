@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx serve playground"
+    "start": "nx serve playground",
+    "postinstall": "nx workspace-generator patch-dependencies"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +22,7 @@
     "@babel/preset-react": "^7.14.5",
     "@nrwl/cli": "15.8.5",
     "@nrwl/cypress": "15.8.5",
+    "@nrwl/devkit": "15.8.5",
     "@nrwl/esbuild": "15.8.5",
     "@nrwl/eslint-plugin-nx": "15.8.5",
     "@nrwl/jest": "15.8.5",
@@ -35,7 +37,7 @@
     "@swc/core": "^1.2.173",
     "@testing-library/react": "13.4.0",
     "@types/jest": "^29.4.0",
-    "@types/node": "18.11.9",
+    "@types/node": "latest",
     "@types/prettier": "^2.7.2",
     "@types/prismjs": "^1.26.0",
     "@types/react": "18.0.25",
