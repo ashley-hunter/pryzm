@@ -1,5 +1,4 @@
 // import * as ts from 'typescript';
-// import { describe, expect, it } from 'vitest';
 // import { extractComment } from './comment';
 
 // describe('Comment Utils', () => {

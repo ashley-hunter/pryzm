@@ -22,19 +22,25 @@
       },
       "dependsOn": ["build"]
     },
-    "test": {
-      "executor": "@nrwl/vite:test",
-      "outputs": ["coverage/packages/vue"],
-      "options": {
-        "passWithNoTests": true,
-        "reportsDirectory": "../../coverage/packages/vue"
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/vue/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/vue/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
       }
     }
   },

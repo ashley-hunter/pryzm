@@ -43,8 +43,6 @@
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "@vitejs/plugin-react": "^3.0.0",
-    "@vitest/coverage-c8": "~0.25.8",
-    "@vitest/ui": "^0.25.8",
     "@vue/component-compiler-utils": "^3.3.0",
     "autoprefixer": "10.4.13",
     "cypress": "^12.2.0",
@@ -76,7 +74,6 @@
     "vite": "^4.0.1",
     "vite-plugin-dts": "~1.7.1",
     "vite-plugin-eslint": "^1.8.1",
-    "vite-tsconfig-paths": "^4.0.2",
-    "vitest": "^0.25.8"
+    "vite-tsconfig-paths": "^4.0.2"
   }
 }
