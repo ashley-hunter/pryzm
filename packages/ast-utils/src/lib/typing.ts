@@ -1,5 +1,5 @@
-import { getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
+import { getText } from './name';
 
 export function isThisExpression(node: ts.Node): node is ts.ThisExpression {
   return node.kind === ts.SyntaxKind.ThisKeyword;

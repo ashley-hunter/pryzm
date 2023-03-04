@@ -9,63 +9,39 @@ export type TransformerContext = {
   importHandler: ImportHandler;
 };
 
-export type TransformerOutput<T extends Transformer> = {
-  props: T extends Transformer<infer TPropReturn> ? TPropReturn[] : never;
-  states: T extends Transformer<any, infer TStateReturn> ? TStateReturn[] : never;
-  computed: T extends Transformer<any, any, infer TComputedReturn> ? TComputedReturn[] : never;
-  events: T extends Transformer<any, any, any, infer TEventReturn> ? TEventReturn[] : never;
-  refs: T extends Transformer<any, any, any, any, infer TRefReturn> ? TRefReturn[] : never;
-  methods: T extends Transformer<any, any, any, any, any, infer TMethodReturn>
-    ? TMethodReturn[]
-    : never;
-  onInit?: T extends Transformer<any, any, any, any, any, any, infer TOnInitReturn>
-    ? TOnInitReturn
-    : never;
-  onDestroy?: T extends Transformer<any, any, any, any, any, any, any, infer TOnDestroyReturn>
-    ? TOnDestroyReturn
-    : never;
-  providers: T extends Transformer<any, any, any, any, any, any, any, any, infer TProviderReturn>
-    ? TProviderReturn[]
-    : never;
-  injects: T extends Transformer<any, any, any, any, any, any, any, any, any, infer TInjectReturn>
-    ? TInjectReturn[]
-    : never;
-  template: T extends Transformer<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    infer TTemplateReturn
-  >
-    ? TTemplateReturn
-    : never;
-  slots: T extends Transformer<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    infer TSlotsReturn
-  >
-    ? TSlotsReturn[]
-    : never;
-  imports: ts.ImportDeclaration[];
-  styles: string;
-  name: string;
-  selector: string | undefined;
-};
+export type TransformerOutput<T> = T extends Transformer<
+  infer TPropReturn,
+  infer TStateReturn,
+  infer TComputedReturn,
+  infer TEventReturn,
+  infer TRefReturn,
+  infer TMethodReturn,
+  infer TOnInitReturn,
+  infer TOnDestroyReturn,
+  infer TProviderReturn,
+  infer TInjectReturn,
+  infer TTemplateReturn,
+  infer TSlotReturn
+>
+  ? {
+      props: TPropReturn[];
+      states: TStateReturn[];
+      computed: TComputedReturn[];
+      events: TEventReturn[];
+      refs: TRefReturn[];
+      methods: TMethodReturn[];
+      onInit?: TOnInitReturn;
+      onDestroy?: TOnDestroyReturn;
+      providers: TProviderReturn[];
+      injects: TInjectReturn[];
+      template: TTemplateReturn;
+      slots: TSlotReturn[];
+      imports: ts.ImportDeclaration[];
+      styles: string;
+      name: string;
+      selector: string | undefined;
+    }
+  : never;
 
 export interface Transformer<
   TPropReturn = any,
@@ -234,26 +210,28 @@ export function transform<T extends Transformer>(
   const slots = metadata.slots.map(slot => transformer.Slots?.(slot, context) ?? slot);
   const template = transformer.Template?.(metadata.template, styles, context) ?? metadata.template;
 
-  const result: TransformerOutput<T> = {
+  const result = {
     ...metadata,
-    props: props as TransformerOutput<T>['props'],
-    states: states as TransformerOutput<T>['states'],
-    computed: computed as TransformerOutput<T>['computed'],
-    events: events as TransformerOutput<T>['events'],
-    methods: methods as TransformerOutput<T>['methods'],
+    props,
+    states,
+    computed,
+    events,
+    methods,
     onInit,
     onDestroy,
-    refs: refs as TransformerOutput<T>['refs'],
-    providers: providers as TransformerOutput<T>['providers'],
-    injects: injects as TransformerOutput<T>['injects'],
-    template: template as TransformerOutput<T>['template'],
-    slots: slots as TransformerOutput<T>['slots'],
+    refs,
+    providers,
+    injects,
+    template,
+    slots,
     styles,
     selector: metadata.selector,
     imports: context.importHandler.getImportNodes(),
   };
 
-  return transformer.PostTransform ? transformer.PostTransform(result, context) : result;
+  return (
+    transformer.PostTransform ? transformer.PostTransform(result, context) : result
+  ) as TransformerOutput<T>;
 }
 
 export type StringTransformer = Transformer<
