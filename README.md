@@ -28,7 +28,7 @@
 | **Attribute Inheritance**       | ❌    | ❌     | ❌  | –   |
 | **Async Methods**               | ✅    | ✅     | ✅  | ✅  |
 | **Component Generics**          | ❌    | ❌     | ❌  | ❌  |
-| **Methods Generics**            | ❌    | ❌     | ❌  | ❌  |
+| **Methods Generics**\*\*        | ⚠️    | –      | ✅  | ✅  |
 | **Define Selector**             | –     | –      | –   | ✅  |
 | **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
 
@@ -41,3 +41,4 @@
 | **Multiple Files**        | ❌       | ❌      |
 
 \* Only `onInit` and `onDestroy` are currently supported
+\*\* Callbacks with generics must have an `extends` clause
