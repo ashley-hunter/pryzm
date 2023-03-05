@@ -4,18 +4,10 @@ import * as ts from 'typescript';
 
 export const templateTransformer = createTemplateTransformer({
   Slot(name) {
-    if (name === 'default') {
-      return `<slot />`;
-    }
-    return `<slot name="${name}" />`;
+    return name === 'default' ? `<slot />` : `<slot name="${name}" />`;
   },
   Attribute({ name, value }) {
-    // if the attribute is named "key" then do no render it
-    if (name === 'key') {
-      return '';
-    }
-
-    return `${name}={${printNode(stripThis(value))}}`;
+    return name === 'key' ? '' : `${name}={${printNode(stripThis(value))}}`;
   },
   Ref({ ref }) {
     return `bind:this={${printNode(stripThis(ref))}}`;
@@ -25,8 +17,7 @@ export const templateTransformer = createTemplateTransformer({
       {#if ${printNode(stripThis(when))}}
         ${children}
         ${fallback ? `{:else}\n${fallback}` : ``}
-      {/if}
-      `;
+      {/if}`;
   },
   For({ each, itemName, indexName, children, key }) {
     return `
@@ -34,8 +25,7 @@ export const templateTransformer = createTemplateTransformer({
       key ? ` (${key})` : ''
     }}
         ${children}
-      {/each}
-      `;
+      {/each}`;
   },
   ConditionalClasses({ classes }) {
     return Object.entries(classes)

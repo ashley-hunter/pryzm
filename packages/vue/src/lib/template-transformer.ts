@@ -3,10 +3,7 @@ import { createTemplateTransformer } from '@pryzm/compiler';
 
 export const templateTransformer = createTemplateTransformer({
   Slot(name) {
-    if (name === 'default') {
-      return `<slot></slot>`;
-    }
-    return `<slot name="${name}"></slot>`;
+    return name === 'default' ? `<slot></slot>` : `<slot name="${name}"></slot>`;
   },
   Attribute({ name, value }) {
     // if the attribute is named "key" then do not render it
