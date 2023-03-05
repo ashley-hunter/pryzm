@@ -1,4 +1,5 @@
 import {
+  convertMethodToFunction,
   getPropertyName,
   getPropertyType,
   getReturnExpression,
@@ -93,11 +94,9 @@ export const transformer: VueTranformer = {
       printNode(value.initializer) ?? 'null'
     });`;
   },
-  Method({ name, returnType, parameters, body }) {
+  Method({ node }) {
     // convert a method to a function declaration
-    return `function ${name}(${parameters.map(printNode).join(', ')})${
-      returnType ? `: ${printNode(returnType)}` : ''
-    } ${printNode(stripThis(body))};`;
+    return printNode(convertMethodToFunction(stripThis(node)));
   },
   OnInit({ body }, context) {
     context.importHandler.addNamedImport('onMounted', 'vue');

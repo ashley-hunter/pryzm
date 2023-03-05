@@ -26,7 +26,7 @@
 | **Conditional Render Fallback** | ✅    | ✅     | ✅  | ✅  |
 | **Child Components**            | ❌    | ❌     | ❌  | ❌  |
 | **Attribute Inheritance**       | ❌    | ❌     | ❌  | –   |
-| **Async Methods**               | ❌    | ❌     | ❌  | ❌  |
+| **Async Methods**               | ✅    | ✅     | ✅  | ✅  |
 | **Component Generics**          | ❌    | ❌     | ❌  | ❌  |
 | **Methods Generics**            | ❌    | ❌     | ❌  | ❌  |
 | **Define Selector**             | –     | –      | –   | ✅  |

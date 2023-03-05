@@ -8,7 +8,7 @@ export function convertMethodToFunction(method: ts.MethodDeclaration): ts.Functi
   return factory.createFunctionDeclaration(
     method.modifiers,
     method.asteriskToken,
-    factory.createIdentifier(method.name.getText()),
+    factory.createIdentifier((method.name as ts.StringLiteral).text),
     method.typeParameters,
     method.parameters,
     method.type,
@@ -30,9 +30,7 @@ export function convertMethodToArrowFunction(method: ts.MethodDeclaration): ts.A
   }
 
   // convert the method body to a concise body
-  const body = factory.createBlock([
-    factory.createReturnStatement(method.body.statements[0] as unknown as ts.Expression),
-  ]);
+  const body = factory.createBlock(method.body.statements);
 
   return factory.createArrowFunction(
     modifiers,

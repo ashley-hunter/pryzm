@@ -1,4 +1,10 @@
-import { getPropertyName, getReturnExpression, printNode, stripThis } from '@pryzm/ast-utils';
+import {
+  convertMethodToFunction,
+  getPropertyName,
+  getReturnExpression,
+  printNode,
+  stripThis,
+} from '@pryzm/ast-utils';
 import { StringTransformer, transformTemplate } from '@pryzm/compiler';
 import { templateTransformer } from './template-transformer';
 
@@ -38,10 +44,8 @@ export const transformer: SvelteTranformer = {
   Ref(value) {
     return `let ${getPropertyName(value)};`;
   },
-  Method({ name, parameters, body }) {
-    return `function ${name}(${parameters.map(printNode).join(', ')}) ${printNode(
-      stripThis(body)
-    )}`;
+  Method({ node }) {
+    return printNode(convertMethodToFunction(stripThis(node)));
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

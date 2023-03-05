@@ -180,7 +180,7 @@ export const transformer: ReactTransformer = {
 
     return { name, statement };
   },
-  Method({ name, body, parameters }, context) {
+  Method({ name, body, node }, context) {
     context.importHandler.addNamedImport('useCallback', 'react');
 
     // scan the body for any dependencies
@@ -188,7 +188,7 @@ export const transformer: ReactTransformer = {
 
     // convert a method to a useCallback hook
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
-    const statement = useCallback(name, parameters, body!, dependencies);
+    const statement = useCallback(name, node, dependencies);
 
     return { name, statement, dependencies };
   },

@@ -1,4 +1,4 @@
-import { printNode, stripThis } from '@pryzm/ast-utils';
+import { convertMethodToArrowFunction, printNode, stripThis } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { transformAssignment } from '../utils/assignment';
 
@@ -64,14 +64,13 @@ export function useMemo(name: string, initializer: ts.BlockLike, dependencies: s
  */
 export function useCallback(
   name: string,
-  parameters: ts.NodeArray<ts.ParameterDeclaration>,
-  initializer: ts.BlockLike,
+  method: ts.MethodDeclaration,
   dependencies: string[]
 ): string {
-  return `const ${name} = useCallback((${parameters
-    .map(p => printNode(p))
-    .join(', ')}) => ${printNode(
-    stripThis(transformAssignment(initializer))!
+  const arrowFunction = convertMethodToArrowFunction(method);
+
+  return `const ${name} = useCallback(${printNode(
+    stripThis(transformAssignment(arrowFunction))!
   )}, [${dependencies.join(', ')}]);`;
 }
 
