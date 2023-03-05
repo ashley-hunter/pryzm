@@ -1,4 +1,4 @@
-import { printNode } from '@pryzm/ast-utils';
+import { insertComment, printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
 import { transformer } from './transformer';
 
@@ -40,7 +40,11 @@ export class VuePrinter implements Printer<typeof transformer> {
       ${metadata.imports.map(imp => printNode(imp)).join('\n')}
 
       interface Props {
-        ${metadata.props.map(prop => `${prop.name}: ${prop.type ? prop.type : 'any'};`).join('\n')}
+        ${metadata.props
+          .map(prop =>
+            insertComment(`${prop.name}: ${prop.type ? prop.type : 'any'};`, prop.comment)
+          )
+          .join('\n')}
       }
 
       const {${metadata.props.map(prop => prop.name).join(', ')}} = defineProps<Props>();

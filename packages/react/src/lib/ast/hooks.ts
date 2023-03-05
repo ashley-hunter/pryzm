@@ -1,4 +1,9 @@
-import { convertMethodToArrowFunction, printNode, stripThis } from '@pryzm/ast-utils';
+import {
+  convertMethodToArrowFunction,
+  insertComment,
+  printNode,
+  stripThis,
+} from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { transformAssignment } from '../utils/assignment';
 
@@ -9,11 +14,16 @@ import { transformAssignment } from '../utils/assignment';
  * @param type The type of the ref
  * @returns The useRef hook
  */
-export function useRef(name: string, initializer: ts.Expression, type?: ts.TypeNode): string {
+export function useRef(
+  name: string,
+  initializer: ts.Expression,
+  type?: ts.TypeNode,
+  comment = ''
+): string {
   const initialValue = initializer ? printNode(initializer) : '';
   const generic = type ? `<${printNode(type)}>` : '';
 
-  return `const ${name} = useRef${generic}(${initialValue});`;
+  return insertComment(`const ${name} = useRef${generic}(${initialValue});`, comment);
 }
 
 /**
@@ -29,12 +39,16 @@ export function useState(
   getter: string,
   setter: string,
   initializer?: ts.Expression,
-  type?: ts.TypeNode
+  type?: ts.TypeNode,
+  comment = ''
 ): string {
   const initialValue = initializer ? printNode(initializer) : '';
   const generic = type ? `<${printNode(type)}>` : '';
 
-  return `const [${getter}, ${setter}] = useState${generic}(${initialValue});`;
+  return insertComment(
+    `const [${getter}, ${setter}] = useState${generic}(${initialValue});`,
+    comment
+  );
 }
 
 /**
@@ -46,10 +60,18 @@ export function useState(
  * @example
  * const name = useMemo(() => 'value', []);
  */
-export function useMemo(name: string, initializer: ts.BlockLike, dependencies: string[]): string {
-  return `const ${name} = useMemo(() => ${printNode(stripThis(initializer)!)}, [${dependencies.join(
-    ', '
-  )}]);`;
+export function useMemo(
+  name: string,
+  initializer: ts.BlockLike,
+  dependencies: string[],
+  comment = ''
+): string {
+  return insertComment(
+    `const ${name} = useMemo(() => ${printNode(stripThis(initializer)!)}, [${dependencies.join(
+      ', '
+    )}]);`,
+    comment
+  );
 }
 
 /**
@@ -65,13 +87,17 @@ export function useMemo(name: string, initializer: ts.BlockLike, dependencies: s
 export function useCallback(
   name: string,
   method: ts.MethodDeclaration,
-  dependencies: string[]
+  dependencies: string[],
+  comment = ''
 ): string {
   const arrowFunction = convertMethodToArrowFunction(method);
 
-  return `const ${name} = useCallback(${printNode(
-    stripThis(transformAssignment(arrowFunction))!
-  )}, [${dependencies.join(', ')}]);`;
+  return insertComment(
+    `const ${name} = useCallback(${printNode(
+      stripThis(transformAssignment(arrowFunction))!
+    )}, [${dependencies.join(', ')}]);`,
+    comment
+  );
 }
 
 /**

@@ -15,7 +15,7 @@
 | **Named Slots**                 | ✅    | ✅     | ✅  | ✅  |
 | **Retain Imports**              | ✅    | ✅     | ✅  | ✅  |
 | **Forward Ref**                 | ❌    | –      | –   | –   |
-| **Comment Extraction**          | ❌    | ❌     | ❌  | ❌  |
+| **Comment Extraction**          | ✅    | ✅     | ✅  | ✅  |
 | **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Classes**         | ✅    | ✅     | ✅  | ✅  |
@@ -31,6 +31,10 @@
 | **Methods Generics**\*\*        | ⚠️    | –      | ✅  | ✅  |
 | **Define Selector**             | –     | –      | –   | ✅  |
 | **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
+
+### Todo
+
+- [ ] Vue - Unwrap ref and reactive values
 
 ### Core and Compiler
 

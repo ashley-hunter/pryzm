@@ -25,3 +25,7 @@ export function addComment(node: ts.Node, comment?: string) {
 
   ts.addSyntheticLeadingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, ` ${comment} `, true);
 }
+
+export function insertComment(statement: string, comment?: string) {
+  return comment ? `/** ${comment} */\n${statement}` : statement;
+}

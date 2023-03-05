@@ -2,6 +2,7 @@ import {
   convertMethodToFunction,
   getPropertyName,
   getReturnExpression,
+  insertComment,
   printNode,
   stripThis,
 } from '@pryzm/ast-utils';
@@ -9,20 +10,29 @@ import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
-  Computed({ name, node }) {
-    return `$: ${name} = ${printNode(stripThis(getReturnExpression(node)))};`;
+  Computed({ name, node, comment }) {
+    return insertComment(
+      `$: ${name} = ${printNode(stripThis(getReturnExpression(node)))};`,
+      comment
+    );
   },
-  Prop({ name, initializer }) {
-    return initializer
-      ? `export let ${name} = ${printNode(stripThis(initializer))};`
-      : `export let ${name};`;
+  Prop({ name, initializer, comment }) {
+    return insertComment(
+      initializer
+        ? `export let ${name} = ${printNode(stripThis(initializer))};`
+        : `export let ${name};`,
+      comment
+    );
   },
-  State({ name, isReadonly, initializer }) {
+  State({ name, isReadonly, initializer, comment }) {
     initializer = stripThis(initializer);
 
-    return initializer
-      ? `${isReadonly ? 'const' : 'let'} ${name} = ${printNode(initializer)};`
-      : `${isReadonly ? 'const' : 'let'} ${name};`;
+    return insertComment(
+      initializer
+        ? `${isReadonly ? 'const' : 'let'} ${name} = ${printNode(initializer)};`
+        : `${isReadonly ? 'const' : 'let'} ${name};`,
+      comment
+    );
   },
   Event(event, context) {
     context.importHandler.addNamedImport('createEventDispatcher', 'svelte');
@@ -38,20 +48,20 @@ export const transformer = createTransformer({
   Ref({ name }) {
     return `let ${name};`;
   },
-  Method({ node }) {
-    return printNode(convertMethodToFunction(stripThis(node)));
+  Method({ node, comment }) {
+    return insertComment(printNode(convertMethodToFunction(stripThis(node))), comment);
   },
   Template(value, _, context) {
     return transformTemplate(value, templateTransformer, context);
   },
-  OnInit({ body }, context) {
+  OnInit({ body, comment }, context) {
     context.importHandler.addNamedImport('onMount', 'svelte');
 
-    return `onMount(() => ${printNode(stripThis(body))});`;
+    return insertComment(`onMount(() => ${printNode(stripThis(body))});`, comment);
   },
-  OnDestroy({ body }, context) {
+  OnDestroy({ body, comment }, context) {
     context.importHandler.addNamedImport('onDestroy', 'svelte');
 
-    return `onDestroy(() => ${printNode(stripThis(body))});`;
+    return insertComment(`onDestroy(() => ${printNode(stripThis(body))});`, comment);
   },
 });

@@ -14,7 +14,7 @@ import { findDependencies } from './utils/find-dependencies';
 import { setterName } from './utils/names';
 
 export const transformer = createTransformer({
-  Computed({ body, name }, context) {
+  Computed({ body, name, comment }, context) {
     context.importHandler.addNamedImport('useMemo', 'react');
 
     // scan the body for any dependencies
@@ -22,16 +22,16 @@ export const transformer = createTransformer({
 
     // convert a getter to use memo
     // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
-    const statement = useMemo(name, body!, dependencies);
+    const statement = useMemo(name, body!, dependencies, comment);
 
     return { name, statement, dependencies };
   },
-  Prop({ name, type, initializer, node }) {
+  Prop({ name, type, initializer, node, comment }) {
     // get the default value of the prop if it exists
     initializer = stripThis(initializer);
 
     // create the interface property with the type attached
-    const interfaceProperty = createInterfaceProperty(name, type, node);
+    const interfaceProperty = createInterfaceProperty(name, type, node, comment);
 
     // create the destructured property with the default value attached
     const destructuredProperty = createDestructuredProperty(name, initializer);
@@ -65,7 +65,7 @@ export const transformer = createTransformer({
       destructuredProperty: printNode(destructuredProperty),
     };
   },
-  State({ name, type, initializer }, context) {
+  State({ name, type, initializer, comment }, context) {
     context.importHandler.addNamedImport('useState', 'react');
 
     // get the name of the state
@@ -78,7 +78,7 @@ export const transformer = createTransformer({
     initializer = stripThis(initializer);
 
     // convert the property to a useState hook
-    const statement = useState(getter, setter, initializer, type);
+    const statement = useState(getter, setter, initializer, type, comment);
 
     return { getter, setter, statement };
   },
@@ -118,12 +118,12 @@ export const transformer = createTransformer({
   Provider(value) {
     throw new Error('Provider is not supported in React');
   },
-  Ref({ name, type }, context) {
+  Ref({ name, type, comment }, context) {
     context.importHandler.addNamedImport('useRef', 'react');
 
-    return { name, statement: useRef(name, factory.createNull(), type) };
+    return { name, statement: useRef(name, factory.createNull(), type, comment) };
   },
-  Method({ name, body, node }, context) {
+  Method({ name, body, node, comment }, context) {
     context.importHandler.addNamedImport('useCallback', 'react');
 
     // scan the body for any dependencies
@@ -131,7 +131,7 @@ export const transformer = createTransformer({
 
     // convert a method to a useCallback hook
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
-    const statement = useCallback(name, node, dependencies);
+    const statement = useCallback(name, node, dependencies, comment);
 
     return { name, statement, dependencies };
   },

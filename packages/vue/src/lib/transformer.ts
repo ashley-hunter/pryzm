@@ -3,6 +3,7 @@ import {
   getPropertyName,
   getReturnExpression,
   inferType,
+  insertComment,
   printNode,
   stripThis,
 } from '@pryzm/ast-utils';
@@ -11,18 +12,22 @@ import * as ts from 'typescript';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
-  Computed({ name, node }, context) {
+  Computed({ name, node, comment }, context) {
     context.importHandler.addNamedImport('computed', 'vue');
-    return `const ${name} = computed(() => ${printNode(stripThis(getReturnExpression(node)))});`;
+    return insertComment(
+      `const ${name} = computed(() => ${printNode(stripThis(getReturnExpression(node)))});`,
+      comment
+    );
   },
-  Prop({ name, type, initializer }) {
+  Prop({ name, type, initializer, comment }) {
     return {
       name,
       type: printNode(type),
       initializer: printNode(initializer),
+      comment,
     };
   },
-  State({ name, type, initializer }, context) {
+  State({ name, type, initializer, comment }, context) {
     // if the type is a primitive, we use `ref` to create a reactive variable
     // otherwise, we use `reactive` to create a reactive object
     type ??= inferType(initializer!);
@@ -32,7 +37,10 @@ export const transformer = createTransformer({
 
     context.importHandler.addNamedImport(reactiveFn, 'vue');
 
-    return `const ${name} = ${reactiveFn}(${printNode(stripThis(initializer)) ?? 'null'});`;
+    return insertComment(
+      `const ${name} = ${reactiveFn}(${printNode(stripThis(initializer)) ?? 'null'});`,
+      comment
+    );
   },
   Event(event) {
     // get the default value of the prop if it exists
@@ -54,25 +62,28 @@ export const transformer = createTransformer({
   Provider(value) {
     throw new Error('Method not implemented.');
   },
-  Ref({ name, type, initializer }, context) {
+  Ref({ name, type, initializer, comment }, context) {
     context.importHandler.addNamedImport('ref', 'vue');
-    return `const ${name} = ref${type ? `<${printNode(type)}>` : ''}(${
-      printNode(initializer) ?? 'null'
-    });`;
+    return insertComment(
+      `const ${name} = ref${type ? `<${printNode(type)}>` : ''}(${
+        printNode(initializer) ?? 'null'
+      });`,
+      comment
+    );
   },
-  Method({ node }) {
+  Method({ node, comment }) {
     // convert a method to a function declaration
-    return printNode(convertMethodToFunction(stripThis(node)));
+    return insertComment(printNode(convertMethodToFunction(stripThis(node))), comment);
   },
-  OnInit({ body }, context) {
+  OnInit({ body, comment }, context) {
     context.importHandler.addNamedImport('onMounted', 'vue');
 
-    return `onMounted(() => ${printNode(stripThis(body))});`;
+    return insertComment(`onMounted(() => ${printNode(stripThis(body))});`, comment);
   },
-  OnDestroy({ body }, context) {
+  OnDestroy({ body, comment }, context) {
     context.importHandler.addNamedImport('onUnmounted', 'vue');
 
-    return `onUnmounted(() => ${printNode(stripThis(body))});`;
+    return insertComment(`onUnmounted(() => ${printNode(stripThis(body))});`, comment);
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

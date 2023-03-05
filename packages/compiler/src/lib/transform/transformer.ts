@@ -1,4 +1,9 @@
-import { getPropertyName, getPropertyType, isPropertyReadonly } from '@pryzm/ast-utils';
+import {
+  extractComment,
+  getPropertyName,
+  getPropertyType,
+  isPropertyReadonly,
+} from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { ComponentMetadata } from '../parser/component-metadata';
 import { parseFile } from '../parser/parser';
@@ -143,26 +148,34 @@ export function transform<T extends Transformer>(
   styles = styles.replace(/(\r\n|\n|\r)/gm, '');
 
   const props = metadata.props.map(prop => {
-    const metadata: PropertyTransformerMetadata = {
-      name: getPropertyName(prop),
-      type: getPropertyType(prop, true),
-      isReadonly: isPropertyReadonly(prop),
-      initializer: prop.initializer,
-      node: prop,
-    };
-
-    return transformer.Prop?.(metadata, context) ?? prop;
+    return (
+      transformer.Prop?.(
+        {
+          name: getPropertyName(prop),
+          type: getPropertyType(prop, true),
+          isReadonly: isPropertyReadonly(prop),
+          initializer: prop.initializer,
+          node: prop,
+          comment: extractComment(prop),
+        },
+        context
+      ) ?? prop
+    );
   });
   const states = metadata.state.map(state => {
-    const metadata: PropertyTransformerMetadata = {
-      name: getPropertyName(state),
-      type: getPropertyType(state),
-      isReadonly: isPropertyReadonly(state),
-      initializer: state.initializer,
-      node: state,
-    };
-
-    return transformer.State?.(metadata, context) ?? state;
+    return (
+      transformer.State?.(
+        {
+          name: getPropertyName(state),
+          type: getPropertyType(state),
+          isReadonly: isPropertyReadonly(state),
+          initializer: state.initializer,
+          node: state,
+          comment: extractComment(state),
+        },
+        context
+      ) ?? state
+    );
   });
   const computed = metadata.computed.map(
     computed =>
@@ -171,21 +184,26 @@ export function transform<T extends Transformer>(
           name: getPropertyName(computed),
           body: computed.body!,
           node: computed,
+          comment: extractComment(computed),
         },
         context
       ) ?? computed
   );
   const events = metadata.events.map(event => transformer.Event?.(event, context) ?? event);
   const methods = metadata.methods.map(method => {
-    const metadata: MethodTransformerMetadata = {
-      name: getPropertyName(method),
-      returnType: method.type,
-      parameters: method.parameters,
-      body: method.body,
-      node: method,
-    };
-
-    return transformer.Method?.(metadata, context) ?? method;
+    return (
+      transformer.Method?.(
+        {
+          name: getPropertyName(method),
+          returnType: method.type,
+          parameters: method.parameters,
+          body: method.body,
+          node: method,
+          comment: extractComment(method),
+        },
+        context
+      ) ?? method
+    );
   });
 
   const onInit = metadata.onInit
@@ -196,6 +214,7 @@ export function transform<T extends Transformer>(
           parameters: metadata.onInit.parameters,
           body: metadata.onInit.body,
           node: metadata.onInit,
+          comment: extractComment(metadata.onInit),
         },
         context
       ) ?? metadata.onInit
@@ -209,6 +228,7 @@ export function transform<T extends Transformer>(
           parameters: metadata.onDestroy.parameters,
           body: metadata.onDestroy.body,
           node: metadata.onDestroy,
+          comment: extractComment(metadata.onDestroy),
         },
         context
       ) ?? metadata.onDestroy
@@ -217,7 +237,13 @@ export function transform<T extends Transformer>(
   const refs = metadata.refs.map(
     ref =>
       transformer.Ref?.(
-        { name: getPropertyName(ref), node: ref, type: ref.type, initializer: ref.initializer },
+        {
+          name: getPropertyName(ref),
+          node: ref,
+          type: ref.type,
+          initializer: ref.initializer,
+          comment: extractComment(ref),
+        },
         context
       ) ?? ref
   );
@@ -258,6 +284,7 @@ export interface PropertyTransformerMetadata {
   isReadonly: boolean;
   initializer?: ts.Expression;
   node: ts.PropertyDeclaration;
+  comment?: string;
 }
 
 export interface MethodTransformerMetadata {
@@ -266,12 +293,14 @@ export interface MethodTransformerMetadata {
   parameters: ts.NodeArray<ts.ParameterDeclaration>;
   body?: ts.Block;
   node: ts.MethodDeclaration;
+  comment?: string;
 }
 
 export interface ComputedTransformerMetadata {
   name: string;
   body: ts.Block;
   node: ts.GetAccessorDeclaration;
+  comment?: string;
 }
 
 export interface RefTransformerMetadata {
@@ -279,4 +308,5 @@ export interface RefTransformerMetadata {
   type?: ts.TypeNode;
   initializer?: ts.Expression;
   node: ts.PropertyDeclaration;
+  comment?: string;
 }

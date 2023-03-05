@@ -1,10 +1,11 @@
-import { addComment, extractComment, stripParentNode } from '@pryzm/ast-utils';
+import { addComment, stripParentNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 
 export function createInterfaceProperty(
   name: string,
   type?: ts.TypeNode | ts.FunctionTypeNode,
-  source?: ts.PropertyDeclaration
+  source?: ts.PropertyDeclaration,
+  comment?: string
 ): ts.PropertySignature {
   // determine if the property is optional
   const isOptional = source ? source.questionToken !== undefined : true;
@@ -16,12 +17,8 @@ export function createInterfaceProperty(
     type
   );
 
-  if (source) {
-    const comment = extractComment(source);
-
-    if (comment) {
-      addComment(signature, comment);
-    }
+  if (comment) {
+    addComment(signature, comment);
   }
 
   return signature;
