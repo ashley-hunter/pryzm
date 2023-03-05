@@ -1,7 +1,7 @@
 import { printNode } from '@pryzm/ast-utils';
-import { TemplateTransformer } from '@pryzm/compiler';
+import { createTemplateTransformer } from '@pryzm/compiler';
 
-export const templateTransformer: TemplateTransformer = {
+export const templateTransformer = createTemplateTransformer({
   Slot(name) {
     return name === 'default' ? `<slot />` : `<slot name="${name}" />`;
   },
@@ -37,5 +37,10 @@ export const templateTransformer: TemplateTransformer = {
 
     return `\${classMap(${printNode(node)})}`;
   },
+  ConditionalStyles({ node }, context) {
+    context.importHandler.addNamedImport('styleMap', 'lit/directives/style-map.js');
+
+    return `\${styleMap(${printNode(node)})}`;
+  },
   Expression: value => `\${${printNode(value.expression)}}`,
-};
+});

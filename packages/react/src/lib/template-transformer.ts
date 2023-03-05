@@ -1,8 +1,8 @@
 import { printNode, stripThis } from '@pryzm/ast-utils';
-import { TemplateTransformer } from '@pryzm/compiler';
+import { createTemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
 
-export const templateTransformer: TemplateTransformer = {
+export const templateTransformer = createTemplateTransformer({
   Element({ tagName, attributes, children }, context) {
     return `<${tagName} ${context.data.get('id') ?? ''} ${attributes}>${children}</${tagName}>`;
   },
@@ -61,4 +61,4 @@ export const templateTransformer: TemplateTransformer = {
   },
   Expression: value => printNode(stripThis(value)),
   Text: value => value.text,
-};
+});

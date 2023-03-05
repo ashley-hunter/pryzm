@@ -1,7 +1,8 @@
 import { printNode, stripQuotes, stripThis } from '@pryzm/ast-utils';
-import { TemplateTransformer } from '@pryzm/compiler';
+import { createTemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
-export const templateTransformer: TemplateTransformer = {
+
+export const templateTransformer = createTemplateTransformer({
   Slot(name) {
     if (name === 'default') {
       return `<slot />`;
@@ -54,4 +55,4 @@ export const templateTransformer: TemplateTransformer = {
       .join(' ')}"`;
   },
   Expression: value => `{${printNode(stripThis(value.expression))}}`,
-};
+});

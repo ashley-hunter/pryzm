@@ -1,7 +1,7 @@
 import { printNode, sanitizeAttribute, stripQuotes, stripThis } from '@pryzm/ast-utils';
-import { TemplateTransformer } from '@pryzm/compiler';
+import { createTemplateTransformer } from '@pryzm/compiler';
 
-export const templateTransformer: TemplateTransformer = {
+export const templateTransformer = createTemplateTransformer({
   Slot(name) {
     if (name === 'default') {
       return `<slot></slot>`;
@@ -64,4 +64,4 @@ export const templateTransformer: TemplateTransformer = {
     return `:style="{${properties}}"`;
   },
   Expression: value => `{{${printNode(stripThis(value.expression))}}}`,
-};
+});

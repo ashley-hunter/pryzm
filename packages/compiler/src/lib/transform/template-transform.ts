@@ -393,6 +393,10 @@ export class TemplateVisitor {
   }
 }
 
+export function createTemplateTransformer(transformer: TemplateTransformer) {
+  return transformer;
+}
+
 type JsxNode =
   | ts.JsxText
   | ts.JsxExpression
