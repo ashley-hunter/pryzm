@@ -35,6 +35,7 @@
 ### Todo
 
 - [ ] Vue - Unwrap ref and reactive values
+- [ ] Vue - Fix default prop values
 
 ### Core and Compiler
 

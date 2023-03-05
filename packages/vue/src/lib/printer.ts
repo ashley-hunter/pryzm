@@ -47,7 +47,11 @@ export class VuePrinter implements Printer<typeof transformer> {
           .join('\n')}
       }
 
-      const {${metadata.props.map(prop => prop.name).join(', ')}} = defineProps<Props>();
+      const {${metadata.props
+        .map(prop => {
+          return prop.initializer ? `${prop.name} = ${prop.initializer}` : prop.name;
+        })
+        .join(', ')}} = defineProps<Props>();
 
       ${metadata.refs.join('\n\n')}
 
