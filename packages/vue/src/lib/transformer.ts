@@ -6,37 +6,11 @@ import {
   printNode,
   stripThis,
 } from '@pryzm/ast-utils';
-import { Transformer, transformTemplate } from '@pryzm/compiler';
+import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { templateTransformer } from './template-transformer';
 
-type VueProp = {
-  name: string;
-  type: string | undefined;
-  initializer: string | undefined;
-};
-
-type VueEvent = {
-  name: string;
-  type: ts.TypeNode | undefined;
-};
-
-export type VueTranformer = Transformer<
-  VueProp,
-  string,
-  string,
-  VueEvent,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string
->;
-
-export const transformer: VueTranformer = {
+export const transformer = createTransformer({
   Computed({ name, node }, context) {
     context.importHandler.addNamedImport('computed', 'vue');
     return `const ${name} = computed(() => ${printNode(stripThis(getReturnExpression(node)))});`;
@@ -103,4 +77,4 @@ export const transformer: VueTranformer = {
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);
   },
-};
+});

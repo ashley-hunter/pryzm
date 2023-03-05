@@ -1,18 +1,18 @@
 import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
-import { LitTranformer, transformer } from './transformer';
+import { transformer } from './transformer';
 
 export function print(source: string): string {
   const printer = new LitPrinter();
   return printer.print(transform(source, transformer));
 }
 
-export class LitPrinter implements Printer<LitTranformer> {
+export class LitPrinter implements Printer<typeof transformer> {
   private selector(name: string): string {
     return name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   }
 
-  print(metadata: TransformerOutput<LitTranformer>): string {
+  print(metadata: TransformerOutput<typeof transformer>): string {
     return `
     ${metadata.imports.map(printNode).join('\r\n')}
 

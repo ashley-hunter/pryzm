@@ -1,5 +1,5 @@
 import { getPropertyName, printNode, stripThis } from '@pryzm/ast-utils';
-import { Transformer, transformTemplate } from '@pryzm/compiler';
+import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
@@ -13,51 +13,7 @@ import { templateTransformer } from './template-transformer';
 import { findDependencies } from './utils/find-dependencies';
 import { setterName } from './utils/names';
 
-type ReactState = {
-  getter: string;
-  setter: string;
-  statement: string;
-};
-
-type ReactProp = {
-  name: string;
-  interfaceProperty: string;
-  destructuredProperty: string;
-};
-
-type ReactComputed = {
-  name: string;
-  dependencies: string[];
-  statement: string;
-};
-
-type ReactRef = {
-  name: string;
-  statement: string;
-};
-
-type ReactMethod = {
-  name: string;
-  dependencies: string[];
-  statement: string;
-};
-
-export type ReactTransformer = Transformer<
-  ReactProp,
-  ReactState,
-  ReactComputed,
-  ReactProp,
-  ReactRef,
-  ReactMethod,
-  string,
-  string,
-  string,
-  string,
-  string,
-  ReactProp
->;
-
-export const transformer: ReactTransformer = {
+export const transformer = createTransformer({
   Computed({ body, name }, context) {
     context.importHandler.addNamedImport('useMemo', 'react');
 
@@ -248,4 +204,4 @@ export const transformer: ReactTransformer = {
 
     return metadata;
   },
-};
+});

@@ -5,12 +5,10 @@ import {
   printNode,
   stripThis,
 } from '@pryzm/ast-utils';
-import { StringTransformer, transformTemplate } from '@pryzm/compiler';
+import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { templateTransformer } from './template-transformer';
 
-export type SvelteTranformer = StringTransformer;
-
-export const transformer: SvelteTranformer = {
+export const transformer = createTransformer({
   Computed({ name, node }) {
     return `$: ${name} = ${printNode(stripThis(getReturnExpression(node)))};`;
   },
@@ -56,4 +54,4 @@ export const transformer: SvelteTranformer = {
 
     return `onDestroy(() => ${printNode(stripThis(body))});`;
   },
-};
+});

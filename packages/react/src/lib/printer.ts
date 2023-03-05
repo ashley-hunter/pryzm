@@ -1,6 +1,6 @@
 import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
-import { ReactTransformer, transformer } from './transformer';
+import { transformer } from './transformer';
 import { propsName } from './utils/names';
 
 export function print(source: string): string {
@@ -8,8 +8,8 @@ export function print(source: string): string {
   return printer.print(transform(source, transformer));
 }
 
-export class ReactPrinter implements Printer<ReactTransformer> {
-  private getInterfaceProperties(metadata: TransformerOutput<ReactTransformer>): string {
+export class ReactPrinter implements Printer<typeof transformer> {
+  private getInterfaceProperties(metadata: TransformerOutput<typeof transformer>): string {
     return [
       ...metadata.props.map(prop => prop.interfaceProperty),
       ...metadata.events.map(prop => prop.interfaceProperty),
@@ -17,7 +17,7 @@ export class ReactPrinter implements Printer<ReactTransformer> {
     ].join('\n');
   }
 
-  private getDesctructuredProperties(metadata: TransformerOutput<ReactTransformer>): string {
+  private getDesctructuredProperties(metadata: TransformerOutput<typeof transformer>): string {
     return [
       ...metadata.props.map(prop => prop.destructuredProperty),
       ...metadata.events.map(prop => prop.destructuredProperty),
@@ -25,7 +25,7 @@ export class ReactPrinter implements Printer<ReactTransformer> {
     ].join(', ');
   }
 
-  print(metadata: TransformerOutput<ReactTransformer>): string {
+  print(metadata: TransformerOutput<typeof transformer>): string {
     return `
       ${metadata.imports.map(printNode).join('\n')}
 

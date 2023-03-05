@@ -1,14 +1,14 @@
 import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
-import { SvelteTranformer, transformer } from './transformer';
+import { transformer } from './transformer';
 
 export function print(source: string): string {
   const printer = new SveltePrinter();
   return printer.print(transform(source, transformer));
 }
 
-export class SveltePrinter implements Printer<SvelteTranformer> {
-  private getStyle(metadata: TransformerOutput<SvelteTranformer>): string {
+export class SveltePrinter implements Printer<typeof transformer> {
+  private getStyle(metadata: TransformerOutput<typeof transformer>): string {
     if (metadata.styles.length === 0) {
       return '';
     }
@@ -19,7 +19,7 @@ export class SveltePrinter implements Printer<SvelteTranformer> {
     `;
   }
 
-  print(metadata: TransformerOutput<SvelteTranformer>): string {
+  print(metadata: TransformerOutput<typeof transformer>): string {
     return `
     <script lang="ts">
         ${metadata.imports.map(printNode).join('\n')}

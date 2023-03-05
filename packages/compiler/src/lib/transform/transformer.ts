@@ -111,6 +111,10 @@ export interface Transformer<
   >;
 }
 
+export function createTransformer<T extends Transformer>(transformer: T) {
+  return transformer;
+}
+
 export function transform<T extends Transformer>(
   source: string,
   transformer: T
@@ -247,21 +251,6 @@ export function transform<T extends Transformer>(
     transformer.PostTransform ? transformer.PostTransform(result, context) : result
   ) as TransformerOutput<T>;
 }
-
-export type StringTransformer = Transformer<
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string
->;
 
 export interface PropertyTransformerMetadata {
   name: string;

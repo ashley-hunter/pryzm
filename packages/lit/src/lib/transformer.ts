@@ -1,12 +1,10 @@
 import { getPropertyName, printNode } from '@pryzm/ast-utils';
-import { StringTransformer, transformTemplate } from '@pryzm/compiler';
+import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { templateTransformer } from './template-transformer';
 
-export type LitTranformer = StringTransformer;
-
-export const transformer: LitTranformer = {
+export const transformer = createTransformer({
   Computed({ name, body }) {
     return printNode(factory.createGetAccessorDeclaration(undefined, name, [], undefined, body));
   },
@@ -120,4 +118,4 @@ export const transformer: LitTranformer = {
     context.importHandler.addNamedImport('customElement', 'lit/decorators.js');
     return metadata;
   },
-};
+});
