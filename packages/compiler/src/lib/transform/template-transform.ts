@@ -70,6 +70,14 @@ export interface TemplateTransformer {
     },
     context: TransformerContext
   ) => string;
+  Style?: (name: string, context: TransformerContext) => string;
+  ConditionalStyles: (
+    metadata: {
+      styles: Record<string, ts.Expression>;
+      node: ts.ObjectLiteralExpression;
+    },
+    context: TransformerContext
+  ) => string;
 }
 
 export function transformTemplate(
@@ -173,6 +181,10 @@ export class TemplateVisitor {
 
     if (getAttributeName(node) === 'ref' && this.transformer.Ref) {
       return this.visitRef(node);
+    }
+
+    if (getAttributeName(node) === 'style') {
+      return this.visitStyle(node);
     }
 
     const name = getAttributeName(node);
@@ -336,6 +348,36 @@ export class TemplateVisitor {
     node: ts.ObjectLiteralExpression
   ): string {
     return this.transformer.ConditionalClasses({ classes, node }, this.context);
+  }
+
+  visitStyle(node: ts.JsxAttribute): string {
+    const styleValue = getAttributeValue(node);
+
+    if (!styleValue) {
+      return '';
+    }
+
+    if (ts.isStringLiteral(styleValue)) {
+      return `style="${styleValue.text}"`;
+    }
+
+    if (ts.isObjectLiteralExpression(styleValue)) {
+      const styles: Record<string, ts.Expression> = {};
+
+      styleValue.properties.forEach(p => {
+        if (ts.isPropertyAssignment(p)) {
+          const name = getText(p.name);
+
+          if (name) {
+            styles[name] = p.initializer;
+          }
+        }
+      });
+
+      return this.transformer.ConditionalStyles({ styles, node: styleValue }, this.context);
+    }
+
+    throw new Error('Invalid style attribute');
   }
 
   visitSlot(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement): string {

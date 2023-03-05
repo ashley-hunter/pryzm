@@ -1,6 +1,6 @@
 import { printNode, stripQuotes, stripThis } from '@pryzm/ast-utils';
 import { TemplateTransformer } from '@pryzm/compiler';
-
+import * as ts from 'typescript';
 export const templateTransformer: TemplateTransformer = {
   Slot(name) {
     if (name === 'default') {
@@ -42,6 +42,16 @@ export const templateTransformer: TemplateTransformer = {
         return `class:${stripQuotes(name)}={${printNode(stripThis(condition))}}`;
       })
       .join(' ');
+  },
+  ConditionalStyles({ styles }) {
+    return `style="${Object.entries(styles)
+      .map(([name, value]) => {
+        // if the value is a string then we don't need to wrap it in curly braces
+        return ts.isStringLiteral(value)
+          ? `${name}: ${value.text};`
+          : `${name}: {${printNode(stripThis(value))}};`;
+      })
+      .join(' ')}"`;
   },
   Expression: value => `{${printNode(stripThis(value.expression))}}`,
 };

@@ -19,7 +19,7 @@
 | **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
 | **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
 | **Conditional Classes**         | ✅    | ✅     | ✅  | ✅  |
-| **Inline Styles**               | ❌    | ❌     | ❌  | ❌  |
+| **Inline Styles**               | ✅    | ✅     | ✅  | ✅  |
 | **Loops**                       | ✅    | ✅     | ✅  | ✅  |
 | **Keyed Loops**                 | ✅    | ✅     | ✅  | ✅  |
 | **Conditional Render**          | ✅    | ✅     | ✅  | ✅  |

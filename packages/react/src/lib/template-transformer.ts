@@ -51,6 +51,14 @@ export const templateTransformer: TemplateTransformer = {
 
     return `className={clsx({${properties.join(', ')}})}`;
   },
+  ConditionalStyles({ styles, node }) {
+    // if styles is empty, we can just return an empty string
+    if (Object.keys(styles).length === 0) {
+      return '';
+    }
+
+    return `style={${printNode(stripThis(node))}}`;
+  },
   For({ each, itemName, indexName, children }) {
     return `{${printNode(stripThis(each))}.map((${itemName}${
       indexName ? `, ${indexName}` : ''
