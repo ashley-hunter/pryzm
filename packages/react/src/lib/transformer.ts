@@ -162,21 +162,10 @@ export const transformer: ReactTransformer = {
   Provider(value) {
     throw new Error('Provider is not supported in React');
   },
-  Ref(value, context) {
+  Ref({ name, type }, context) {
     context.importHandler.addNamedImport('useRef', 'react');
 
-    // get the name of the ref
-    const name = getPropertyName(value);
-
-    // get the type of the ref if it exists
-    const type =
-      value.type ??
-      factory.createTypeReferenceNode(factory.createIdentifier('HTMLElement'), undefined);
-
-    // convert the property to a useRef hook
-    const statement = useRef(name, factory.createNull(), type);
-
-    return { name, statement };
+    return { name, statement: useRef(name, factory.createNull(), type) };
   },
   Method({ name, body, node }, context) {
     context.importHandler.addNamedImport('useCallback', 'react');

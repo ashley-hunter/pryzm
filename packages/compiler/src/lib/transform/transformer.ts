@@ -63,7 +63,7 @@ export interface Transformer<
   OnInit: (metadata: MethodTransformerMetadata, context: TransformerContext) => TOnInitReturn;
   OnDestroy: (metadata: MethodTransformerMetadata, context: TransformerContext) => TOnDestroyReturn;
   Event: (value: ts.PropertyDeclaration, context: TransformerContext) => TEventReturn;
-  Ref: (value: ts.PropertyDeclaration, context: TransformerContext) => TRefReturn;
+  Ref: (metadata: RefTransformerMetadata, context: TransformerContext) => TRefReturn;
   Computed: (matadata: ComputedTransformerMetadata, context: TransformerContext) => TComputedReturn;
   Provider: (value: ts.PropertyDeclaration, context: TransformerContext) => TProviderReturn;
   Inject: (value: ts.PropertyDeclaration, context: TransformerContext) => TInjectReturn;
@@ -210,7 +210,13 @@ export function transform<T extends Transformer>(
       ) ?? metadata.onDestroy
     : undefined;
 
-  const refs = metadata.refs.map(ref => transformer.Ref?.(ref, context) ?? ref);
+  const refs = metadata.refs.map(
+    ref =>
+      transformer.Ref?.(
+        { name: getPropertyName(ref), node: ref, type: ref.type, initializer: ref.initializer },
+        context
+      ) ?? ref
+  );
   const providers = metadata.providers.map(
     provider => transformer.Provider?.(provider, context) ?? provider
   );
@@ -277,4 +283,11 @@ export interface ComputedTransformerMetadata {
   name: string;
   body: ts.Block;
   node: ts.GetAccessorDeclaration;
+}
+
+export interface RefTransformerMetadata {
+  name: string;
+  type?: ts.TypeNode;
+  initializer?: ts.Expression;
+  node: ts.PropertyDeclaration;
 }

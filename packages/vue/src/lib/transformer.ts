@@ -1,7 +1,6 @@
 import {
   convertMethodToFunction,
   getPropertyName,
-  getPropertyType,
   getReturnExpression,
   inferType,
   printNode,
@@ -81,13 +80,10 @@ export const transformer: VueTranformer = {
   Provider(value) {
     throw new Error('Method not implemented.');
   },
-  Ref(value, context) {
+  Ref({ name, type, initializer }, context) {
     context.importHandler.addNamedImport('ref', 'vue');
-
-    const type = getPropertyType(value);
-
-    return `const ${getPropertyName(value)} = ref${type ? `<${printNode(type)}>` : ''}(${
-      printNode(value.initializer) ?? 'null'
+    return `const ${name} = ref${type ? `<${printNode(type)}>` : ''}(${
+      printNode(initializer) ?? 'null'
     });`;
   },
   Method({ node }) {

@@ -1,4 +1,4 @@
-import { getPropertyName, getPropertyType, printNode } from '@pryzm/ast-utils';
+import { getPropertyName, printNode } from '@pryzm/ast-utils';
 import { StringTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
@@ -87,17 +87,15 @@ export const transformer: LitTranformer = {
   Provider(value) {
     throw new Error('Method not implemented.');
   },
-  Ref(value, context) {
+  Ref({ name, type }, context) {
     context.importHandler.addNamedImport('createRef', 'lit/directives/ref.js');
     context.importHandler.addNamedImport('ref', 'lit/directives/ref.js');
     context.importHandler.addNamedImport('Ref', 'lit');
 
-    const type = getPropertyType(value);
-
     return printNode(
       factory.createPropertyDeclaration(
         undefined,
-        factory.createIdentifier('inputRef'),
+        factory.createIdentifier(name),
         undefined,
         factory.createTypeReferenceNode(factory.createIdentifier('Ref'), type ? [type] : undefined),
         factory.createCallExpression(factory.createIdentifier('createRef'), undefined, [])

@@ -37,8 +37,8 @@ export const transformer: SvelteTranformer = {
   Provider(value) {
     throw new Error('Method not implemented.');
   },
-  Ref(value) {
-    return `let ${getPropertyName(value)};`;
+  Ref({ name }) {
+    return `let ${name};`;
   },
   Method({ node }) {
     return printNode(convertMethodToFunction(stripThis(node)));
