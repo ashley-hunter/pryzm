@@ -242,12 +242,7 @@ export const transformer: ReactTransformer = {
   Template(value, styles, context) {
     const template = transformTemplate(value, templateTransformer, context);
 
-    // if there are no styles then return the template directly
-    if (!context.data.has('id')) {
-      return template;
-    }
-
-    return `<>${template}<style>{\`${styles}\`}</style></>`;
+    return !context.data.has('id') ? template : `<>${template}<style>{\`${styles}\`}</style></>`;
   },
   PreTransform(metadata, context) {
     // add the react import
