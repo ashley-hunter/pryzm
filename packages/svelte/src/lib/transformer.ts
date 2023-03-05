@@ -11,12 +11,8 @@ import { templateTransformer } from './template-transformer';
 export type SvelteTranformer = StringTransformer;
 
 export const transformer: SvelteTranformer = {
-  Computed(computed) {
-    // computed is a get accessor declaration, we need to convert it to a variable statement that is exported
-    const name = getPropertyName(computed);
-    const initializer = getReturnExpression(computed);
-
-    return `$: ${name} = ${printNode(stripThis(initializer))};`;
+  Computed({ name, node }) {
+    return `$: ${name} = ${printNode(stripThis(getReturnExpression(node)))};`;
   },
   Prop({ name, initializer }) {
     return initializer
@@ -47,7 +43,7 @@ export const transformer: SvelteTranformer = {
   Method({ node }) {
     return printNode(convertMethodToFunction(stripThis(node)));
   },
-  Template(value, styles, context) {
+  Template(value, _, context) {
     return transformTemplate(value, templateTransformer, context);
   },
   OnInit({ body }, context) {

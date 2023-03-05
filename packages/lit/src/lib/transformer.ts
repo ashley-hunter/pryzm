@@ -7,10 +7,8 @@ import { templateTransformer } from './template-transformer';
 export type LitTranformer = StringTransformer;
 
 export const transformer: LitTranformer = {
-  Computed(computed) {
-    return printNode(
-      factory.createGetAccessorDeclaration(undefined, computed.name, [], undefined, computed.body)
-    );
+  Computed({ name, body }) {
+    return printNode(factory.createGetAccessorDeclaration(undefined, name, [], undefined, body));
   },
   Prop({ name, type, initializer }, context) {
     context.importHandler.addNamedImport('property', 'lit/decorators.js');

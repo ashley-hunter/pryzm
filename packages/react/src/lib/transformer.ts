@@ -58,17 +58,15 @@ export type ReactTransformer = Transformer<
 >;
 
 export const transformer: ReactTransformer = {
-  Computed(computed, context) {
+  Computed({ body, name }, context) {
     context.importHandler.addNamedImport('useMemo', 'react');
 
-    const name = getPropertyName(computed);
-
     // scan the body for any dependencies
-    const dependencies = findDependencies(computed.body!);
+    const dependencies = findDependencies(body!);
 
     // convert a getter to use memo
     // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
-    const statement = useMemo(name, computed.body!, dependencies);
+    const statement = useMemo(name, body!, dependencies);
 
     return { name, statement, dependencies };
   },

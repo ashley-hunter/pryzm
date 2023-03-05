@@ -38,13 +38,9 @@ export type VueTranformer = Transformer<
 >;
 
 export const transformer: VueTranformer = {
-  Computed(computed, context) {
+  Computed({ name, node }, context) {
     context.importHandler.addNamedImport('computed', 'vue');
-    // computed is a get accessor declaration, we need to convert it to a variable statement that is exported
-    const name = getPropertyName(computed);
-    const initializer = getReturnExpression(computed);
-
-    return `const ${name} = computed(() => ${printNode(stripThis(initializer))});`;
+    return `const ${name} = computed(() => ${printNode(stripThis(getReturnExpression(node)))});`;
   },
   Prop({ name, type, initializer }) {
     return {
