@@ -2,35 +2,35 @@
 
 ### Features
 
-| Feature                         | React | Svelte | Vue | Lit |
-| ------------------------------- | ----- | ------ | --- | --- |
-| **Props**                       | ✅    | ✅     | ✅  | ✅  |
-| **State**                       | ✅    | ✅     | ✅  | ✅  |
-| **Computed**                    | ✅    | ✅     | ✅  | ✅  |
-| **Methods**                     | ✅    | ✅     | ✅  | ✅  |
-| **Events**                      | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
-| **Styles**                      | ✅    | ✅     | ✅  | ✅  |
-| **Refs**                        | ✅    | ✅     | ✅  | ✅  |
-| **Slots**                       | ✅    | ✅     | ✅  | ✅  |
-| **Named Slots**                 | ✅    | ✅     | ✅  | ✅  |
-| **Retain Imports**              | ✅    | ✅     | ✅  | ✅  |
-| **Forward Ref**                 | ❌    | –      | –   | –   |
-| **Comment Extraction**          | ✅    | ✅     | ✅  | ✅  |
-| **Lifecycle Hooks**\*           | ⚠️    | ⚠️     | ⚠️  | ⚠️  |
-| **Providers/DI**                | ❌    | ❌     | ❌  | ❌  |
-| **Conditional Classes**         | ✅    | ✅     | ✅  | ✅  |
-| **Inline Styles**               | ✅    | ✅     | ✅  | ✅  |
-| **Loops**                       | ✅    | ✅     | ✅  | ✅  |
-| **Keyed Loops**                 | ✅    | ✅     | ✅  | ✅  |
-| **Conditional Render**          | ✅    | ✅     | ✅  | ✅  |
-| **Conditional Render Fallback** | ✅    | ✅     | ✅  | ✅  |
-| **Child Components**            | ❌    | ❌     | ❌  | ❌  |
-| **Attribute Inheritance**       | ❌    | ❌     | ❌  | –   |
-| **Async Methods**               | ✅    | ✅     | ✅  | ✅  |
-| **Component Generics**          | ❌    | ❌     | ❌  | ❌  |
-| **Methods Generics**\*\*        | ⚠️    | –      | ✅  | ✅  |
-| **Define Selector**             | –     | –      | –   | ✅  |
-| **Component Previews**          | ✅    | ✅     | ✅  | ❌  |
+| Feature                         | React  | Svelte | Vue | Lit |
+| ------------------------------- | ------ | ------ | --- | --- |
+| **Props**                       | ✅     | ✅     | ✅  | ✅  |
+| **State**                       | ✅     | ✅     | ✅  | ✅  |
+| **Computed**                    | ✅     | ✅     | ✅  | ✅  |
+| **Methods**                     | ✅     | ✅     | ✅  | ✅  |
+| **Events**                      | ⚠️     | ⚠️     | ⚠️  | ⚠️  |
+| **Styles**                      | ✅     | ✅     | ✅  | ✅  |
+| **Refs**                        | ✅     | ✅     | ✅  | ✅  |
+| **Slots**                       | ✅     | ✅     | ✅  | ✅  |
+| **Named Slots**                 | ✅     | ✅     | ✅  | ✅  |
+| **Retain Imports**              | ✅     | ✅     | ✅  | ✅  |
+| **Forward Ref**                 | ❌     | –      | –   | –   |
+| **Comment Extraction**          | ✅     | ✅     | ✅  | ✅  |
+| **Lifecycle Hooks**\*           | ⚠️     | ⚠️     | ⚠️  | ⚠️  |
+| **Providers/DI**                | ❌     | ❌     | ❌  | ❌  |
+| **Conditional Classes**         | ✅     | ✅     | ✅  | ✅  |
+| **Inline Styles**               | ✅     | ✅     | ✅  | ✅  |
+| **Loops**                       | ✅     | ✅     | ✅  | ✅  |
+| **Keyed Loops**                 | ✅     | ✅     | ✅  | ✅  |
+| **Conditional Render**          | ✅     | ✅     | ✅  | ✅  |
+| **Conditional Render Fallback** | ✅     | ✅     | ✅  | ✅  |
+| **Child Components**            | ❌     | ❌     | ❌  | ❌  |
+| **Attribute Inheritance**       | ❌     | ❌     | ❌  | –   |
+| **Async Methods**               | ✅     | ✅     | ✅  | ✅  |
+| **Component Generics**          | ❌     | ❌     | ❌  | ❌  |
+| **Methods Generics**            | ⚠️\*\* | –      | ✅  | ✅  |
+| **Define Selector**             | –      | –      | –   | ✅  |
+| **Component Previews**          | ✅     | ✅     | ✅  | ❌  |
 
 ### Todo
 
@@ -46,4 +46,5 @@
 | **Multiple Files**        | ❌       | ❌      |
 
 \* Only `onInit` and `onDestroy` are currently supported
+
 \*\* Callbacks with generics must have an `extends` clause
