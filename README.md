@@ -45,6 +45,7 @@
 | **JSX Runtime**           | –        | ❌      |
 | **Writing to FileSystem** | ❌       | –       |
 | **Multiple Files**        | ❌       | ❌      |
+| **Shared Test Suite**     | ❌       | –       |
 
 \* Only `onInit` and `onDestroy` are currently supported
 
