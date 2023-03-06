@@ -116,7 +116,7 @@ function getAccessorsWithDecorator(
     `GetAccessor:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
   );
 
-  // find any property that has a Prop decorator and report an error
+  // find any property that has the decorator and report an error
   const properties = tsquery<ts.PropertyDeclaration>(
     component,
     `PropertyDeclaration:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
@@ -126,7 +126,7 @@ function getAccessorsWithDecorator(
     throw new Error(`Cannot use @${decoratorName}() on a property. Use a getter instead.`);
   }
 
-  // find any set accessor that has a Prop decorator and report an error
+  // find any set accessor that has the decorator and report an error
   const setters = tsquery<ts.SetAccessorDeclaration>(
     component,
     `SetAccessor:has(Decorator:has(CallExpression[expression.name="${decoratorName}"]))`
@@ -135,6 +135,25 @@ function getAccessorsWithDecorator(
   if (setters.length > 0) {
     throw new Error(`Cannot use @${decoratorName}() on a setter. Use a getter instead.`);
   }
+
+  // if any getter has anything except a return statement, report an error
+  accessors.forEach(accessor => {
+    const body = accessor.body;
+
+    if (!body) {
+      return;
+    }
+
+    if (body.statements.length !== 1) {
+      throw new Error(`@${decoratorName}() getter must have a single return statement.`);
+    }
+
+    const statement = body.statements[0];
+
+    if (!ts.isReturnStatement(statement)) {
+      throw new Error(`@${decoratorName}() getter must have a single return statement.`);
+    }
+  });
 
   return accessors;
 }
