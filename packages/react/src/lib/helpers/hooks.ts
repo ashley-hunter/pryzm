@@ -5,7 +5,7 @@ import {
   stripThis,
 } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
-import { transformAssignment } from '../utils/assignment';
+import { transformAssignment } from '../helpers/assignment';
 
 /**
  * Create a useRef hook

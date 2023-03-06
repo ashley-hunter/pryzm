@@ -1,5 +1,5 @@
 import { tsquery } from '@phenomnomnominal/tsquery';
-import { getDecorator, getDecoratorProperty, getText } from '@pryzm/ast-utils';
+import { getDecorator, getDecoratorProperty, getPropertyName, getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { toLowerCamelCase } from '../utils/names';
 import { ComponentMetadata } from './component-metadata';
@@ -61,6 +61,7 @@ function collectComponentMetadata(
   ensureNoPrivateMembers(metadata);
   ensureFieldsAreInitialized(metadata);
   ensureEventsAreInitialized(metadata);
+  ensureEventsArePrefixed(metadata);
 
   return metadata;
 }
@@ -422,6 +423,15 @@ function ensureEventsAreInitialized(metadata: ComponentMetadata): void {
       event.initializer.expression.text !== 'EventEmitter'
     ) {
       throw new Error(`Event "${getText(event.name)}" must be initialized as a new EventEmitter`);
+    }
+  });
+}
+
+function ensureEventsArePrefixed(metadata: ComponentMetadata): void {
+  // check that all events are prefixed with "on"
+  metadata.events.forEach(event => {
+    if (!getPropertyName(event).startsWith('on')) {
+      throw new Error(`Event "${getText(event.name)}" must be prefixed with "on"`);
     }
   });
 }
