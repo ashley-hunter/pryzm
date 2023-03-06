@@ -19,7 +19,9 @@ export const transformer = createTransformer({
       comment
     );
   },
-  Prop({ name, type, initializer, comment }) {
+  Prop({ name, type, initializer, comment }, context) {
+    context.importHandler.addNamedImport('toRefs', 'vue');
+
     return {
       name,
       type: printNode(type),
