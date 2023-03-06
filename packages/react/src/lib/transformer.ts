@@ -1,4 +1,4 @@
-import { getPropertyName, printNode, stripThis } from '@pryzm/ast-utils';
+import { printNode, stripThis } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
@@ -82,18 +82,7 @@ export const transformer = createTransformer({
 
     return { getter, setter, statement };
   },
-  Event(event) {
-    // get the name of the prop
-    const name = getPropertyName(event);
-
-    // get the default value of the prop if it exists
-    const initializer = event.initializer;
-
-    // the event initializer will always be EventEmitter, but we need to get the type from the EventEmitter generic
-    if (!initializer || !ts.isNewExpression(initializer)) {
-      throw new Error('Event initializers must be an EventEmitter');
-    }
-
+  Event({ name, initializer, comment, node }) {
     // get the type of the event
     const eventType = initializer.typeArguments?.[0];
 
@@ -101,7 +90,7 @@ export const transformer = createTransformer({
     const type = createFunctionTypeNode(eventType);
 
     // create the interface property with the type attached
-    const interfaceProperty = createInterfaceProperty(name, type, event);
+    const interfaceProperty = createInterfaceProperty(name, type, node, comment);
 
     // create the destructured property with the default value attached
     const destructuredProperty = createDestructuredProperty(name);

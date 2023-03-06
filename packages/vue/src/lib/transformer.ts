@@ -56,7 +56,14 @@ export const transformer = createTransformer({
     // get the type of the event
     const type = initializer.typeArguments?.[0];
 
-    return { name: getPropertyName(event), type };
+    const name = getPropertyName(event);
+
+    // if the name does not start with 'on', throw an error
+    if (!name.startsWith('on')) {
+      throw new Error(`Event names must start with 'on'`);
+    }
+
+    return { name, type };
   },
   Inject(value) {
     throw new Error('Method not implemented.');

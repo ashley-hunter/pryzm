@@ -67,7 +67,7 @@ export interface Transformer<
   Method: (metadata: MethodTransformerMetadata, context: TransformerContext) => TMethodReturn;
   OnInit: (metadata: MethodTransformerMetadata, context: TransformerContext) => TOnInitReturn;
   OnDestroy: (metadata: MethodTransformerMetadata, context: TransformerContext) => TOnDestroyReturn;
-  Event: (value: ts.PropertyDeclaration, context: TransformerContext) => TEventReturn;
+  Event: (metadata: EventTransformerMetadata, context: TransformerContext) => TEventReturn;
   Ref: (metadata: RefTransformerMetadata, context: TransformerContext) => TRefReturn;
   Computed: (matadata: ComputedTransformerMetadata, context: TransformerContext) => TComputedReturn;
   Provider: (value: ts.PropertyDeclaration, context: TransformerContext) => TProviderReturn;
@@ -189,7 +189,19 @@ export function transform<T extends Transformer>(
         context
       ) ?? computed
   );
-  const events = metadata.events.map(event => transformer.Event?.(event, context) ?? event);
+  const events = metadata.events.map(
+    event =>
+      transformer.Event?.(
+        {
+          name: getPropertyName(event),
+          type: getPropertyType(event),
+          node: event,
+          initializer: event.initializer as ts.NewExpression,
+          comment: extractComment(event),
+        },
+        context
+      ) ?? event
+  );
   const methods = metadata.methods.map(method => {
     return (
       transformer.Method?.(
@@ -307,6 +319,14 @@ export interface RefTransformerMetadata {
   name: string;
   type?: ts.TypeNode;
   initializer?: ts.Expression;
+  node: ts.PropertyDeclaration;
+  comment?: string;
+}
+
+export interface EventTransformerMetadata {
+  name: string;
+  type?: ts.TypeNode;
+  initializer: ts.NewExpression;
   node: ts.PropertyDeclaration;
   comment?: string;
 }

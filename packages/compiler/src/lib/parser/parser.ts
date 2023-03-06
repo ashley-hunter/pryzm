@@ -60,6 +60,7 @@ function collectComponentMetadata(
   ensureFieldsAreReadonly(metadata);
   ensureNoPrivateMembers(metadata);
   ensureFieldsAreInitialized(metadata);
+  ensureEventsAreInitialized(metadata);
 
   return metadata;
 }
@@ -407,6 +408,20 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
   metadata.injects.forEach(dependency => {
     if (!dependency.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword)) {
       throw new Error(`Dependency "${getText(dependency.name)}" must be readonly`);
+    }
+  });
+}
+
+function ensureEventsAreInitialized(metadata: ComponentMetadata): void {
+  // check that all events are initialized as new EventEmitter
+  metadata.events.forEach(event => {
+    if (
+      !event.initializer ||
+      !ts.isNewExpression(event.initializer) ||
+      !ts.isIdentifier(event.initializer.expression) ||
+      event.initializer.expression.text !== 'EventEmitter'
+    ) {
+      throw new Error(`Event "${getText(event.name)}" must be initialized as a new EventEmitter`);
     }
   });
 }
