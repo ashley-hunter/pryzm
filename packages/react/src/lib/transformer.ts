@@ -3,15 +3,15 @@ import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
-import { useCallback, useEffect, useMemo, useRef, useState } from './ast/hooks';
+import { findDependencies } from './helpers/find-dependencies';
+import { useCallback, useEffect, useMemo, useRef, useState } from './helpers/hooks';
 import {
   createDestructuredProperty,
   createFunctionTypeNode,
   createInterfaceProperty,
-} from './ast/misc';
+} from './helpers/misc';
+import { setterName } from './helpers/names';
 import { templateTransformer } from './template-transformer';
-import { findDependencies } from './utils/find-dependencies';
-import { setterName } from './utils/names';
 
 export const transformer = createTransformer({
   Computed({ body, name, comment }, context) {

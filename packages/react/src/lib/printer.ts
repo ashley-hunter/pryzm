@@ -1,7 +1,7 @@
 import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
+import { propsName } from './helpers/names';
 import { transformer } from './transformer';
-import { propsName } from './utils/names';
 
 export function print(source: string): string {
   const printer = new ReactPrinter();
