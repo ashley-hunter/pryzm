@@ -26,6 +26,9 @@ export const templateTransformer = createTemplateTransformer({
 
     return `${name}={${printNode(stripThis(value))}}`;
   },
+  Event({ name, value }) {
+    return `${name}={${printNode(stripThis(value))}}`;
+  },
   Show({ when, fallback, children }) {
     return fallback
       ? `{${printNode(stripThis(when))} ? <>${children}</> : ${fallback}}`

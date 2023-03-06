@@ -1,5 +1,6 @@
 import { printNode } from '@pryzm/ast-utils';
 import { createTemplateTransformer } from '@pryzm/compiler';
+import { toEventName } from './helpers';
 
 export const templateTransformer = createTemplateTransformer({
   Slot(name) {
@@ -12,6 +13,9 @@ export const templateTransformer = createTemplateTransformer({
     }
 
     return `${name}={${printNode(value)}}`;
+  },
+  Event({ name, value }) {
+    return `${toEventName(name)}="\${${printNode(value)}}"`;
   },
   Ref({ ref }) {
     return `\${ref(${printNode(ref)})}`;

@@ -1,4 +1,4 @@
-import { getPropertyName, insertComment, printNode } from '@pryzm/ast-utils';
+import { insertComment, printNode } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
@@ -83,8 +83,8 @@ export const transformer = createTransformer({
 
     return insertComment(printNode(disconnectedCallback), comment);
   },
-  Event(event) {
-    return getPropertyName(event);
+  Event({ name }) {
+    return name;
   },
   Inject(value) {
     throw new Error('Method not implemented.');

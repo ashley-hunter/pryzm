@@ -1,6 +1,7 @@
 import { printNode, stripQuotes, stripThis } from '@pryzm/ast-utils';
 import { createTemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
+import { toEventName } from './helpers';
 
 export const templateTransformer = createTemplateTransformer({
   Slot(name) {
@@ -8,6 +9,9 @@ export const templateTransformer = createTemplateTransformer({
   },
   Attribute({ name, value }) {
     return name === 'key' ? '' : `${name}={${printNode(stripThis(value))}}`;
+  },
+  Event({ name, value }) {
+    return `${toEventName(name)}={${printNode(stripThis(value))}}`;
   },
   Ref({ ref }) {
     return `bind:this={${printNode(stripThis(ref))}}`;

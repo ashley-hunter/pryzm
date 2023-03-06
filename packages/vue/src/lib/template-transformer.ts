@@ -1,5 +1,6 @@
 import { printNode, sanitizeAttribute, stripQuotes, stripThis } from '@pryzm/ast-utils';
 import { createTemplateTransformer } from '@pryzm/compiler';
+import { toEventName } from './helpers';
 
 export const templateTransformer = createTemplateTransformer({
   Slot(name) {
@@ -19,6 +20,9 @@ export const templateTransformer = createTemplateTransformer({
     }
 
     return `${name}="${stripQuotes(printNode(stripThis(value))!)}"`;
+  },
+  Event({ name, value }) {
+    return `${toEventName(name)}="${stripQuotes(printNode(stripThis(value))!)}"`;
   },
   Ref({ ref }) {
     return `ref="${printNode(stripThis(ref))}"`;

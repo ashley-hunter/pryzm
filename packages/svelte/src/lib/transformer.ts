@@ -1,6 +1,5 @@
 import {
   convertMethodToFunction,
-  getPropertyName,
   getReturnExpression,
   insertComment,
   printNode,
@@ -34,10 +33,10 @@ export const transformer = createTransformer({
       comment
     );
   },
-  Event(event, context) {
+  Event({ name }, context) {
     context.importHandler.addNamedImport('createEventDispatcher', 'svelte');
 
-    return getPropertyName(event);
+    return name;
   },
   Inject(value) {
     throw new Error('Method not implemented.');

@@ -1,6 +1,5 @@
 import {
   convertMethodToFunction,
-  getPropertyName,
   getReturnExpression,
   inferType,
   insertComment,
@@ -44,24 +43,9 @@ export const transformer = createTransformer({
       comment
     );
   },
-  Event(event) {
-    // get the default value of the prop if it exists
-    const initializer = event.initializer;
-
-    // the event initializer will always be EventEmitter, but we need to get the type from the EventEmitter generic
-    if (!initializer || !ts.isNewExpression(initializer)) {
-      throw new Error('Event initializers must be an EventEmitter');
-    }
-
+  Event({ name, initializer }) {
     // get the type of the event
     const type = initializer.typeArguments?.[0];
-
-    const name = getPropertyName(event);
-
-    // if the name does not start with 'on', throw an error
-    if (!name.startsWith('on')) {
-      throw new Error(`Event names must start with 'on'`);
-    }
 
     return { name, type };
   },

@@ -38,6 +38,14 @@ export interface TemplateTransformer {
     },
     context: TransformerContext
   ) => string;
+  Event: (
+    metadata: {
+      name: string;
+      value: ts.PropertyAccessExpression;
+      node: ts.JsxAttribute;
+    },
+    context: TransformerContext
+  ) => string;
   Ref?: (
     metadata: { node: ts.JsxAttribute; ref: ts.Expression | undefined },
     context: TransformerContext
@@ -190,7 +198,23 @@ export class TemplateVisitor {
     const name = getAttributeName(node);
     const value = getAttributeValue(node);
 
+    if (name.startsWith('on')) {
+      return this.visitEvent(node, name, value);
+    }
+
     return this.transformer.Attribute({ node, name, value }, this.context);
+  }
+
+  visitEvent(node: ts.JsxAttribute, name: string, value?: ts.Expression) {
+    if (!value) {
+      throw new Error(`Event ${name} has no value`);
+    }
+
+    if (ts.isPropertyAccessExpression(value)) {
+      return this.transformer.Event?.({ node, name, value }, this.context) ?? '';
+    }
+
+    throw new Error(`Event ${name} must bind directly to a method`);
   }
 
   visitClass(node: ts.JsxAttribute) {
