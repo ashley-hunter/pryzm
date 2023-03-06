@@ -5,5 +5,5 @@
  * @param name JSX event name
  */
 export function toEventName(name: string): string {
-  return `@${name[2].toLowerCase()}${name.slice(3)}`;
+  return `${name[2].toLowerCase()}${name.slice(3)}`;
 }
