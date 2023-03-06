@@ -12,6 +12,7 @@ import { ImportHandler } from '../utils/imports-handler';
 export type TransformerContext = {
   data: Map<string, unknown>;
   importHandler: ImportHandler;
+  metadata: ComponentMetadata;
 };
 
 export type TransformerOutput<T> = T extends Transformer<
@@ -134,12 +135,13 @@ export function transform<T extends Transformer>(
     throw new Error('Multiple components found');
   }
 
+  const metadata = components[0];
+
   const context: TransformerContext = {
     data: new Map(),
     importHandler: new ImportHandler(components[0].imports),
+    metadata,
   };
-
-  const metadata = components[0];
 
   transformer.PreTransform?.(metadata, context);
   let styles = transformer.Styles?.(metadata.styles, context) ?? metadata.styles;

@@ -1,52 +1,52 @@
-import { printNode, stripQuotes, stripThis } from '@pryzm/ast-utils';
+import { stripQuotes } from '@pryzm/ast-utils';
 import { createTemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
-import { toEventName } from './helpers';
+import { processNodeToString, toEventName } from './helpers';
 
 export const templateTransformer = createTemplateTransformer({
   Slot(name) {
     return name === 'default' ? `<slot />` : `<slot name="${name}" />`;
   },
-  Attribute({ name, value }) {
-    return name === 'key' ? '' : `${name}={${printNode(stripThis(value))}}`;
+  Attribute({ name, value }, context) {
+    return name === 'key' ? '' : `${name}={${processNodeToString(value, context)}}`;
   },
-  Event({ name, value }) {
-    return `${toEventName(name)}={${printNode(stripThis(value))}}`;
+  Event({ name, value }, context) {
+    return `${toEventName(name)}={${processNodeToString(value, context)}}`;
   },
-  Ref({ ref }) {
-    return `bind:this={${printNode(stripThis(ref))}}`;
+  Ref({ ref }, context) {
+    return `bind:this={${processNodeToString(ref, context)}}`;
   },
-  Show({ when, children, fallback }) {
+  Show({ when, children, fallback }, context) {
     return `
-      {#if ${printNode(stripThis(when))}}
+      {#if ${processNodeToString(when, context)}}
         ${children}
         ${fallback ? `{:else}\n${fallback}` : ``}
       {/if}`;
   },
-  For({ each, itemName, indexName, children, key }) {
+  For({ each, itemName, indexName, children, key }, context) {
     return `
-      {#each ${printNode(stripThis(each))} as ${itemName}${indexName ? `, ${indexName}` : ''}${
-      key ? ` (${key})` : ''
-    }}
+      {#each ${processNodeToString(each, context)} as ${itemName}${
+      indexName ? `, ${indexName}` : ''
+    }${key ? ` (${key})` : ''}}
         ${children}
       {/each}`;
   },
-  ConditionalClasses({ classes }) {
+  ConditionalClasses({ classes }, context) {
     return Object.entries(classes)
       .map(([name, condition]) => {
-        return `class:${stripQuotes(name)}={${printNode(stripThis(condition))}}`;
+        return `class:${stripQuotes(name)}={${processNodeToString(condition, context)}}`;
       })
       .join(' ');
   },
-  ConditionalStyles({ styles }) {
+  ConditionalStyles({ styles }, context) {
     return `style="${Object.entries(styles)
       .map(([name, value]) => {
         // if the value is a string then we don't need to wrap it in curly braces
         return ts.isStringLiteral(value)
           ? `${name}: ${value.text};`
-          : `${name}: {${printNode(stripThis(value))}};`;
+          : `${name}: {${processNodeToString(value, context)}};`;
       })
       .join(' ')}"`;
   },
-  Expression: value => `{${printNode(stripThis(value.expression))}}`,
+  Expression: (value, context) => `{${processNodeToString(value.expression, context)}}`,
 });

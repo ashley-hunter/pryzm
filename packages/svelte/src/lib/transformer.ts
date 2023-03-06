@@ -2,33 +2,33 @@ import {
   convertMethodToFunction,
   getReturnExpression,
   insertComment,
-  printNode,
   stripThis,
 } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
+import { processNodeToString } from './helpers';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
-  Computed({ name, node, comment }) {
+  Computed({ name, node, comment }, context) {
     return insertComment(
-      `$: ${name} = ${printNode(stripThis(getReturnExpression(node)))};`,
+      `$: ${name} = ${processNodeToString(getReturnExpression(node), context)};`,
       comment
     );
   },
-  Prop({ name, initializer, comment }) {
+  Prop({ name, initializer, comment }, context) {
     return insertComment(
       initializer
-        ? `export let ${name} = ${printNode(stripThis(initializer))};`
+        ? `export let ${name} = ${processNodeToString(initializer, context)};`
         : `export let ${name};`,
       comment
     );
   },
-  State({ name, isReadonly, initializer, comment }) {
+  State({ name, isReadonly, initializer, comment }, context) {
     initializer = stripThis(initializer);
 
     return insertComment(
       initializer
-        ? `${isReadonly ? 'const' : 'let'} ${name} = ${printNode(initializer)};`
+        ? `${isReadonly ? 'const' : 'let'} ${name} = ${processNodeToString(initializer, context)};`
         : `${isReadonly ? 'const' : 'let'} ${name};`,
       comment
     );
@@ -47,8 +47,8 @@ export const transformer = createTransformer({
   Ref({ name }) {
     return `let ${name};`;
   },
-  Method({ node, comment }) {
-    return insertComment(printNode(convertMethodToFunction(stripThis(node))), comment);
+  Method({ node, comment }, context) {
+    return insertComment(processNodeToString(convertMethodToFunction(node), context), comment);
   },
   Template(value, _, context) {
     return transformTemplate(value, templateTransformer, context);
@@ -56,11 +56,11 @@ export const transformer = createTransformer({
   OnInit({ body, comment }, context) {
     context.importHandler.addNamedImport('onMount', 'svelte');
 
-    return insertComment(`onMount(() => ${printNode(stripThis(body))});`, comment);
+    return insertComment(`onMount(() => ${processNodeToString(body, context)});`, comment);
   },
   OnDestroy({ body, comment }, context) {
     context.importHandler.addNamedImport('onDestroy', 'svelte');
 
-    return insertComment(`onDestroy(() => ${printNode(stripThis(body))});`, comment);
+    return insertComment(`onDestroy(() => ${processNodeToString(body, context)});`, comment);
   },
 });
