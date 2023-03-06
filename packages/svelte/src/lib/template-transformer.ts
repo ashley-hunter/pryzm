@@ -11,7 +11,7 @@ export const templateTransformer = createTemplateTransformer({
     return name === 'key' ? '' : `${name}={${processNodeToString(value, context)}}`;
   },
   Event({ name, value }, context) {
-    return `${toEventName(name)}={${processNodeToString(value, context)}}`;
+    return `on:${toEventName(name)}={${processNodeToString(value, context)}}`;
   },
   Ref({ ref }, context) {
     return `bind:this={${processNodeToString(ref, context)}}`;

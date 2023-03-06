@@ -1,6 +1,7 @@
-import { printNode, stripThis } from '@pryzm/ast-utils';
+import { getPropertyName, printNode, stripThis } from '@pryzm/ast-utils';
 import { TransformerContext } from '@pryzm/compiler';
 import * as ts from 'typescript';
+import { factory } from 'typescript';
 
 /**
  * JSX Event name to Svelte event name
@@ -9,7 +10,7 @@ import * as ts from 'typescript';
  * @param name JSX event name
  */
 export function toEventName(name: string): string {
-  return `on:${name[2].toLowerCase()}${name.slice(3)}`;
+  return `${name[2].toLowerCase()}${name.slice(3)}`;
 }
 
 /**
@@ -48,9 +49,31 @@ export function processNodeToString<T extends ts.Node | undefined>(
  * A TypeScript transformer that transforms event emitter calls to use the event dispatcher
  * @param context
  */
-export function eventTransformer(context: TransformerContext): ts.TransformerFactory<ts.Node> {
+export function eventTransformer(pryzmContext: TransformerContext): ts.TransformerFactory<ts.Node> {
   return (context: ts.TransformationContext) => (root: ts.Node) => {
     const visitor = (node: ts.Node): ts.Node => {
+      // if this is a call expression and the expression is a property access expression
+      // and the property name is `emit` and the expression the name of an event
+      if (
+        ts.isExpressionStatement(node) &&
+        ts.isCallExpression(node.expression) &&
+        ts.isPropertyAccessExpression(node.expression.expression) &&
+        node.expression.expression.name.text === 'emit' &&
+        ts.isIdentifier(node.expression.expression.expression)
+      ) {
+        const eventName = node.expression.expression.expression.text;
+
+        // if the event name is not in the list of events, then it is not an event emitter
+        if (pryzmContext.metadata.events.some(e => getPropertyName(e) === eventName)) {
+          return factory.createExpressionStatement(
+            factory.createCallExpression(factory.createIdentifier('dispatch'), undefined, [
+              factory.createStringLiteral(toEventName(eventName)),
+              node.expression.arguments[0],
+            ])
+          );
+        }
+      }
+
       return ts.visitEachChild(node, visitor, context);
     };
 
