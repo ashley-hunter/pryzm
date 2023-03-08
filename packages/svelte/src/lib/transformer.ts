@@ -1,9 +1,4 @@
-import {
-  convertMethodToFunction,
-  getReturnExpression,
-  insertComment,
-  stripThis,
-} from '@pryzm/ast-utils';
+import { convertMethodToFunction, getReturnExpression, insertComment } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { processNodeToString } from './helpers';
 import { templateTransformer } from './template-transformer';
@@ -24,8 +19,6 @@ export const transformer = createTransformer({
     );
   },
   State({ name, isReadonly, initializer, comment }, context) {
-    initializer = stripThis(initializer);
-
     return insertComment(
       initializer
         ? `${isReadonly ? 'const' : 'let'} ${name} = ${processNodeToString(initializer, context)};`

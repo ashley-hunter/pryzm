@@ -1,6 +1,7 @@
 export * from './lib/comment';
 export * from './lib/converter';
 export * from './lib/decorator';
+export * from './lib/events';
 export * from './lib/jsx';
 export * from './lib/name';
 export * from './lib/printer';

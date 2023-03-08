@@ -1,4 +1,4 @@
-import { printNode, stripThis } from '@pryzm/ast-utils';
+import { printNode } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
@@ -11,6 +11,7 @@ import {
   createInterfaceProperty,
 } from './helpers/misc';
 import { setterName } from './helpers/names';
+import { processNode } from './helpers/process-node';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
@@ -26,9 +27,9 @@ export const transformer = createTransformer({
 
     return { name, statement, dependencies };
   },
-  Prop({ name, type, initializer, node, comment }) {
+  Prop({ name, type, initializer, node, comment }, context) {
     // get the default value of the prop if it exists
-    initializer = stripThis(initializer);
+    initializer = processNode(initializer, context);
 
     // create the interface property with the type attached
     const interfaceProperty = createInterfaceProperty(name, type, node, comment);
@@ -75,7 +76,7 @@ export const transformer = createTransformer({
     const setter = setterName(getter);
 
     // get the initializer of the prop if it exists
-    initializer = stripThis(initializer);
+    initializer = processNode(initializer, context);
 
     // convert the property to a useState hook
     const statement = useState(getter, setter, initializer, type, comment);
@@ -120,7 +121,7 @@ export const transformer = createTransformer({
 
     // convert a method to a useCallback hook
     // e.g. test() { return 'test'; } => const test = useCallback(() => { return 'test'; }, []);
-    const statement = useCallback(name, node, dependencies, comment);
+    const statement = useCallback(name, processNode(node, context), dependencies, comment);
 
     return { name, statement, dependencies };
   },
