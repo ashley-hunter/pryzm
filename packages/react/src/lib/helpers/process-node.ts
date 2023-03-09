@@ -8,6 +8,7 @@ import {
 import { TransformerContext } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
+import { convertAssignmentTransformer } from './assignment';
 
 /**
  * In React we must process any method body or initializer to do the following:
@@ -22,11 +23,12 @@ export function processNode<T extends ts.Node | undefined>(
     return undefined as T extends undefined ? undefined : T;
   }
 
+  // replace any event emitter calls with the event dispatcher
+  node = ts.transform(node!, [convertAssignmentTransformer(), eventTransformer(context)])
+    .transformed[0] as T;
+
   // remove any `this.` references
   node = stripThis(node) as T;
-
-  // replace any event emitter calls with the event dispatcher
-  node = ts.transform(node!, [eventTransformer(context)]).transformed[0] as T;
 
   return node as unknown as T extends undefined ? undefined : T;
 }

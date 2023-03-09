@@ -1,11 +1,5 @@
-import {
-  convertMethodToArrowFunction,
-  insertComment,
-  printNode,
-  stripThis,
-} from '@pryzm/ast-utils';
+import { convertMethodToArrowFunction, insertComment, printNode } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
-import { transformAssignment } from '../helpers/assignment';
 
 /**
  * Create a useRef hook
@@ -67,9 +61,7 @@ export function useMemo(
   comment = ''
 ): string {
   return insertComment(
-    `const ${name} = useMemo(() => ${printNode(stripThis(initializer)!)}, [${dependencies.join(
-      ', '
-    )}]);`,
+    `const ${name} = useMemo(() => ${printNode(initializer)}, [${dependencies.join(', ')}]);`,
     comment
   );
 }
@@ -93,9 +85,7 @@ export function useCallback(
   const arrowFunction = convertMethodToArrowFunction(method);
 
   return insertComment(
-    `const ${name} = useCallback(${printNode(
-      stripThis(transformAssignment(arrowFunction))!
-    )}, [${dependencies.join(', ')}]);`,
+    `const ${name} = useCallback(${printNode(arrowFunction)}, [${dependencies.join(', ')}]);`,
     comment
   );
 }
@@ -109,5 +99,5 @@ export function useCallback(
  * useEffect(() => 'value', []);
  */
 export function useEffect(initializer: ts.BlockLike, dependencies: string[]): string {
-  return `useEffect(() => ${printNode(stripThis(initializer)!)}, [${dependencies.join(', ')}]);`;
+  return `useEffect(() => ${printNode(initializer)}, [${dependencies.join(', ')}]);`;
 }

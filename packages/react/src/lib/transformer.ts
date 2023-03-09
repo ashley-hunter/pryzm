@@ -23,7 +23,7 @@ export const transformer = createTransformer({
 
     // convert a getter to use memo
     // e.g. @Computed() get test() { return 'test'; } => const test = useMemo(() => { return 'test'; }, []);
-    const statement = useMemo(name, body!, dependencies, comment);
+    const statement = useMemo(name, processNode(body, context), dependencies, comment);
 
     return { name, statement, dependencies };
   },
@@ -130,7 +130,7 @@ export const transformer = createTransformer({
 
     // convert a method to a useEffect hook
     // e.g. onInit() { return 'test'; } => useEffect(() => { return 'test'; }, []);
-    return useEffect(method.body!, []);
+    return useEffect(processNode(method.body, context)!, []);
   },
   OnDestroy(method, context) {
     context.importHandler.addNamedImport('useEffect', 'react');
@@ -144,7 +144,7 @@ export const transformer = createTransformer({
           [],
           undefined,
           factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-          method.body!
+          processNode(method.body, context)!
         )
       ),
     ]);
@@ -180,17 +180,6 @@ export const transformer = createTransformer({
   PreTransform(metadata, context) {
     // add the react import
     context.importHandler.addDefaultImport('React', 'react');
-
-    return metadata;
-  },
-  PostTransform(metadata) {
-    // find all events and rename to include the on prefix
-    // const eventsToRename = metadata.events.filter(event => event.name !== eventName(event.name));
-
-    // rename all events
-    // eventsToRename.forEach(event =>
-    //   renameIdentifierOccurences(metadata, event.name, eventName(event.name))
-    // );
 
     return metadata;
   },

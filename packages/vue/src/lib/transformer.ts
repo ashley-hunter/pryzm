@@ -4,17 +4,17 @@ import {
   inferType,
   insertComment,
   printNode,
-  stripThis,
 } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
+import { processNode, processNodeToString } from './helpers';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
   Computed({ name, node, comment }, context) {
     context.importHandler.addNamedImport('computed', 'vue');
     return insertComment(
-      `const ${name} = computed(() => ${printNode(stripThis(getReturnExpression(node)))});`,
+      `const ${name} = computed(() => ${processNodeToString(getReturnExpression(node), context)});`,
       comment
     );
   },
@@ -24,7 +24,7 @@ export const transformer = createTransformer({
     return {
       name,
       type: printNode(type),
-      initializer: printNode(initializer),
+      initializer: processNodeToString(initializer, context),
       comment,
     };
   },
@@ -39,7 +39,7 @@ export const transformer = createTransformer({
     context.importHandler.addNamedImport(reactiveFn, 'vue');
 
     return insertComment(
-      `const ${name} = ${reactiveFn}(${printNode(stripThis(initializer)) ?? 'null'});`,
+      `const ${name} = ${reactiveFn}(${processNodeToString(initializer, context) ?? 'null'});`,
       comment
     );
   },
@@ -59,24 +59,24 @@ export const transformer = createTransformer({
     context.importHandler.addNamedImport('ref', 'vue');
     return insertComment(
       `const ${name} = ref${type ? `<${printNode(type)}>` : ''}(${
-        printNode(initializer) ?? 'null'
+        processNodeToString(initializer, context) ?? 'null'
       });`,
       comment
     );
   },
-  Method({ node, comment }) {
+  Method({ node, comment }, context) {
     // convert a method to a function declaration
-    return insertComment(printNode(convertMethodToFunction(stripThis(node))), comment);
+    return insertComment(printNode(convertMethodToFunction(processNode(node, context))), comment);
   },
   OnInit({ body, comment }, context) {
     context.importHandler.addNamedImport('onMounted', 'vue');
 
-    return insertComment(`onMounted(() => ${printNode(stripThis(body))});`, comment);
+    return insertComment(`onMounted(() => ${processNodeToString(body, context)});`, comment);
   },
   OnDestroy({ body, comment }, context) {
     context.importHandler.addNamedImport('onUnmounted', 'vue');
 
-    return insertComment(`onUnmounted(() => ${printNode(stripThis(body))});`, comment);
+    return insertComment(`onUnmounted(() => ${processNodeToString(body, context)});`, comment);
   },
   Template(value, styles, context) {
     return transformTemplate(value, templateTransformer, context);

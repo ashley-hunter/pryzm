@@ -16,7 +16,7 @@ export function transformAssignment<T extends ts.Node>(node: T): T {
 }
 
 // create a ts transformer factory
-function convertAssignmentTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
+export function convertAssignmentTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
   return context => {
     const visitor = (node: ts.Node): ts.Node => {
       // e.g. this.test = 'test'; => setTest('test');
@@ -87,7 +87,8 @@ function convertAssignmentTransformer<T extends ts.Node>(): ts.TransformerFactor
             break;
 
           default:
-            throw new Error(`Unknown operator: ${getText(node.operatorToken)}`);
+            // this is likely a nested binary expression, so just return the node
+            return node;
         }
 
         // if the operator is an equals, then just call the setter

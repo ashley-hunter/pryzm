@@ -15,13 +15,12 @@ export function isEventEmitterCall<T extends ts.Node>(
     ts.isExpressionStatement(node) &&
     ts.isCallExpression(node.expression) &&
     ts.isPropertyAccessExpression(node.expression.expression) &&
-    node.expression.expression.name.text === 'emit' &&
-    ts.isIdentifier(node.expression.expression.expression)
+    node.expression.expression.name.text === 'emit'
   ) {
-    const identifier = node.expression.expression.expression.text;
+    const eventName = getEventNameFromEmitterCall(node);
 
     // if the event name is not in the list of events, then it is not an event emitter
-    return events.some(e => getPropertyName(e) === identifier);
+    return events.some(e => getPropertyName(e) === eventName);
   }
 
   return false;
@@ -49,6 +48,11 @@ export function getEventNameFromEmitterCall<T extends ts.Node>(node: T): string 
 
   if (node.expression.expression.name.text !== 'emit') {
     throw new Error('Node is not an emit call');
+  }
+
+  // if this is a property access expression, then strip this
+  if (ts.isPropertyAccessExpression(node.expression.expression.expression)) {
+    return getPropertyName(node.expression.expression.expression);
   }
 
   if (!ts.isIdentifier(node.expression.expression.expression)) {
