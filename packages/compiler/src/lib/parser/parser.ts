@@ -168,7 +168,52 @@ function getMethods(component: ts.ClassDeclaration): ts.MethodDeclaration[] {
     'MethodDeclaration:not([name.name="render"])'
   );
 
+  // we want to sort the methods so that any functions that rely on other functions are defined after the functions they rely on
+  // this is because we are going to generate the methods as strings and then concatenate them together
+  // if we don't sort them, we might get a reference error in frameworks like React where functions are defined as variables
+  methods.sort((a, b) => {
+    const aName = a.name.getText();
+    const bName = b.name.getText();
+
+    // if a calls b, then a should come after b
+    if (callsMethod(a, bName)) {
+      return 1;
+    }
+
+    // if b calls a, then b should come after a
+    if (callsMethod(b, aName)) {
+      return -1;
+    }
+
+    // if neither call the other, then they can be in any order
+    return 0;
+  });
+
   return methods;
+}
+
+/**
+ * Returns true if the method calls the specified method name
+ * @param method The method body to search
+ * @param methodName The name of the method to search for
+ */
+function callsMethod(method: ts.MethodDeclaration, methodName: string): boolean {
+  // find all the nodes that are a call expression
+  const callExpressions = tsquery<ts.CallExpression>(method, 'CallExpression');
+
+  // find all the call expressions that are calling the specified method
+  const calls = callExpressions.filter(call => {
+    // get the name of the method being called
+    // if the method is a property access expression, then the name is the property name
+    // if the method is a simple identifier, then the name is the identifier name
+    const name = ts.isPropertyAccessExpression(call.expression)
+      ? call.expression.name.getText()
+      : call.expression.getText();
+
+    return name === methodName;
+  });
+
+  return calls.length > 0;
 }
 
 function getSelector(component: ts.ClassDeclaration): string | undefined {

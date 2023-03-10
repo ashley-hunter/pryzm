@@ -39,6 +39,7 @@
 
 | Feature                   | Compiler | Runtime |
 | ------------------------- | -------- | ------- |
+| **Method Sorting**        | ✅       | –       |
 | **JSX Runtime**           | –        | ❌      |
 | **Writing to FileSystem** | ❌       | –       |
 | **Multiple Files**        | ❌       | ❌      |
