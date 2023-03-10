@@ -1,13 +1,11 @@
 import {
   convertMethodToFunction,
   getReturnExpression,
-  inferType,
   insertComment,
   printNode,
 } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
-import * as ts from 'typescript';
-import { processNode, processNodeToString, toEventName } from './helpers';
+import { isReactive, processNode, processNodeToString, toEventName } from './helpers';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
@@ -31,10 +29,7 @@ export const transformer = createTransformer({
   State({ name, type, initializer, comment }, context) {
     // if the type is a primitive, we use `ref` to create a reactive variable
     // otherwise, we use `reactive` to create a reactive object
-    type ??= inferType(initializer!);
-
-    const reactiveFn =
-      type && (ts.isArrayTypeNode(type) || ts.isTypeLiteralNode(type)) ? 'reactive' : 'ref';
+    const reactiveFn = isReactive(type, initializer) ? 'reactive' : 'ref';
 
     context.importHandler.addNamedImport(reactiveFn, 'vue');
 

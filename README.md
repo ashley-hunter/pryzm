@@ -37,7 +37,6 @@
 
 ### Todo
 
-- [ ] Vue - Unwrap ref and reactive values
 - [ ] React - Unwrap ref usages
 
 ### Core and Compiler
