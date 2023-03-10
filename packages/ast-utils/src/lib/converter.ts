@@ -6,7 +6,10 @@ import { factory } from 'typescript';
  */
 export function convertMethodToFunction(method: ts.MethodDeclaration): ts.FunctionDeclaration {
   return factory.createFunctionDeclaration(
-    method.modifiers,
+    method.modifiers?.filter(modifier => {
+      // remove any modifiers that are not allowed on functions
+      return modifier.kind === ts.SyntaxKind.AsyncKeyword;
+    }),
     method.asteriskToken,
     factory.createIdentifier((method.name as ts.StringLiteral).text),
     method.typeParameters,
@@ -21,9 +24,9 @@ export function convertMethodToFunction(method: ts.MethodDeclaration): ts.Functi
  */
 export function convertMethodToArrowFunction(method: ts.MethodDeclaration): ts.ArrowFunction {
   // extract the modifiers from the method that are allowed on arrow functions
-  const modifiers = method.modifiers?.filter(modifier => ts.isModifier(modifier)) as
-    | ts.Modifier[]
-    | undefined;
+  const modifiers = method.modifiers?.filter(
+    modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword
+  ) as ts.Modifier[] | undefined;
 
   if (method.body === undefined) {
     throw new Error('Cannot convert method without a body to an arrow function.');

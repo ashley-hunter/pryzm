@@ -118,7 +118,7 @@ export class App {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <nav className="bg-gray-800">
         <div className="mx-auto px-2 sm:px-6 lg:px-8">
           <div className="relative flex h-12 items-center justify-between">

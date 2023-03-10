@@ -59,6 +59,7 @@ function collectComponentMetadata(
   // post collect checks
   ensureFieldsAreReadonly(metadata);
   ensureNoPrivateMembers(metadata);
+  ensureNoPublicMethods(metadata);
   ensureFieldsAreInitialized(metadata);
   ensureEventsAreInitialized(metadata);
   ensureEventsArePrefixed(metadata);
@@ -432,6 +433,15 @@ function ensureEventsArePrefixed(metadata: ComponentMetadata): void {
   metadata.events.forEach(event => {
     if (!getPropertyName(event).startsWith('on')) {
       throw new Error(`Event "${getText(event.name)}" must be prefixed with "on"`);
+    }
+  });
+}
+
+function ensureNoPublicMethods(metadata: ComponentMetadata): void {
+  // check that all methods are private
+  metadata.methods.forEach(method => {
+    if (!method.modifiers || !method.modifiers.find(m => m.kind === ts.SyntaxKind.PrivateKeyword)) {
+      throw new Error(`Method "${getText(method.name)}" must be private`);
     }
   });
 }
