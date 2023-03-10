@@ -1,14 +1,16 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
+import { exampleFiles } from '../examples/examples';
 import { FrameworkPicker } from './framework-picker';
 
 interface NavbarProps {
   framework: string;
   onFrameworkChange: (framework: string) => void;
+  onExampleChange: (example: string) => void;
 }
 
-export function Navbar({ framework, onFrameworkChange }: NavbarProps) {
-  const examples = ['Basic', 'Props', 'Events', 'Slots', 'Styles'];
+export function Navbar({ framework, onFrameworkChange, onExampleChange }: NavbarProps) {
+  const examples = Object.keys(exampleFiles);
 
   return (
     <nav className="border-b bg-white">
@@ -31,7 +33,10 @@ export function Navbar({ framework, onFrameworkChange }: NavbarProps) {
                 {examples.map(example => (
                   <DropdownMenu.Item
                     key={example}
-                    className="flex cursor-pointer select-none items-center rounded px-4 py-2 text-sm outline-none transition-colors hover:bg-gray-100"
+                    className="flex cursor-pointer select-none items-center rounded px-4 py-2 text-sm capitalize outline-none transition-colors hover:bg-gray-100"
+                    onClick={() => {
+                      onExampleChange(exampleFiles[example]);
+                    }}
                   >
                     {example}
                   </DropdownMenu.Item>

@@ -12,28 +12,11 @@ import * as parserTypeScript from 'prettier/parser-typescript';
 import { format } from 'prettier/standalone';
 import { useCallback, useMemo, useState } from 'react';
 import { Navbar } from './components/navbar';
+import { exampleFiles } from './examples/examples';
 window.Buffer = Buffer;
 
 export function App() {
-  const [code, setCode] = useState(`import { Component, Prop, Computed, State } from '@pryzm/core';
-
-@Component()
-export class App {
-
-  @Prop() readonly firstName = "John";
-  @Prop() readonly lastName = "Smith";
-
-  @State() counter: number = 10;
-
-  @Computed() get fullName() {
-    return this.firstName + ' ' + this.lastName;
-  }
-
-  render() {
-    return <div>Something Here</div>
-  }
-
-}`);
+  const [code, setCode] = useState(exampleFiles['basic']);
   const [error, setError] = useState<Error | null>(null);
   const [framework, setFramework] = useState<'react' | 'svelte' | 'vue' | 'lit'>('react');
 
@@ -125,6 +108,7 @@ export class App {
         onFrameworkChange={newFramework =>
           setFramework(newFramework as 'react' | 'svelte' | 'vue' | 'lit')
         }
+        onExampleChange={example => setCode(example)}
       />
       <div className="flex flex-1 flex-col">
         <div className="relative flex-1">
