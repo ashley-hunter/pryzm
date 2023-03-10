@@ -122,7 +122,7 @@ export class App {
     <div className="flex flex-col h-screen overflow-hidden">
       <Navbar
         framework={framework}
-        setFramework={newFramework =>
+        onFrameworkChange={newFramework =>
           setFramework(newFramework as 'react' | 'svelte' | 'vue' | 'lit')
         }
       />
