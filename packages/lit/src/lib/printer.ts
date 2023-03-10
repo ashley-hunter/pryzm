@@ -1,15 +1,22 @@
 import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
+import * as parserHtml from 'prettier/parser-html';
+import * as parserCss from 'prettier/parser-postcss';
+import * as parserTypeScript from 'prettier/parser-typescript';
+import { format } from 'prettier/standalone';
 import { transformer } from './transformer';
 
 export function print(source: string): string {
   const printer = new LitPrinter();
-  return printer.print(transform(source, transformer));
+  return printer.format(printer.print(transform(source, transformer)));
 }
 
 export class LitPrinter implements Printer<typeof transformer> {
-  private selector(name: string): string {
-    return name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  format(value: string): string {
+    return format(value, {
+      plugins: [parserTypeScript, parserCss, parserHtml],
+      parser: 'typescript',
+    });
   }
 
   print(metadata: TransformerOutput<typeof transformer>): string {

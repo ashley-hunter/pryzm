@@ -1,13 +1,24 @@
 import { insertComment, printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
+import * as parserHtml from 'prettier/parser-html';
+import * as parserCss from 'prettier/parser-postcss';
+import * as parserTypeScript from 'prettier/parser-typescript';
+import { format } from 'prettier/standalone';
 import { transformer } from './transformer';
 
 export function print(source: string): string {
   const printer = new VuePrinter();
-  return printer.print(transform(source, transformer));
+  return printer.format(printer.print(transform(source, transformer)));
 }
 
 export class VuePrinter implements Printer<typeof transformer> {
+  format(value: string): string {
+    return format(value, {
+      plugins: [parserTypeScript, parserCss, parserHtml],
+      parser: 'vue',
+    });
+  }
+
   private getEventEmitters(metadata: TransformerOutput<typeof transformer>): string {
     if (metadata.events.length === 0) {
       return '';

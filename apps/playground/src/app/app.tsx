@@ -5,11 +5,6 @@ import { print as reactPrint } from '@pryzm/react';
 import { print as sveltePrint } from '@pryzm/svelte';
 import { print as vuePrint } from '@pryzm/vue';
 import { Buffer } from 'buffer';
-import * as sveltePlugin from 'prettier-plugin-svelte';
-import * as parserHtml from 'prettier/parser-html';
-import * as parserCss from 'prettier/parser-postcss';
-import * as parserTypeScript from 'prettier/parser-typescript';
-import { format } from 'prettier/standalone';
 import { useCallback, useMemo, useState } from 'react';
 import { Navbar } from './components/navbar';
 import { exampleFiles } from './examples/examples';
@@ -24,30 +19,18 @@ export function App() {
     setError(null);
     try {
       if (framework === 'react') {
-        return format(reactPrint(code), {
-          plugins: [parserTypeScript, parserCss],
-          parser: 'typescript',
-        });
+        return reactPrint(code);
       }
 
       if (framework === 'vue') {
-        return format(vuePrint(code), {
-          plugins: [parserTypeScript, parserCss, parserHtml],
-          parser: 'vue',
-        });
+        return vuePrint(code);
       }
 
       if (framework === 'lit') {
-        return format(litPrint(code), {
-          plugins: [parserTypeScript, parserCss, parserHtml],
-          parser: 'typescript',
-        });
+        return litPrint(code);
       }
 
-      return format(sveltePrint(code), {
-        plugins: [sveltePlugin, parserCss, parserHtml, parserTypeScript],
-        parser: 'svelte',
-      });
+      return sveltePrint(code);
     } catch (e) {
       setError(e as Error);
       return '';
