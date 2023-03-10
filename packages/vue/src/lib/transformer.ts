@@ -7,7 +7,7 @@ import {
 } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
-import { processNode, processNodeToString } from './helpers';
+import { processNode, processNodeToString, toEventName } from './helpers';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
@@ -47,7 +47,7 @@ export const transformer = createTransformer({
     // get the type of the event
     const type = initializer.typeArguments?.[0];
 
-    return { name, type };
+    return { name: toEventName(name), type };
   },
   Inject(value) {
     throw new Error('Method not implemented.');

@@ -8,7 +8,7 @@
 | **State**                          | ✅     | ✅     | ✅  | ✅  |
 | **Computed**                       | ✅     | ✅     | ✅  | ✅  |
 | **Methods**                        | ✅     | ✅     | ✅  | ✅  |
-| **Events Emitters**                | ✅     | ✅     | ❌  | ❌  |
+| **Events Emitters**                | ✅     | ✅     | ✅  | ❌  |
 | **Required/Optional Props/Events** | ❌     | ❌     | ❌  | ❌  |
 | **Template Events**                | ✅     | ✅     | ✅  | ✅  |
 | **Styles**                         | ✅     | ✅     | ✅  | ✅  |
