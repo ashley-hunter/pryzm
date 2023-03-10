@@ -35,10 +35,6 @@
 | **Define Selector**             | –      | –      | –   | ✅  |
 | **Component Previews**          | ✅     | ✅     | ✅  | ❌  |
 
-### Todo
-
-- [ ] React - Unwrap ref usages
-
 ### Core and Compiler
 
 | Feature                   | Compiler | Runtime |
