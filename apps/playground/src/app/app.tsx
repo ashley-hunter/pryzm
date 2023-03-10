@@ -11,6 +11,7 @@ import * as parserCss from 'prettier/parser-postcss';
 import * as parserTypeScript from 'prettier/parser-typescript';
 import { format } from 'prettier/standalone';
 import { useCallback, useMemo, useState } from 'react';
+import { Navbar } from './components/navbar';
 window.Buffer = Buffer;
 
 export function App() {
@@ -34,26 +35,26 @@ export class App {
 
 }`);
   const [error, setError] = useState<Error | null>(null);
-  const [target, setTarget] = useState<'react' | 'svelte' | 'vue' | 'lit'>('react');
+  const [framework, setFramework] = useState<'react' | 'svelte' | 'vue' | 'lit'>('react');
 
   const output = useMemo(() => {
     setError(null);
     try {
-      if (target === 'react') {
+      if (framework === 'react') {
         return format(reactPrint(code), {
           plugins: [parserTypeScript, parserCss],
           parser: 'typescript',
         });
       }
 
-      if (target === 'vue') {
+      if (framework === 'vue') {
         return format(vuePrint(code), {
           plugins: [parserTypeScript, parserCss, parserHtml],
           parser: 'vue',
         });
       }
 
-      if (target === 'lit') {
+      if (framework === 'lit') {
         return format(litPrint(code), {
           plugins: [parserTypeScript, parserCss, parserHtml],
           parser: 'typescript',
@@ -68,11 +69,11 @@ export class App {
       setError(e as Error);
       return '';
     }
-  }, [code, target]);
+  }, [code, framework]);
 
   // get the sandpack template
   const template = useMemo(() => {
-    switch (target) {
+    switch (framework) {
       case 'react':
         return 'react-ts';
       case 'vue':
@@ -82,11 +83,11 @@ export class App {
       case 'lit':
         return 'vanilla-ts';
     }
-  }, [target]);
+  }, [framework]);
 
   // get the primary file name for the sandpack template
   const primaryFile = useMemo(() => {
-    switch (target) {
+    switch (framework) {
       case 'react':
         return '/App.tsx';
       case 'vue':
@@ -96,10 +97,10 @@ export class App {
       case 'lit':
         return '/index.ts';
     }
-  }, [target]);
+  }, [framework]);
 
   const customSetup = useMemo(() => {
-    if (target !== 'lit') {
+    if (framework !== 'lit') {
       return;
     }
 
@@ -108,7 +109,7 @@ export class App {
         lit: 'latest',
       },
     };
-  }, [target]);
+  }, [framework]);
 
   const handleEditorDidMount = useCallback((editor: any, monaco: any) => {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -119,27 +120,12 @@ export class App {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <nav className="bg-gray-800">
-        <div className="mx-auto px-2 sm:px-6 lg:px-8">
-          <div className="relative flex h-12 items-center justify-between">
-            <div className="flex flex-1 items-center justify-center sm:justify-start">
-              <img className="h-3.5" src="/logo.svg" alt="Logo" />
-              <small className="text-xs font-medium text-gray-400 pl-1 mt-1.5">v0.1</small>
-
-              <select
-                className="ml-auto inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100"
-                value={target}
-                onChange={event => setTarget(event.target.value as any)}
-              >
-                <option value="react">React</option>
-                <option value="svelte">Svelte</option>
-                <option value="vue">Vue</option>
-                <option value="lit">Lit</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar
+        framework={framework}
+        setFramework={newFramework =>
+          setFramework(newFramework as 'react' | 'svelte' | 'vue' | 'lit')
+        }
+      />
       <div className="flex flex-col flex-1">
         <div className="relative flex-1">
           <Editor
