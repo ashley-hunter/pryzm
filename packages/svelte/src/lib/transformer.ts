@@ -1,4 +1,9 @@
-import { convertMethodToFunction, getReturnExpression, insertComment } from '@pryzm/ast-utils';
+import {
+  convertMethodToFunction,
+  getReturnExpression,
+  insertComment,
+  printNode,
+} from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import { processNodeToString } from './helpers';
 import { templateTransformer } from './template-transformer';
@@ -10,19 +15,24 @@ export const transformer = createTransformer({
       comment
     );
   },
-  Prop({ name, initializer, comment }, context) {
+  Prop({ name, initializer, comment, type }, context) {
     return insertComment(
       initializer
-        ? `export let ${name} = ${processNodeToString(initializer, context)};`
-        : `export let ${name};`,
+        ? `export let ${name}${type ? `: ${printNode(type)}` : ''} = ${processNodeToString(
+            initializer,
+            context
+          )};`
+        : `export let ${name}${type ? `: ${printNode(type)}` : ''};`,
       comment
     );
   },
-  State({ name, isReadonly, initializer, comment }, context) {
+  State({ name, isReadonly, initializer, comment, type }, context) {
     return insertComment(
       initializer
-        ? `${isReadonly ? 'const' : 'let'} ${name} = ${processNodeToString(initializer, context)};`
-        : `${isReadonly ? 'const' : 'let'} ${name};`,
+        ? `${isReadonly ? 'const' : 'let'} ${name}${
+            type ? `: ${printNode(type)}` : ''
+          } = ${processNodeToString(initializer, context)};`
+        : `${isReadonly ? 'const' : 'let'} ${name}${type ? `: ${printNode(type)}` : ''};`,
       comment
     );
   },
