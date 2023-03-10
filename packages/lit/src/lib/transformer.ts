@@ -2,6 +2,7 @@ import { insertComment, printNode } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
+import { toEventName } from './helpers';
 import { templateTransformer } from './template-transformer';
 
 export const transformer = createTransformer({
@@ -116,6 +117,32 @@ export const transformer = createTransformer({
   Styles(value, context) {
     context.importHandler.addNamedImport('css', 'lit');
     return value;
+  },
+  EventEmit({ name, value }) {
+    return factory.createExpressionStatement(
+      factory.createCallExpression(
+        factory.createPropertyAccessExpression(
+          factory.createThis(),
+          factory.createIdentifier('dispatchEvent')
+        ),
+        undefined,
+        [
+          factory.createNewExpression(
+            factory.createIdentifier('CustomEvent'),
+            undefined,
+            value
+              ? [
+                  factory.createStringLiteral(toEventName(name)),
+                  factory.createObjectLiteralExpression(
+                    [factory.createPropertyAssignment(factory.createIdentifier('detail'), value)],
+                    true
+                  ),
+                ]
+              : [factory.createStringLiteral(toEventName(name))]
+          ),
+        ]
+      )
+    );
   },
   Template(value, styles, context) {
     context.importHandler.addNamedImport('html', 'lit');

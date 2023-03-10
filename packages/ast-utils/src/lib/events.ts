@@ -7,10 +7,10 @@ import { getPropertyName } from './name';
  * @param node The node to test
  * @returns True if the node is an event emitter call
  */
-export function isEventEmitterCall<T extends ts.Node>(
-  node: T,
+export function isEventEmitterCall(
+  node: ts.Node,
   events: ts.PropertyDeclaration[]
-): boolean {
+): node is ts.CallExpression {
   if (
     ts.isExpressionStatement(node) &&
     ts.isCallExpression(node.expression) &&

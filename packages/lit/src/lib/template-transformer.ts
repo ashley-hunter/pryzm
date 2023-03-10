@@ -15,7 +15,7 @@ export const templateTransformer = createTemplateTransformer({
     return `${name}={${printNode(value)}}`;
   },
   Event({ name, value }) {
-    return `${toEventName(name)}="\${${printNode(value)}}"`;
+    return `@${toEventName(name)}="\${${printNode(value)}}"`;
   },
   Ref({ ref }) {
     return `\${ref(${printNode(ref)})}`;

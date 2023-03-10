@@ -18,7 +18,7 @@ export function Navbar({ framework, onFrameworkChange, onExampleChange }: Navbar
         <div className="relative flex h-16 items-center">
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button className="mr-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white outline-none hover:bg-gray-100">
+              <button className="mr-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white outline-none hover:bg-gray-100">
                 <HamburgerMenuIcon />
               </button>
             </DropdownMenu.Trigger>
@@ -47,7 +47,9 @@ export function Navbar({ framework, onFrameworkChange, onExampleChange }: Navbar
 
           <div className="flex flex-1 items-center justify-center sm:justify-start">
             <img className="h-3.5" src="/logo.svg" alt="Logo" />
-            <small className="mt-1.5 pl-1 text-xs font-medium text-gray-400">v0.1</small>
+            <small className="mt-1.5 pl-2 text-xs font-medium tracking-wider text-gray-400">
+              v0.1
+            </small>
           </div>
           <div className="flex-1" />
 

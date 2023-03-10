@@ -40,3 +40,9 @@ export interface EventTransformerMetadata {
   node: ts.PropertyDeclaration;
   comment?: string;
 }
+
+export interface EventEmitTransformerMetadata {
+  name: string;
+  value?: ts.Expression;
+  node?: ts.CallExpression;
+}

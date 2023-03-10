@@ -177,6 +177,11 @@ export const transformer = createTransformer({
 
     return !context.data.has('id') ? template : `<>${template}<style>{\`${styles}\`}</style></>`;
   },
+  EventEmit({ name, value }) {
+    return factory.createExpressionStatement(
+      factory.createCallExpression(factory.createIdentifier(name), undefined, value ? [value] : [])
+    );
+  },
   PreTransform(metadata, context) {
     // add the react import
     context.importHandler.addDefaultImport('React', 'react');

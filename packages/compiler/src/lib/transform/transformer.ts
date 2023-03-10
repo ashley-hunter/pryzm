@@ -1,7 +1,10 @@
 import {
   extractComment,
+  getEventNameFromEmitterCall,
   getPropertyName,
   getPropertyType,
+  getValueFromEmitterCall,
+  isEventEmitterCall,
   isPropertyReadonly,
 } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
@@ -10,6 +13,7 @@ import { parseFile } from '../parser/parser';
 import { ImportHandler } from '../utils/imports-handler';
 import {
   ComputedTransformerMetadata,
+  EventEmitTransformerMetadata,
   EventTransformerMetadata,
   MethodTransformerMetadata,
   PropertyTransformerMetadata,
@@ -88,40 +92,7 @@ export interface Transformer<
   Slots?: (slot: string, context: TransformerContext) => TSlotsReturn;
   Styles?: (value: string, context: TransformerContext) => string;
   PreTransform?: (metadata: ComponentMetadata, context: TransformerContext) => void;
-  PostTransform?: (
-    metadata: TransformerOutput<
-      Transformer<
-        TPropReturn,
-        TStateReturn,
-        TComputedReturn,
-        TEventReturn,
-        TRefReturn,
-        TMethodReturn,
-        TOnInitReturn,
-        TOnDestroyReturn,
-        TProviderReturn,
-        TInjectReturn,
-        TTemplateReturn,
-        TSlotsReturn
-      >
-    >,
-    context: TransformerContext
-  ) => TransformerOutput<
-    Transformer<
-      TPropReturn,
-      TStateReturn,
-      TComputedReturn,
-      TEventReturn,
-      TRefReturn,
-      TMethodReturn,
-      TOnInitReturn,
-      TOnDestroyReturn,
-      TProviderReturn,
-      TInjectReturn,
-      TTemplateReturn,
-      TSlotsReturn
-    >
-  >;
+  EventEmit?: (metadata: EventEmitTransformerMetadata, context: TransformerContext) => ts.Node;
 }
 
 export function createTransformer<T extends Transformer>(transformer: T) {
@@ -149,6 +120,33 @@ export function transform<T extends Transformer>(
     importHandler: new ImportHandler(components[0].imports),
     metadata,
   };
+
+  const methodTransformerFactory: ts.TransformerFactory<ts.MethodDeclaration> = tsContext => {
+    return node => {
+      const visitor: ts.Visitor = node => {
+        // if the node is an event emit
+        if (isEventEmitterCall(node, metadata.events)) {
+          const name = getEventNameFromEmitterCall(node);
+          const value = getValueFromEmitterCall(node);
+
+          return transformer.EventEmit?.({ name, value, node }, context) ?? node;
+        }
+
+        return ts.visitEachChild(node, visitor, tsContext);
+      };
+
+      return ts.visitEachChild(node, visitor, tsContext);
+    };
+  };
+
+  // perform some typescript transformations on all method bodies
+  for (let idx = 0; idx < metadata.methods.length; idx++) {
+    const method = metadata.methods[idx];
+
+    metadata.methods[idx] = ts.transform<ts.MethodDeclaration>(method, [
+      methodTransformerFactory,
+    ]).transformed[0];
+  }
 
   transformer.PreTransform?.(metadata, context);
   let styles = transformer.Styles?.(metadata.styles, context) ?? metadata.styles;
@@ -294,7 +292,5 @@ export function transform<T extends Transformer>(
     imports: context.importHandler.getImportNodes(),
   };
 
-  return (
-    transformer.PostTransform ? transformer.PostTransform(result, context) : result
-  ) as TransformerOutput<T>;
+  return result as unknown as TransformerOutput<T>;
 }

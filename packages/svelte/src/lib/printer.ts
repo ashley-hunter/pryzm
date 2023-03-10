@@ -44,13 +44,13 @@ export class SveltePrinter implements Printer<typeof transformer> {
 
         ${metadata.computed.join('\n')}
 
+        ${metadata.events.length > 0 ? 'const dispatch = createEventDispatcher();' : ''}
+
         ${metadata.onInit ?? ''}
 
         ${metadata.onDestroy ?? ''}
 
         ${metadata.methods.join('\n\n')}
-
-        ${metadata.events.length > 0 ? 'const dispatch = createEventDispatcher();' : ''}
       </script>
 
       ${metadata.template}

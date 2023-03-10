@@ -5,6 +5,7 @@ import {
   printNode,
 } from '@pryzm/ast-utils';
 import { createTransformer, transformTemplate } from '@pryzm/compiler';
+import { factory } from 'typescript';
 import { isReactive, processNode, processNodeToString, toEventName } from './helpers';
 import { templateTransformer } from './template-transformer';
 
@@ -62,6 +63,17 @@ export const transformer = createTransformer({
   Method({ node, comment }, context) {
     // convert a method to a function declaration
     return insertComment(printNode(convertMethodToFunction(processNode(node, context))), comment);
+  },
+  EventEmit({ name, value }) {
+    name = toEventName(name);
+
+    return factory.createExpressionStatement(
+      factory.createCallExpression(
+        factory.createIdentifier('emit'),
+        undefined,
+        value ? [factory.createStringLiteral(name), value] : [factory.createStringLiteral(name)]
+      )
+    );
   },
   OnInit({ body, comment }, context) {
     context.importHandler.addNamedImport('onMounted', 'vue');
