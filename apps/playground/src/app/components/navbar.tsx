@@ -1,3 +1,5 @@
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 import { FrameworkPicker } from './framework-picker';
 
 interface NavbarProps {
@@ -6,13 +8,41 @@ interface NavbarProps {
 }
 
 export function Navbar({ framework, onFrameworkChange }: NavbarProps) {
+  const examples = ['Basic', 'Props', 'Events', 'Slots', 'Styles'];
+
   return (
-    <nav className="bg-white border-b">
-      <div className="mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="relative flex h-16 items-center justify-between">
+    <nav className="border-b bg-white">
+      <div className="mx-auto px-2 sm:px-6 lg:px-4">
+        <div className="relative flex h-16 items-center">
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button className="mr-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white outline-none hover:bg-gray-100">
+                <HamburgerMenuIcon />
+              </button>
+            </DropdownMenu.Trigger>
+
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content className="ml-2 min-w-[220px] rounded-md border bg-white p-1 shadow-lg">
+                {/* Small Header with the title Examples */}
+                <span className="block px-4 py-2 text-xs font-medium uppercase text-gray-500">
+                  Examples
+                </span>
+
+                {examples.map(example => (
+                  <DropdownMenu.Item
+                    key={example}
+                    className="flex cursor-pointer select-none items-center rounded px-4 py-2 text-sm outline-none transition-colors hover:bg-gray-100"
+                  >
+                    {example}
+                  </DropdownMenu.Item>
+                ))}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+
           <div className="flex flex-1 items-center justify-center sm:justify-start">
             <img className="h-3.5" src="/logo.svg" alt="Logo" />
-            <small className="text-xs font-medium text-gray-400 pl-1 mt-1.5">v0.1</small>
+            <small className="mt-1.5 pl-1 text-xs font-medium text-gray-400">v0.1</small>
           </div>
           <div className="flex-1" />
 

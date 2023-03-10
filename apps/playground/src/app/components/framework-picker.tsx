@@ -11,7 +11,7 @@ export function FrameworkPicker({ framework, onFrameworkChange }: FrameworkPicke
 
   return (
     <ToggleGroup.Root
-      className="flex space-x-1 rounded-lg bg-slate-100 p-0.5"
+      className="flex space-x-1 rounded-lg bg-gray-100 p-0.5"
       type="single"
       value={framework}
       onValueChange={onFrameworkChange}
@@ -20,18 +20,18 @@ export function FrameworkPicker({ framework, onFrameworkChange }: FrameworkPicke
         <ToggleGroup.Item asChild key={lib} value={lib}>
           <button
             className={clsx(
-              'flex items-center rounded-md min-w-[48px] py-[0.4375rem] px-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-300 justify-center transition-colors',
+              'flex min-w-[48px] items-center justify-center rounded-md py-[0.4375rem] px-3 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-purple-300 focus-visible:ring-offset-2',
               {
                 'bg-white shadow': lib === framework,
-                'hover:bg-slate-200': lib !== framework,
+                'hover:bg-gray-200': lib !== framework,
               }
             )}
             type="button"
           >
             <span
               className={clsx('capitalize', {
-                'text-slate-600': lib !== framework,
-                'text-slate-900': lib === framework,
+                'text-gray-600': lib !== framework,
+                'text-gray-900': lib === framework,
               })}
             >
               {lib}
