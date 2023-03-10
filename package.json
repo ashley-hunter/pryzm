@@ -8,7 +8,7 @@
   },
   "private": true,
   "dependencies": {
-    "@codesandbox/sandpack-react": "^2.0.22",
+    "@codesandbox/sandpack-react": "^2.1.2",
     "@fontsource/inter": "^4.5.15",
     "@monaco-editor/react": "^4.4.6",
     "@radix-ui/react-dropdown-menu": "^2.0.4",

@@ -1292,28 +1292,28 @@
     style-mod "^4.0.0"
     w3c-keyname "^2.2.4"
 
-"@codesandbox/nodebox@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@codesandbox/nodebox/-/nodebox-0.1.0.tgz#b86a13a131c2f3413e3b8f4568fe0082dd7e748c"
-  integrity sha512-gcpoFoLY0M34l67rXJCA8ysdRBN9aj++ebXpfLn2KCl7H2XongKkvYi/uQiKGoQ8iH5EhKe8+x40y/NrCS9J9Q==
+"@codesandbox/nodebox@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@codesandbox/nodebox/-/nodebox-0.1.4.tgz#1c9ed4caf6cda764500aec3d46b245e2e9b88ccc"
+  integrity sha512-+MR7JibjGjTRDmyQbL8Mliej6wakQP7q99+wGL/nOzd0Q3s+YWGQfv0QpYKbdMClKUTFJGvwzwOeqHVTkpWNCQ==
   dependencies:
     outvariant "^1.3.0"
     strict-event-emitter "^0.4.3"
 
-"@codesandbox/sandpack-client@^2.0.21":
-  version "2.0.21"
-  resolved "https://registry.yarnpkg.com/@codesandbox/sandpack-client/-/sandpack-client-2.0.21.tgz#937a4bb4b388a6a4c941aa167a7525d4fdf672f0"
-  integrity sha512-jzVzBxNKVf5TLO9BzkNPtfrUtl1QYiE4OIByk+vkcmGuWrpBAnBZIQ71Teh/57ZP3frNYvEuhKtBwMTMxXOMwQ==
+"@codesandbox/sandpack-client@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@codesandbox/sandpack-client/-/sandpack-client-2.1.0.tgz#5fb598bb32772ea2b3676455423779a0f8bcbf80"
+  integrity sha512-/z3EbaYaatd45DWAOvhU+8M7cMaDlmBEjyQaahNXRDY7keSraMZnsdImmASlU9qqLm6vQpAu1ZXtOMeL7dkMww==
   dependencies:
-    "@codesandbox/nodebox" "0.1.0"
+    "@codesandbox/nodebox" "0.1.4"
     buffer "^6.0.3"
     dequal "^2.0.2"
     outvariant "1.3.0"
 
-"@codesandbox/sandpack-react@^2.0.22":
-  version "2.0.22"
-  resolved "https://registry.yarnpkg.com/@codesandbox/sandpack-react/-/sandpack-react-2.0.22.tgz#f48dab117dd0b344d8fb2ef620b2f2e04fd1b651"
-  integrity sha512-P0MtG9x3PwXEp/jtF04rWibNCia3Rq1CEugDUw3/Q9Od/FtePNAlXmtUO1PghEu4sWXkMPXq3028CC+hwpTOyQ==
+"@codesandbox/sandpack-react@^2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@codesandbox/sandpack-react/-/sandpack-react-2.1.2.tgz#0a2b39c81c67e8c89bd18f53fd1ddd8665ccd981"
+  integrity sha512-MkjF/NXBzUVOZweBrNzv1ijdeVN7FbTckPjOQ+1ktPalr+u+3jzwdPHrCojuRGNtJFN8ZuHg/YZJMm/IoF3aRQ==
   dependencies:
     "@code-hike/classer" "^0.0.0-aa6efee"
     "@codemirror/autocomplete" "^6.4.0"
@@ -1324,7 +1324,7 @@
     "@codemirror/language" "^6.3.2"
     "@codemirror/state" "^6.2.0"
     "@codemirror/view" "^6.7.1"
-    "@codesandbox/sandpack-client" "^2.0.21"
+    "@codesandbox/sandpack-client" "^2.1.0"
     "@lezer/highlight" "^1.1.3"
     "@react-hook/intersection-observer" "^3.1.1"
     "@stitches/core" "^1.2.6"

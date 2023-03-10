@@ -79,7 +79,7 @@ export class App {
       case 'vue':
         return 'vite-vue';
       case 'svelte':
-        return 'vite-svelte';
+        return 'vite-svelte-ts';
       case 'lit':
         return 'vanilla-ts';
     }
@@ -119,14 +119,14 @@ export class App {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden">
       <Navbar
         framework={framework}
         onFrameworkChange={newFramework =>
           setFramework(newFramework as 'react' | 'svelte' | 'vue' | 'lit')
         }
       />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-1 flex-col">
         <div className="relative flex-1">
           <Editor
             onChange={value => setCode(value!)}
@@ -135,7 +135,7 @@ export class App {
             onMount={handleEditorDidMount}
           />
           {error && (
-            <div className="absolute left-0 right-0 bottom-0 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-1 text-xs">
+            <div className="absolute left-0 right-0 bottom-0 border-l-4 border-red-500 bg-red-100 px-4 py-1 text-xs text-red-700">
               <p>
                 <span className="font-semibold">Error:</span> {error.message}
               </p>
