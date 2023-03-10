@@ -70,8 +70,9 @@ export function reactiveTransformer(
           return printNode(state.name) === name && !isReactive(state.type, state.initializer);
         });
         const isProp = pryzmContext.metadata.props.some(prop => printNode(prop.name) === name);
+        const isRef = pryzmContext.metadata.refs.some(ref => printNode(ref.name) === name);
 
-        if (isState || isProp) {
+        if (isState || isProp || isRef) {
           return factory.createPropertyAccessExpression(node, 'value');
         }
       }

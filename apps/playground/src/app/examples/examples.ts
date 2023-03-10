@@ -36,4 +36,32 @@ export const exampleFiles: Record<string, string> = {
     }
 
   }`,
+  refs: `import { Component, Prop, Computed, State } from '@pryzm/core';
+
+  @Component()
+  export class App {
+
+    @Ref() readonly elementRef: HTMLElement;
+
+    private randomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    private changeColor() {
+      this.elementRef.style.backgroundColor = this.randomColor();
+    }
+
+    render() {
+      return <button ref={this.elementRef} onClick={this.changeColor}>
+        Click Me to change color
+      </button>
+    }
+
+  }`,
 };
