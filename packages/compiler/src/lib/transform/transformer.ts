@@ -121,7 +121,7 @@ export function transform<T extends Transformer>(
     metadata,
   };
 
-  const methodTransformerFactory: ts.TransformerFactory<ts.MethodDeclaration> = tsContext => {
+  const methodTransformerFactory: ts.TransformerFactory<ts.Block> = tsContext => {
     return node => {
       const visitor: ts.Visitor = node => {
         // if the node is an event emit
@@ -143,7 +143,13 @@ export function transform<T extends Transformer>(
   for (let idx = 0; idx < metadata.methods.length; idx++) {
     const method = metadata.methods[idx];
 
-    metadata.methods[idx] = ts.transform<ts.MethodDeclaration>(method, [
+    if (!method.body) {
+      continue;
+    }
+
+    // cast to any because the body is readonly and we want to preserve the original
+    // details of the method e.g. position and comments
+    (metadata.methods[idx] as any).body = ts.transform(method.body, [
       methodTransformerFactory,
     ]).transformed[0];
   }
