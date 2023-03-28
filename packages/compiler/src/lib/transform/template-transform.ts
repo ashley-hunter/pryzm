@@ -11,6 +11,12 @@ import * as ts from 'typescript';
 import { TransformerContext } from './transformer';
 
 export interface TemplateTransformer {
+  Root?: (
+    metadata: {
+      children: string;
+    },
+    context: TransformerContext
+  ) => string;
   Element?: (
     metadata: {
       node: ts.JsxElement;
@@ -95,11 +101,17 @@ export function transformTemplate(
 ) {
   const visitor = new TemplateVisitor(transformer, context);
 
-  return visitor.visit(stripParentNode(value));
+  return visitor.visitRoot(stripParentNode(value));
 }
 
 export class TemplateVisitor {
   constructor(private transformer: TemplateTransformer, private context: TransformerContext) {}
+
+  visitRoot(node: JsxNode) {
+    const children = this.visit(node);
+
+    return this.transformer.Root?.({ children }, this.context) ?? children;
+  }
 
   visit(value: JsxNode): string {
     if (ts.isJsxText(value)) {

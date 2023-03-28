@@ -53,6 +53,8 @@ export class ReactPrinter implements Printer<typeof transformer> {
 
         ${metadata.computed.map(computed => computed.statement).join('\n\n')}
 
+        ${metadata.injects.join('\n\n')}
+
         ${metadata.methods.map(method => method.statement).join('\n\n')}
 
         ${metadata.onInit ?? ''}

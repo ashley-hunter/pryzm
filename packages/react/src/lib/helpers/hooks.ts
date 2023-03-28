@@ -1,4 +1,5 @@
 import { convertMethodToArrowFunction, insertComment, printNode } from '@pryzm/ast-utils';
+import { Injection } from '@pryzm/compiler';
 import * as ts from 'typescript';
 
 /**
@@ -100,4 +101,35 @@ export function useCallback(
  */
 export function useEffect(initializer: ts.BlockLike, dependencies: string[]): string {
   return `useEffect(() => ${printNode(initializer)}, [${dependencies.join(', ')}]);`;
+}
+
+/**
+ * Create createContext function call
+ * @param provider The provider identifier
+ */
+export function createContext(provider: ts.Identifier): string {
+  // if the provider was called Service then the output would be
+  // const ServiceContext = createContext<Service>(null);
+  return `const ${provider.text}Context = createContext<${provider.text}>(null);`;
+}
+
+/**
+ * Create a Provider component
+ * @param provider The provider identifier
+ * @param injects The injects in the class, used to determine if the class requires access to the context
+ */
+export function createProvider(provider: ts.Identifier, injects: Injection[]) {
+  // if the provider was called Service then the provider name would be ServiceContext.Provider
+  // if the class injects this service then the value would be the service, otherwise we would instantiate the service class
+  const inject = injects.find(inject => inject.provider.getText() === provider.text && inject.self);
+
+  return {
+    name: `${provider.text}Context.Provider`,
+    value: inject ? inject.identifier.getText() : `new ${provider.text}()`,
+  };
+}
+
+export interface ProviderResult {
+  name: string;
+  value: string;
 }

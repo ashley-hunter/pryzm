@@ -224,4 +224,27 @@ export class App {
     </div>
   }
 }`,
+  providers: `import { Component, State, Inject } from '@pryzm/core';
+
+class Service {
+  message = 'Hello World!';
+
+  updateMessage() {
+    this.message = 'Hello Pryzm!';
+  }
+}
+
+@Component({
+  providers: [
+    Service
+  ]
+})
+export class App {
+
+    @Inject() private readonly service: Service;
+
+    render() {
+      return <div onClick={this.service.updateMessage}>{this.service.message}</div>
+    }
+  }`,
 };

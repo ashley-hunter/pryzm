@@ -2,7 +2,7 @@ import { tsquery } from '@phenomnomnominal/tsquery';
 import { getDecorator, getDecoratorProperty, getPropertyName, getText } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
 import { toLowerCamelCase } from '../utils/names';
-import { ComponentMetadata } from './component-metadata';
+import { ComponentMetadata, Injection } from './component-metadata';
 
 export function parseFile(code: string): ComponentMetadata[] {
   const sourceFile = tsquery.ast(code, undefined, ts.ScriptKind.TSX);
@@ -45,8 +45,8 @@ function collectComponentMetadata(
     computed: getAccessorsWithDecorator(component, 'Computed'),
     events: getPropertiesWithDecorator(component, 'Event'),
     refs: getPropertiesWithDecorator(component, 'Ref'),
-    providers: getPropertiesWithDecorator(component, 'Provider'),
-    injects: getPropertiesWithDecorator(component, 'Inject'),
+    providers: getProviders(component),
+    injects: getInjects(component),
     methods: methods.filter(method => !lifecycleMethods.includes(method.name.getText())),
     onInit: methods.find(method => method.name.getText() === 'onInit'),
     onDestroy: methods.find(method => method.name.getText() === 'onDestroy'),
@@ -237,6 +237,62 @@ function getSelector(component: ts.ClassDeclaration): string | undefined {
   throw new Error(`Invalid selector value for component ${getComponentName(component)}`);
 }
 
+function getProviders(component: ts.ClassDeclaration): ts.Identifier[] {
+  // find the component decorator on the component class and extract the value of the providers property
+  const componentDecorator = getDecorator(component, 'Component');
+
+  if (!componentDecorator) {
+    return [];
+  }
+
+  const providersProperty = getDecoratorProperty(componentDecorator, 'providers');
+
+  if (!providersProperty || !ts.isPropertyAssignment(providersProperty)) {
+    return [];
+  }
+
+  if (!ts.isArrayLiteralExpression(providersProperty.initializer)) {
+    throw new Error(`Invalid providers value for component ${getComponentName(component)}`);
+  }
+
+  return providersProperty.initializer.elements.filter(ts.isIdentifier);
+}
+
+function getInjects(component: ts.ClassDeclaration): Injection[] {
+  // find all the nodes that are a property with a Inject decorator
+  const properties = getPropertiesWithDecorator(component, 'Inject');
+
+  // get the providers so we can check if the inject is using a provider defined this class
+  const providers = getProviders(component);
+
+  return properties.map(property => {
+    // ensure the name is an identifier
+    if (!ts.isIdentifier(property.name)) {
+      throw new Error(`Invalid inject name for component ${getComponentName(component)}`);
+    }
+
+    // get the type which will be the name of the provider
+    let type: ts.Identifier | undefined;
+
+    if (
+      property.type &&
+      ts.isTypeReferenceNode(property.type) &&
+      ts.isIdentifier(property.type.typeName)
+    ) {
+      type = property.type.typeName;
+    } else {
+      throw new Error(`Invalid inject type for component ${getComponentName(component)}`);
+    }
+
+    return {
+      identifier: property.name,
+      property,
+      provider: type,
+      self: providers.some(provider => provider.getText() === type!.getText()),
+    };
+  });
+}
+
 function getStyles(component: ts.ClassDeclaration): string {
   // find the component decorator on the component class and extract the value of the styles property
   const componentDecorator = getDecorator(component, 'Component');
@@ -420,13 +476,6 @@ function ensureFieldsAreInitialized(metadata: ComponentMetadata): void {
       throw new Error(`Event "${event.name}" must be initialized as a new EventEmitter`);
     }
   });
-
-  // check that all providers are initialized
-  metadata.providers.forEach(provider => {
-    if (!provider.initializer) {
-      throw new Error(`Provider "${getText(provider.name)}" must be initialized`);
-    }
-  });
 }
 
 function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
@@ -444,15 +493,9 @@ function ensureFieldsAreReadonly(metadata: ComponentMetadata): void {
     }
   });
 
-  // ensure that providers are readonly
-  metadata.providers.forEach(provider => {
-    if (!provider.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword)) {
-      throw new Error(`Provider "${getText(provider.name)}" must be readonly`);
-    }
-  });
-
   // ensure the dependencies are readonly
-  metadata.injects.forEach(dependency => {
+  metadata.injects.forEach(inject => {
+    const dependency = inject.property;
     if (!dependency.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword)) {
       throw new Error(`Dependency "${getText(dependency.name)}" must be readonly`);
     }

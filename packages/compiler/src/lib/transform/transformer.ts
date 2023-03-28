@@ -8,7 +8,7 @@ import {
   isPropertyReadonly,
 } from '@pryzm/ast-utils';
 import * as ts from 'typescript';
-import { ComponentMetadata } from '../parser/component-metadata';
+import { ComponentMetadata, Injection } from '../parser/component-metadata';
 import { parseFile } from '../parser/parser';
 import { ImportHandler } from '../utils/imports-handler';
 import {
@@ -24,6 +24,7 @@ export type TransformerContext = {
   data: Map<string, unknown>;
   importHandler: ImportHandler;
   metadata: ComponentMetadata;
+  transformedMetadata?: TransformerOutput<any>;
 };
 
 export type TransformerOutput<T> = T extends Transformer<
@@ -82,8 +83,12 @@ export interface Transformer<
   Event: (metadata: EventTransformerMetadata, context: TransformerContext) => TEventReturn;
   Ref: (metadata: RefTransformerMetadata, context: TransformerContext) => TRefReturn;
   Computed: (matadata: ComputedTransformerMetadata, context: TransformerContext) => TComputedReturn;
-  Provider: (value: ts.PropertyDeclaration, context: TransformerContext) => TProviderReturn;
-  Inject: (value: ts.PropertyDeclaration, context: TransformerContext) => TInjectReturn;
+  Provider: (
+    provider: ts.Identifier,
+    injects: Injection[],
+    context: TransformerContext
+  ) => TProviderReturn;
+  Inject: (inject: Injection, context: TransformerContext) => TInjectReturn;
   Template: (
     value: ts.JsxFragment | ts.JsxElement | ts.JsxSelfClosingElement,
     styles: string,
@@ -273,11 +278,10 @@ export function transform<T extends Transformer>(
       ) ?? ref
   );
   const providers = metadata.providers.map(
-    provider => transformer.Provider?.(provider, context) ?? provider
+    provider => transformer.Provider?.(provider, metadata.injects, context) ?? provider
   );
   const injects = metadata.injects.map(inject => transformer.Inject?.(inject, context) ?? inject);
   const slots = metadata.slots.map(slot => transformer.Slots?.(slot, context) ?? slot);
-  const template = transformer.Template?.(metadata.template, styles, context) ?? metadata.template;
 
   const result = {
     ...metadata,
@@ -291,12 +295,19 @@ export function transform<T extends Transformer>(
     refs,
     providers,
     injects,
-    template,
     slots,
     styles,
     selector: metadata.selector,
     imports: context.importHandler.getImportNodes(),
   };
+
+  // add the result to the context
+  context.transformedMetadata = result;
+
+  const template = transformer.Template?.(metadata.template, styles, context) ?? metadata.template;
+
+  // add the template to the result
+  result.template = template;
 
   return result as unknown as TransformerOutput<T>;
 }

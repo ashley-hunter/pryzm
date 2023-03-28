@@ -4,7 +4,16 @@ import { compileStyle } from '@vue/component-compiler-utils/dist/compileStyle';
 import * as ts from 'typescript';
 import { factory } from 'typescript';
 import { findDependencies } from './helpers/find-dependencies';
-import { useCallback, useEffect, useMemo, useRef, useState } from './helpers/hooks';
+import {
+  createContext,
+  createProvider,
+  ProviderResult,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from './helpers/hooks';
 import {
   createDestructuredProperty,
   createFunctionTypeNode,
@@ -102,11 +111,39 @@ export const transformer = createTransformer({
       destructuredProperty: printNode(destructuredProperty),
     };
   },
-  Inject(value) {
-    throw new Error('Inject is not supported in React');
+  Inject(inject, context) {
+    // if the injected value is present on self them we instantiate it
+    // we wrap it in useMemo so that it is only instantiated once
+    if (inject.self) {
+      // import the useMemo hook
+      context.importHandler.addNamedImport('useMemo', 'react');
+
+      return useMemo(
+        inject.identifier.getText(),
+        factory.createBlock(
+          [
+            factory.createReturnStatement(
+              factory.createNewExpression(inject.provider, undefined, [])
+            ),
+          ],
+          true
+        ),
+        []
+      );
+    }
+
+    // otherwise we add the useContext hook and use the value from the context
+    context.importHandler.addNamedImport('useContext', 'react');
+
+    return `const ${inject.identifier.getText()} = useContext(${inject.provider.getText()});`;
   },
-  Provider(value) {
-    throw new Error('Provider is not supported in React');
+  Provider(provider, injects, context): ProviderOutput {
+    context.importHandler.addNamedImport('createContext', 'react');
+
+    return {
+      context: createContext(provider),
+      provider: createProvider(provider, injects),
+    };
   },
   Ref({ name, type, comment }, context) {
     context.importHandler.addNamedImport('useRef', 'react');
@@ -189,3 +226,8 @@ export const transformer = createTransformer({
     return metadata;
   },
 });
+
+export interface ProviderOutput {
+  context: string;
+  provider: ProviderResult;
+}

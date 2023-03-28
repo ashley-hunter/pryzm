@@ -1,8 +1,21 @@
 import { printNode, stripThis } from '@pryzm/ast-utils';
 import { createTemplateTransformer } from '@pryzm/compiler';
 import * as ts from 'typescript';
+import type { ProviderOutput } from './transformer';
 
 export const templateTransformer = createTemplateTransformer({
+  Root({ children }, context) {
+    // get the providers and wrap the children in them
+    const providers = context.transformedMetadata!.providers as ProviderOutput[];
+
+    if (providers.length) {
+      children = providers.reduceRight<string>((children, { provider }) => {
+        return `<${provider.name} value={${provider.value}}>${children}</${provider.name}>`;
+      }, children);
+    }
+
+    return children;
+  },
   Element({ tagName, attributes, children }, context) {
     return `<${tagName} ${context.data.get('id') ?? ''} ${attributes}>${children}</${tagName}>`;
   },
