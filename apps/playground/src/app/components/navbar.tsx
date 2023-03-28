@@ -38,7 +38,7 @@ export function Navbar({ framework, onFrameworkChange, onExampleChange }: Navbar
                       onExampleChange(exampleFiles[example]);
                     }}
                   >
-                    {example}
+                    {example.replace(/([A-Z])/g, ' $1').trim()}
                   </DropdownMenu.Item>
                 ))}
               </DropdownMenu.Content>
