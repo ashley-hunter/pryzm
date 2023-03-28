@@ -174,35 +174,34 @@ export class App {
     </div>
   }
 }`,
+  conditionalClasses: `import { Component, State } from '@pryzm/core';
 
-  // conditionalClasses: `import { Component, State } from '@pryzm/core';
+    @Component({
+      styles: \`
+        .show {
+          display: block;
+        }
+        .hide {
+          display: none;
+        }
+      \`
+    })
+    export class App {
 
-  //   @Component({
-  //     styles: \`
-  //       .show {
-  //         display: block;
-  //       }
-  //       .hide {
-  //         display: none;
-  //       }
-  //     \`
-  //   })
-  //   export class App {
+        @State() private show = true;
 
-  //       @State() private show = true;
+        private toggle() {
+          this.show = !this.show;
+        }
 
-  //       private toggle() {
-  //         this.show = !this.show;
-  //       }
-
-  //       render() {
-  //         return <div>
-  //           <button onClick={this.toggle}>Toggle</button>
-  //           <div class={{
-  //             show: this.show,
-  //             hide: !this.show
-  //           }}>Hello World!</div>
-  //         </div>
-  //       }
-  //     }`,
+        render() {
+          return <div>
+            <button onClick={this.toggle}>Toggle</button>
+            <div class={{
+              show: this.show,
+              hide: !this.show
+            }}>Hello World!</div>
+          </div>
+        }
+      }`,
 };

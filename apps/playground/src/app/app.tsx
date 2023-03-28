@@ -66,15 +66,21 @@ export function App() {
   }, [framework]);
 
   const customSetup = useMemo(() => {
-    if (framework !== 'lit') {
-      return;
+    if (framework === 'react') {
+      return {
+        dependencies: {
+          clsx: 'latest',
+        },
+      };
     }
 
-    return {
-      dependencies: {
-        lit: 'latest',
-      },
-    };
+    if (framework === 'lit') {
+      return {
+        dependencies: {
+          lit: 'latest',
+        },
+      };
+    }
   }, [framework]);
 
   const handleEditorDidMount = useCallback((editor: any, monaco: any) => {

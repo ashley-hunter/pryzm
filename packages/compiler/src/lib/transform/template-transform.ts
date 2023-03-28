@@ -184,7 +184,7 @@ export class TemplateVisitor {
     }
 
     if (getAttributeName(node) === 'class') {
-      this.visitClass(node);
+      return this.visitClass(node);
     }
 
     if (getAttributeName(node) === 'ref' && this.transformer.Ref) {
