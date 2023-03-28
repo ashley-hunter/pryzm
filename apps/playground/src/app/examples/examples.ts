@@ -204,4 +204,24 @@ export class App {
           </div>
         }
       }`,
+  conditionalStyles: `import { Component, State } from '@pryzm/core';
+
+@Component()
+export class App {
+
+  @State() private show = true;
+
+  private toggle() {
+    this.show = !this.show;
+  }
+
+  render() {
+    return <div>
+      <button onClick={this.toggle}>Toggle</button>
+      <div style={{
+        display: this.show ? 'block' : 'none'
+      }}>Hello World!</div>
+    </div>
+  }
+}`,
 };
