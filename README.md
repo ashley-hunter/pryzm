@@ -34,6 +34,7 @@
 | **Methods Generics**            | ⚠️\*\* | –      | ✅  | ✅  |
 | **Define Selector**             | –      | –      | –   | ✅  |
 | **Component Previews**          | ✅     | ✅     | ✅  | ❌  |
+| **Directives**                  | ❌     | ❌     | ❌  | ❌  |
 
 ### Core and Compiler
 

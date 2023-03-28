@@ -58,6 +58,8 @@ export type TransformerOutput<T> = T extends Transformer<
       styles: string;
       name: string;
       selector: string | undefined;
+      leadingNodes: ts.Node[];
+      trailingNodes: ts.Node[];
     }
   : never;
 
@@ -299,6 +301,8 @@ export function transform<T extends Transformer>(
     styles,
     selector: metadata.selector,
     imports: context.importHandler.getImportNodes(),
+    leadingNodes: metadata.leadingNodes,
+    trailingNodes: metadata.trailingNodes,
   };
 
   // add the result to the context

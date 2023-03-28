@@ -17,6 +17,8 @@ export interface ComponentMetadata {
   slots: string[];
   styles: string;
   selector: string | undefined;
+  leadingNodes: ts.Node[];
+  trailingNodes: ts.Node[];
 }
 
 export interface Injection {

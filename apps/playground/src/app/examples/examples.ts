@@ -243,8 +243,12 @@ export class App {
 
     @Inject() private readonly service: Service;
 
+    private updateMessage() {
+      this.service.updateMessage();
+    }
+
     render() {
-      return <div onClick={this.service.updateMessage}>{this.service.message}</div>
+      return <button onClick={this.updateMessage}>{this.service.message}</button>
     }
   }`,
 };

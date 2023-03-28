@@ -39,6 +39,10 @@ export class ReactPrinter implements Printer<typeof transformer> {
     return `
       ${metadata.imports.map(printNode).join('\n')}
 
+      ${metadata.leadingNodes.map(printNode).join('\n')}
+
+      ${metadata.providers.map(provider => provider.context).join('\n\n')}
+
       export interface ${propsName(metadata.name)} {
         ${this.getInterfaceProperties(metadata)}
       }
@@ -63,6 +67,8 @@ export class ReactPrinter implements Printer<typeof transformer> {
 
         return ${metadata.template};
       }
+
+      ${metadata.trailingNodes.map(printNode).join('\n')}
     `;
   }
 }

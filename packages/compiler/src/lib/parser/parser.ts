@@ -54,6 +54,8 @@ function collectComponentMetadata(
     styles: getStyles(component),
     selector: getSelector(component),
     slots: getSlots(component),
+    leadingNodes: getLeadingNodes(sourceFile, component),
+    trailingNodes: getTrailingNodes(sourceFile, component),
   };
 
   // post collect checks
@@ -532,4 +534,55 @@ function ensureNoPublicMethods(metadata: ComponentMetadata): void {
       throw new Error(`Method "${getText(method.name)}" must be private`);
     }
   });
+}
+
+/**
+ * Get the nodes that come before the Component class declaration
+ */
+function getLeadingNodes(
+  sourceFile: ts.SourceFile,
+  targetClassDeclaration: ts.ClassDeclaration
+): ts.Node[] {
+  const leadingNodes: ts.Node[] = [];
+
+  for (const node of sourceFile.statements) {
+    if (node === targetClassDeclaration) {
+      break;
+    }
+
+    // if this is an import statement, skip it as it is handled elsewhere
+    if (ts.isImportDeclaration(node)) {
+      continue;
+    }
+
+    leadingNodes.push(node);
+  }
+
+  return leadingNodes;
+}
+
+/**
+ * Get the nodes that come after the Component class declaration
+ * @param sourceFile
+ * @param targetClassDeclaration
+ */
+function getTrailingNodes(
+  sourceFile: ts.SourceFile,
+  targetClassDeclaration: ts.ClassDeclaration
+): ts.Node[] {
+  const trailingNodes: ts.Node[] = [];
+  let found = false;
+
+  for (const node of sourceFile.statements) {
+    if (node === targetClassDeclaration) {
+      found = true;
+      continue;
+    }
+
+    if (found) {
+      trailingNodes.push(node);
+    }
+  }
+
+  return trailingNodes;
 }
