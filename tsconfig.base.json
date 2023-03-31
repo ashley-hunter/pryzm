@@ -17,6 +17,7 @@
     "paths": {
       "@pryzm/ast-utils": ["packages/ast-utils/src/index.ts"],
       "@pryzm/compiler": ["packages/compiler/src/index.ts"],
+      "@pryzm/compiler-v2": ["packages/compiler-v2/src/index.ts"],
       "@pryzm/core": ["packages/core/src/index.ts"],
       "@pryzm/core/jsx-runtime": ["packages/core/src/jsx-runtime.d.ts"],
       "@pryzm/lit": ["packages/lit/src/index.ts"],

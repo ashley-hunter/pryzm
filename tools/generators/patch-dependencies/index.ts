@@ -5,7 +5,7 @@ export default async function (tree: Tree) {
 
   tsquery = tsquery!.replace(
     'esquery.parse(cleanSelector)',
-    'esquery.default.parse(cleanSelector)'
+    '(esquery.parse || esquery.default.parse)(cleanSelector)'
   );
 
   tree.write('node_modules/@phenomnomnominal/tsquery/dist/src/parse.js', tsquery!);
