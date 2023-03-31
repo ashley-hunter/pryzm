@@ -226,29 +226,21 @@ export class App {
 }`,
   providers: `import { Component, State, Inject } from '@pryzm/core';
 
-class Service {
-  message = 'Hello World!';
-
-  updateMessage() {
-    this.message = 'Hello Pryzm!';
-  }
+class MessageService {
+  message = 'Hello Pryzm!';
 }
 
 @Component({
   providers: [
-    Service
+    MessageService
   ]
 })
 export class App {
 
-    @Inject() private readonly service: Service;
-
-    private updateMessage() {
-      this.service.updateMessage();
-    }
+    @Inject() private readonly service: MessageService;
 
     render() {
-      return <button onClick={this.updateMessage}>{this.service.message}</button>
+      return <h2>{this.service.message}</h2>
     }
   }`,
 };
