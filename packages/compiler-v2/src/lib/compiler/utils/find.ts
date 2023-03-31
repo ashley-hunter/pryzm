@@ -49,6 +49,14 @@ interface FindMethodOptions {
 }
 
 /**
+ * Find all properties
+ * @param node The class declaration node
+ */
+export function findProperties(node: ts.ClassDeclaration): ts.PropertyDeclaration[] {
+  return tsquery<ts.PropertyDeclaration>(node, 'PropertyDeclaration');
+}
+
+/**
  * Find all properties with a decorator
  * @param node The class declaration node
  * @param name The decorator name
@@ -58,9 +66,7 @@ export function findPropertiesWithDecorator(
   name: string,
   validators: AstValidator[] = []
 ): ts.PropertyDeclaration[] {
-  const properties = tsquery<ts.PropertyDeclaration>(node, `PropertyDeclaration`).filter(property =>
-    hasDecorator(property, name)
-  );
+  const properties = findProperties(node).filter(property => hasDecorator(property, name));
 
   // run all properties through the validators
   return properties.filter(property => validators.every(validator => validator(property)));

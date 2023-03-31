@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { ComponentMetadata } from './component/model';
 import { parseComponent } from './component/parse';
 import { ProviderMetadata } from './provider/model';
+import { parseProvider } from './provider/parse';
 import { findClassWithDecorator } from './utils';
 
 export function parseFile(sourceFile: ts.SourceFile): ParserOutput {
@@ -47,7 +48,9 @@ export function parseFile(sourceFile: ts.SourceFile): ParserOutput {
 
   // if the file contains a provider then parse the provider
   if (providers.length) {
-    // return parseProvider(sourceFile, providers[0]);
+    return {
+      provider: parseProvider(sourceFile, providers[0]),
+    };
   }
 
   return {};

@@ -1,25 +1,20 @@
 import * as ts from 'typescript';
 
-export class ProviderMetadata {
+export interface ProviderMetadata {
   /**
-   * Create a new provider metadata instance
+   * Store the file path
    */
-  constructor(
-    /**
-     * Store the file path
-     */
-    public readonly filePath: string,
-    /**
-     * Store the provider name
-     */
-    public readonly name: string,
-    /**
-     * Store the provider properties
-     */
-    public readonly properties: ts.PropertyDeclaration[] = [],
-    /**
-     * Store the provider methods
-     */
-    public readonly methods: ts.MethodDeclaration[] = []
-  ) {}
+  readonly path: string;
+  /**
+   * Store the provider name
+   */
+  readonly name: string;
+  /**
+   * Store the provider properties
+   */
+  readonly properties: ts.PropertyDeclaration[];
+  /**
+   * Store the provider methods
+   */
+  readonly methods: ts.MethodDeclaration[];
 }

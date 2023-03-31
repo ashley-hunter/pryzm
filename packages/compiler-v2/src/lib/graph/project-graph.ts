@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { SourceFile } from 'typescript';
 import { ComponentMetadata } from '../compiler/component/model';
 import { parseFile } from '../compiler/parser';
+import { ProviderMetadata } from '../compiler/provider/model';
 import { PryzmConfig } from '../config/config';
 import { Tree } from '../fs';
 
@@ -10,10 +11,10 @@ interface ProjectGraphOptions {
   config: PryzmConfig;
 }
 
-interface Dependency {
-  from: string;
-  to: string;
-}
+// interface Dependency {
+//   from: string;
+//   to: string;
+// }
 
 export class ProjectGraph {
   private tree: Tree;
@@ -21,6 +22,7 @@ export class ProjectGraph {
   private files: SourceFile[] = [];
   // private dependencies: Dependency[] = [];
   private components: ComponentMetadata[] = [];
+  private providers: ProviderMetadata[] = [];
 
   constructor({ tree, config }: ProjectGraphOptions) {
     this.tree = tree;
@@ -52,6 +54,10 @@ export class ProjectGraph {
 
       if (output.component) {
         this.components.push(output.component);
+      }
+
+      if (output.provider) {
+        this.providers.push(output.provider);
       }
     }
   }
