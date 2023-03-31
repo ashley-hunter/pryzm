@@ -1,7 +1,7 @@
-import { tsquery } from '@phenomnomnominal/tsquery';
-import * as path from 'path-browserify';
 import * as ts from 'typescript';
 import { SourceFile } from 'typescript';
+import { ComponentMetadata } from '../compiler/component/model';
+import { parseFile } from '../compiler/parser';
 import { PryzmConfig } from '../config/config';
 import { Tree } from '../fs';
 
@@ -19,13 +19,15 @@ export class ProjectGraph {
   private tree: Tree;
   private config: PryzmConfig;
   private files: SourceFile[] = [];
-  private dependencies: Dependency[] = [];
+  // private dependencies: Dependency[] = [];
+  private components: ComponentMetadata[] = [];
 
   constructor({ tree, config }: ProjectGraphOptions) {
     this.tree = tree;
     this.config = config;
     this.loadFiles();
-    this.calculateDependencies();
+    // this.calculateDependencies();
+    this.parseFiles();
   }
 
   private loadFiles(): void {
@@ -33,55 +35,71 @@ export class ProjectGraph {
 
     for (const file of files) {
       const source = this.tree.read(file, 'utf8')!;
-      const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.ES2015);
+      const sourceFile = ts.createSourceFile(
+        file,
+        source,
+        ts.ScriptTarget.ES2015,
+        true,
+        ts.ScriptKind.TSX
+      );
       this.files.push(sourceFile);
     }
   }
 
-  private calculateDependencies(): void {
+  private parseFiles(): void {
     for (const sourceFile of this.files) {
-      const from = sourceFile.fileName;
+      const output = parseFile(sourceFile);
 
-      const importNodes = tsquery<ts.ImportDeclaration>(sourceFile, 'ImportDeclaration');
-      for (const importNode of importNodes) {
-        const importedModule = importNode.moduleSpecifier.getText(sourceFile).slice(1, -1);
-        const to = this.resolveImport(sourceFile.fileName, importedModule);
-        if (to) {
-          this.dependencies.push({ from, to });
-        }
+      if (output.component) {
+        this.components.push(output.component);
       }
     }
   }
 
-  private resolveImport(from: string, importedModule: string): string | undefined {
-    const fromDir = path.dirname(from);
-    const pathsToTry = [
-      `${importedModule}.ts`,
-      `${importedModule}/index.ts`,
-      `${importedModule}.tsx`,
-      `${importedModule}/index.tsx`,
-    ];
+  // private calculateDependencies(): void {
+  //   for (const sourceFile of this.files) {
+  //     const from = sourceFile.fileName;
 
-    for (const p of pathsToTry) {
-      const fullPath = path.join(fromDir, p);
-      if (this.tree.isFile(fullPath)) {
-        return p;
-      } else {
-        const indexFile = path.join(fullPath, 'index.ts');
-        if (this.tree.isFile(indexFile)) {
-          return indexFile;
-        }
-      }
-    }
+  //     const importNodes = tsquery<ts.ImportDeclaration>(sourceFile, 'ImportDeclaration');
+  //     for (const importNode of importNodes) {
+  //       const importedModule = importNode.moduleSpecifier.getText(sourceFile).slice(1, -1);
+  //       const to = this.resolveImport(sourceFile.fileName, importedModule);
+  //       if (to) {
+  //         this.dependencies.push({ from, to });
+  //       }
+  //     }
+  //   }
+  // }
 
-    return undefined;
-  }
+  // private resolveImport(from: string, importedModule: string): string | undefined {
+  //   const fromDir = path.dirname(from);
+  //   const pathsToTry = [
+  //     `${importedModule}.ts`,
+  //     `${importedModule}/index.ts`,
+  //     `${importedModule}.tsx`,
+  //     `${importedModule}/index.tsx`,
+  //   ];
+
+  //   for (const p of pathsToTry) {
+  //     const fullPath = path.join(fromDir, p);
+  //     if (this.tree.isFile(fullPath)) {
+  //       return p;
+  //     } else {
+  //       const indexFile = path.join(fullPath, 'index.ts');
+  //       if (this.tree.isFile(indexFile)) {
+  //         return indexFile;
+  //       }
+  //     }
+  //   }
+
+  //   return undefined;
+  // }
 
   getFiles(): SourceFile[] {
     return this.files;
   }
 
-  getDependencies(): Dependency[] {
-    return this.dependencies;
-  }
+  // getDependencies(): Dependency[] {
+  //   return this.dependencies;
+  // }
 }
