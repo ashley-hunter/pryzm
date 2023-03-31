@@ -24,10 +24,7 @@ export function parseComponent(
     styles: findStyles(component),
     refs: findPropertiesWithDecorator(component, 'Ref', [Validators.readonly, Validators.private]),
     props: findPropertiesWithDecorator(component, 'Prop', [Validators.readonly, Validators.public]),
-    computed: findGettersWithDecorator(component, 'Computed', [
-      Validators.readonly,
-      Validators.private,
-    ]),
+    computed: findGettersWithDecorator(component, 'Computed', [Validators.private]),
     context: findPropertiesWithDecorator(component, 'Inject', [
       Validators.readonly,
       Validators.private,
@@ -40,7 +37,11 @@ export function parseComponent(
       Validators.readonly,
       Validators.private,
     ]),
-    methods: findMethods(component, [Validators.private]),
+    methods: findMethods(component, {
+      validators: [Validators.private],
+      includeLifecycle: false,
+      includeRender: false,
+    }),
     onInit: findMethod(component, 'onInit', [Validators.private]),
     onDestroy: findMethod(component, 'onDestroy', [Validators.private]),
     providers: [],

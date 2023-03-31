@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-type ValidatorNames = 'readonly' | 'private' | 'public' | 'protected';
+type ValidatorNames = 'readonly' | 'private' | 'public';
 
 export const Validators: Record<ValidatorNames, AstValidator> = {
   /**
@@ -9,7 +9,12 @@ export const Validators: Record<ValidatorNames, AstValidator> = {
   readonly: (node): boolean => {
     const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
 
-    return !!modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.ReadonlyKeyword);
+    // if the property is not valid throw an error
+    if (!modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.ReadonlyKeyword)) {
+      throw new Error(`The property "${node.name.getText()}" is not readonly`);
+    }
+
+    return true;
   },
   /**
    * Ensure the node is private
@@ -19,7 +24,11 @@ export const Validators: Record<ValidatorNames, AstValidator> = {
   private: (node): boolean => {
     const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
 
-    return !!modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.PrivateKeyword);
+    if (!modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.PrivateKeyword)) {
+      throw new Error(`The property "${node.name.getText()}" is not private`);
+    }
+
+    return true;
   },
   /**
    * Ensure the node is public
@@ -30,21 +39,16 @@ export const Validators: Record<ValidatorNames, AstValidator> = {
     const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
 
     // a property is public if it has the public keyword or missing the private and protected keywords
-    return (
+    const valid =
       !!modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.PublicKeyword) ||
       (!modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.PrivateKeyword) &&
-        !modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.ProtectedKeyword))
-    );
-  },
-  /**
-   * Ensure the node is protected
-   * @param node The property node
-   * @returns True if the property is protected
-   */
-  protected: (node): boolean => {
-    const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
+        !modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.ProtectedKeyword));
 
-    return !!modifiers?.find(modifier => modifier.kind === ts.SyntaxKind.ProtectedKeyword);
+    if (!valid) {
+      throw new Error(`The property "${node.name.getText()}" is not public`);
+    }
+
+    return true;
   },
 };
 

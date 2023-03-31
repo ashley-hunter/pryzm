@@ -24,12 +24,28 @@ export function findMethod(
  */
 export function findMethods(
   node: ts.ClassDeclaration,
-  validators: AstValidator[] = []
+  options: FindMethodOptions = {}
 ): ts.MethodDeclaration[] {
-  const methods = tsquery<ts.MethodDeclaration>(node, 'MethodDeclaration');
+  let methods = tsquery<ts.MethodDeclaration>(node, 'MethodDeclaration');
+
+  // filter out the lifecycle methods if needed
+  if (!options.includeLifecycle) {
+    methods = methods.filter(method => !method.name.getText().match(/^(onInit|onDestroy)$/));
+  }
+
+  // filter out the render method if needed
+  if (!options.includeRender) {
+    methods = methods.filter(method => !method.name.getText().match(/^render$/));
+  }
 
   // run all methods through the validators
-  return methods.filter(method => validators.every(validator => validator(method)));
+  return methods.filter(method => options.validators?.every(validator => validator(method)));
+}
+
+interface FindMethodOptions {
+  validators?: AstValidator[];
+  includeLifecycle?: boolean;
+  includeRender?: boolean;
 }
 
 /**
@@ -133,15 +149,23 @@ export function findTemplate(node: ts.ClassDeclaration): ts.JsxElement | ts.JsxF
 
   const returnStatement = tsquery<ts.ReturnStatement>(renderMethod, 'ReturnStatement')[0];
 
-  if (
-    !returnStatement ||
-    !returnStatement.expression ||
-    (!ts.isJsxElement(returnStatement.expression) && !ts.isJsxFragment(returnStatement.expression))
-  ) {
+  if (!returnStatement || !returnStatement.expression) {
     throw new Error('The render method must return a JSX element or a JSX fragment');
   }
 
-  return returnStatement.expression;
+  if (ts.isJsxElement(returnStatement.expression) || ts.isJsxFragment(returnStatement.expression)) {
+    return returnStatement.expression;
+  }
+
+  if (ts.isParenthesizedExpression(returnStatement.expression)) {
+    const expression = returnStatement.expression.expression;
+
+    if (ts.isJsxElement(expression) || ts.isJsxFragment(expression)) {
+      return expression;
+    }
+  }
+
+  throw new Error('The render method must return a JSX element or a JSX fragment');
 }
 
 /**
@@ -149,7 +173,53 @@ export function findTemplate(node: ts.ClassDeclaration): ts.JsxElement | ts.JsxF
  */
 export function findSlots(node: ts.ClassDeclaration): ts.JsxElement[] {
   const template = findTemplate(node);
-  return tsquery<ts.JsxElement>(template, 'JsxElement[name.name="slot"]');
+
+  // find all JSX elements and self-closing JSX elements
+  const slots = tsquery<ts.JsxElement>(template, 'JsxElement, JsxSelfClosingElement').filter(
+    slot => findTagName(slot) === 'slot'
+  );
+
+  return slots;
+}
+
+/**
+ * Find the tag name of a JSX element or self-closing JSX element
+ * @param node The JSX element or self-closing JSX element
+ */
+export function findTagName(node: ts.JsxElement | ts.JsxSelfClosingElement): string {
+  if (ts.isJsxElement(node)) {
+    return node.openingElement.tagName.getText();
+  }
+
+  return node.tagName.getText();
+}
+
+/**
+ * Find a JSX attribute by name
+ * @param node The JSX element or self-closing JSX element
+ * @param name The attribute name
+ */
+export function findAttribute(
+  node: ts.JsxElement | ts.JsxSelfClosingElement,
+  name: string
+): ts.JsxAttribute | undefined {
+  const attributes = tsquery<ts.JsxAttribute>(node, `JsxAttribute`);
+
+  return attributes.find(attribute => attribute.name.getText() === name);
+}
+
+/**
+ * Find the value of a JSX attribute
+ * @param node The JSX element or self-closing JSX element
+ * @param name The attribute name
+ */
+export function findAttributeValue(
+  node: ts.JsxElement | ts.JsxSelfClosingElement,
+  name: string
+): ts.Expression | undefined {
+  const attribute = findAttribute(node, name);
+
+  return attribute && attribute.initializer;
 }
 
 /**
@@ -160,8 +230,18 @@ export function findSlots(node: ts.ClassDeclaration): ts.JsxElement[] {
 export function findSlotNames(node: ts.ClassDeclaration): string[] {
   const slots = findSlots(node);
   return slots.map(slot => {
-    const nameAttribute = tsquery<ts.JsxAttribute>(slot, 'JsxAttribute[name.name="name"]')[0];
-    return nameAttribute ? nameAttribute.initializer!.getText() : 'default';
+    const name = findAttributeValue(slot, 'name');
+
+    if (name && ts.isStringLiteral(name)) {
+      return name.text;
+    }
+
+    // if a name is not specified, the slot is the default slot
+    if (!name) {
+      return 'default';
+    }
+
+    throw new Error('The name attribute must be a string literal');
   });
 }
 
@@ -219,12 +299,11 @@ export function findSelector(node: ts.ClassDeclaration): string | undefined {
     return undefined;
   }
 
-  debugger;
-  if (ts.isStringLiteral(selector)) {
-    return selector.text;
+  if (!ts.isStringLiteral(selector)) {
+    throw new Error('The selector must be a string literal');
   }
 
-  return selector.getText();
+  return selector.text.trim();
 }
 
 /**
@@ -238,5 +317,9 @@ export function findStyles(node: ts.ClassDeclaration): string | undefined {
     return;
   }
 
-  return styles.getText();
+  if (!ts.isStringLiteral(styles) && !ts.isNoSubstitutionTemplateLiteral(styles)) {
+    throw new Error('The selector must be a string literal');
+  }
+
+  return styles.text.trim();
 }
