@@ -53,13 +53,6 @@ export class ProjectGraph {
     }
   }
 
-  // private getModulePath(filePath: string): string {
-  //   const { rootDir } = this.config;
-  //   const relativePath = path.relative(rootDir, filePath);
-  //   const normalizedPath = path.normalize(relativePath);
-  //   return normalizedPath.replace(/\.tsx?$/, '');
-  // }
-
   private resolveImport(from: string, importedModule: string): string | undefined {
     const fromDir = path.dirname(from);
     const pathsToTry = [
