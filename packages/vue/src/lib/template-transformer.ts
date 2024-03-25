@@ -1,5 +1,6 @@
 import { printNode, sanitizeAttribute, stripQuotes, stripThis } from '@pryzm/ast-utils';
 import { createTemplateTransformer } from '@pryzm/compiler';
+import * as ts from 'typescript';
 import { toEventName } from './helpers';
 
 export const templateTransformer = createTemplateTransformer({
@@ -7,11 +8,15 @@ export const templateTransformer = createTemplateTransformer({
     return name === 'default' ? `<slot></slot>` : `<slot name="${name}"></slot>`;
   },
   Attribute({ name, value }) {
+    const isBinding = value && ts.isPropertyAccessExpression(value);
+
     // if the attribute is named "key" then do not render it
-    return name === 'key' ? '' : `${name}="${stripQuotes(printNode(stripThis(value))!)}"`;
+    return name === 'key'
+      ? ''
+      : `${isBinding ? ':' : ''}${name}="${stripQuotes(printNode(stripThis(value))!)}"`;
   },
   Event({ name, value }) {
-    return `@${toEventName(name)}="${stripQuotes(printNode(stripThis(value))!)}"`;
+    return `@${toEventName(name)}="${stripQuotes(printNode(stripThis(value))!)}()"`;
   },
   Ref({ ref }) {
     return `ref="${printNode(stripThis(ref))}"`;

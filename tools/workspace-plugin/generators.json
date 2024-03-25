@@ -1,0 +1,9 @@
+{
+  "generators": {
+    "patch-dependencies": {
+      "implementation": "./src/generators/patch-dependencies",
+      "schema": "./src/generators/patch-dependencies/schema.json",
+      "description": "Generator patch-dependencies"
+    }
+  }
+}

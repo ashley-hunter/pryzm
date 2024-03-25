@@ -23,7 +23,8 @@
       "@pryzm/lit": ["packages/lit/src/index.ts"],
       "@pryzm/react": ["packages/react/src/index.ts"],
       "@pryzm/svelte": ["packages/svelte/src/index.ts"],
-      "@pryzm/vue": ["packages/vue/src/index.ts"]
+      "@pryzm/vue": ["packages/vue/src/index.ts"],
+      "workspace-plugin": ["tools/workspace-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
