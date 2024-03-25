@@ -15,7 +15,7 @@ function stripParentNodeTransformer<T extends ts.Node>(): ts.TransformerFactory<
       return ts.visitEachChild(node, visitor, context);
     };
 
-    return root => ts.visitNode(root, visitor);
+    return root => ts.visitNode(root, visitor) as T;
   };
 }
 

@@ -226,7 +226,7 @@ export function transform<T extends Transformer>(
     return (
       transformer.Method?.(
         {
-          name: getPropertyName(method),
+          name: getPropertyName(method as ts.MethodDeclaration),
           returnType: method.type,
           parameters: method.parameters,
           body: method.body,

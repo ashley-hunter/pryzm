@@ -399,14 +399,24 @@ function getTemplate(
 }
 
 function hasDecorator(
-  node: ts.ClassDeclaration | ts.PropertyLikeDeclaration,
+  node:
+    | ts.ClassDeclaration
+    | ts.PropertyDeclaration
+    | ts.GetAccessorDeclaration
+    | ts.SetAccessorDeclaration,
   decoratorName: string
 ): boolean {
   // if the decorator exists, then return true
   return !!getDecorator(node, decoratorName);
 }
 
-function hasAnyDecorator(node: ts.ClassDeclaration | ts.PropertyLikeDeclaration): boolean {
+function hasAnyDecorator(
+  node:
+    | ts.ClassDeclaration
+    | ts.PropertyDeclaration
+    | ts.GetAccessorDeclaration
+    | ts.SetAccessorDeclaration
+): boolean {
   return ['Prop', 'State', 'Event', 'Computed', 'Ref', 'Provider', 'Inject'].some(decorator =>
     hasDecorator(node, decorator)
   );
@@ -429,10 +439,9 @@ function ensureNoStaticMembers(component: ts.ClassDeclaration): void {
 
 function ensureNoUndecoratedProperties(component: ts.ClassDeclaration): void {
   // find all properties and accessors that do not have a decorator
-  const undecoratedProperties = tsquery<ts.PropertyLikeDeclaration>(
-    component,
-    'PropertyDeclaration, GetAccessor, SetAccessor'
-  );
+  const undecoratedProperties = tsquery<
+    ts.PropertyDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration
+  >(component, 'PropertyDeclaration, GetAccessor, SetAccessor');
 
   if (undecoratedProperties.filter(prop => !hasAnyDecorator(prop)).length > 0) {
     throw new Error(

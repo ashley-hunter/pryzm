@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { printNode } from '@pryzm/ast-utils';
 import { Printer, transform, TransformerOutput } from '@pryzm/compiler';
+// @ts-ignore
 import * as sveltePlugin from 'prettier-plugin-svelte';
 import * as parserHtml from 'prettier/parser-html';
 import * as parserCss from 'prettier/parser-postcss';

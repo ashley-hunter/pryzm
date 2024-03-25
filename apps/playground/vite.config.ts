@@ -20,6 +20,8 @@ export default defineConfig({
     },
   },
 
+  base: './',
+
   assetsInclude: ['src/assets'],
 
   plugins: [react(), nxViteTsPaths()],

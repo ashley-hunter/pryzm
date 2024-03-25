@@ -1,12 +1,24 @@
 import * as ts from 'typescript';
 import { inferType } from './type-inference';
 
-export function getPropertyName(node: ts.PropertyLikeDeclaration): string {
+export function getPropertyName(
+  node:
+    | ts.PropertyDeclaration
+    | ts.GetAccessorDeclaration
+    | ts.SetAccessorDeclaration
+    | ts.PropertyAccessExpression
+    | ts.MethodDeclaration
+): string {
   return getText(node.name);
 }
 
 export function getPropertyType(
-  node: ts.PropertyLikeDeclaration,
+  node:
+    | ts.PropertyDeclaration
+    | ts.GetAccessorDeclaration
+    | ts.SetAccessorDeclaration
+    | ts.PropertyAccessExpression
+    | ts.MethodDeclaration,
   infer = false
 ): ts.TypeNode | undefined {
   if (ts.isPropertyDeclaration(node)) {

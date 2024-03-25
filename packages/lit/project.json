@@ -4,25 +4,6 @@
   "sourceRoot": "packages/lit/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/lit",
-        "main": "packages/lit/src/index.ts",
-        "project": "packages/lit/package.json",
-        "tsConfig": "packages/lit/tsconfig.lib.json",
-        "assets": [],
-        "babelUpwardRootMode": true
-      }
-    },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs lit {args.ver} {args.tag}"
-      },
-      "dependsOn": ["build"]
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]

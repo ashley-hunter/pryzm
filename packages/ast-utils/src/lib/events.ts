@@ -52,7 +52,7 @@ export function getEventNameFromEmitterCall<T extends ts.Node>(node: T): string 
 
   // if this is a property access expression, then strip this
   if (ts.isPropertyAccessExpression(node.expression.expression.expression)) {
-    return getPropertyName(node.expression.expression.expression);
+    return getPropertyName(node.expression.expression.expression as ts.PropertyAccessExpression);
   }
 
   if (!ts.isIdentifier(node.expression.expression.expression)) {

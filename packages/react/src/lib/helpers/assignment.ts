@@ -231,10 +231,10 @@ export function convertAssignmentTransformer<T extends ts.Node>(): ts.Transforme
         ]);
       }
 
-      return ts.visitEachChild(node, visitor, context);
+      return ts.visitEachChild(node, visitor, context) as ts.Node;
     };
 
-    return root => ts.visitNode(root, visitor);
+    return root => ts.visitNode(root, visitor) as T;
   };
 }
 

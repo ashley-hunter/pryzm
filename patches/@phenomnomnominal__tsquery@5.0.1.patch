@@ -1,0 +1,13 @@
+diff --git a/dist/src/parse.js b/dist/src/parse.js
+index a372f4ab9a9d9a30d85434c638c2cae22edc6bc7..a1f3fe4bd9c1f9182b274a8277391d66d222bdfc 100644
+--- a/dist/src/parse.js
++++ b/dist/src/parse.js
+@@ -8,7 +8,7 @@ var typescript_1 = require("typescript");
+ var IDENTIFIER_QUERY = 'identifier';
+ function parse(selector) {
+     var cleanSelector = stripComments(stripNewLines(selector));
+-    return validateParse(esquery.parse(cleanSelector));
++    return validateParse((esquery.parse || esquery.default.parse)(cleanSelector));
+ }
+ exports.parse = parse;
+ function stripComments(selector) {

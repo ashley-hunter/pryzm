@@ -4,26 +4,6 @@
   "sourceRoot": "packages/compiler-v2/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/compiler-v2",
-        "main": "packages/compiler-v2/src/index.ts",
-        "tsConfig": "packages/compiler-v2/tsconfig.lib.json",
-        "assets": [],
-        "project": "packages/compiler-v2/package.json",
-        "compiler": "swc",
-        "babelUpwardRootMode": true
-      }
-    },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs compiler-v2 {args.ver} {args.tag}"
-      },
-      "dependsOn": ["build"]
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]

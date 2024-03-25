@@ -9,7 +9,8 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/playground"
+        "outputPath": "dist/apps/playground",
+        "skipTypeCheck": true
       },
       "configurations": {
         "development": {
@@ -40,6 +41,14 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
+    },
+    "deploy": {
+      "executor": "angular-cli-ghpages:deploy",
+      "options": {
+        "baseHref": "./",
+        "cname": "",
+        "dir": "dist/apps/playground"
+      }
     }
   },
   "tags": []

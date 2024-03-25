@@ -46,7 +46,7 @@ export function Navbar({ framework, onFrameworkChange, onExampleChange }: Navbar
           </DropdownMenu.Root>
 
           <div className="flex flex-1 items-center justify-center sm:justify-start">
-            <img className="h-3.5" src="/logo.svg" alt="Logo" />
+            <img className="h-3.5" src="logo.svg" alt="Logo" />
             <small className="mt-1.5 pl-2 text-xs font-medium tracking-wider text-gray-400">
               v0.1
             </small>

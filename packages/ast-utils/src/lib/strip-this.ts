@@ -28,6 +28,6 @@ function stripThisTransformer<T extends ts.Node>(): ts.TransformerFactory<T> {
       return ts.visitEachChild(node, visitor, context);
     };
 
-    return root => ts.visitNode(root, visitor);
+    return root => ts.visitNode(root, visitor) as T;
   };
 }

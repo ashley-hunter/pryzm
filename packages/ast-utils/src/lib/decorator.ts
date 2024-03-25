@@ -18,7 +18,11 @@ export function hasDecorator(node: ts.PropertyAssignment, name: string): boolean
 }
 
 export function getDecorator(
-  node: ts.PropertyLikeDeclaration | ts.ClassDeclaration,
+  node:
+    | ts.PropertyDeclaration
+    | ts.GetAccessorDeclaration
+    | ts.SetAccessorDeclaration
+    | ts.ClassDeclaration,
   name: string
 ): ts.Decorator | undefined {
   if (!ts.canHaveDecorators(node)) {

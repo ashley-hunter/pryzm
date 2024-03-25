@@ -52,4 +52,10 @@ export const Validators: Record<ValidatorNames, AstValidator> = {
   },
 };
 
-export type AstValidator = (property: ts.PropertyLikeDeclaration | ts.MethodDeclaration) => boolean;
+export type AstValidator = (
+  property:
+    | ts.PropertyDeclaration
+    | ts.GetAccessorDeclaration
+    | ts.SetAccessorDeclaration
+    | ts.MethodDeclaration
+) => boolean;
