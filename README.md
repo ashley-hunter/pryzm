@@ -1,4 +1,13 @@
-# Pryzm
+<img width="292" height="28" alt="image" src="https://github.com/ashley-hunter/pryzm/assets/20795331/efb0f5d1-899d-42ab-b634-0e28a75f0714">
+
+<br />
+<br />
+
+Pryzm is an experimental project exploring the ability to take a TypeScript component with JSX and transpiling it into multiple frameworks.
+
+Check out [our playground here](https://ashley-hunter.github.io/pryzm/).
+
+<img width="709" height="532" alt="image" src="https://github.com/ashley-hunter/pryzm/assets/20795331/9b81da9e-a14c-4441-885a-7b44f8f344f8">
 
 ### Features
 
