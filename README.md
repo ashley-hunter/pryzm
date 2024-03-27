@@ -4,6 +4,7 @@
 <br />
 
 Pryzm is an experimental project exploring the ability to take a TypeScript component with JSX and transpiling it into multiple frameworks.
+It is still very early in development, so expect plenty of bugs.
 
 Check out [our playground here](https://ashley-hunter.github.io/pryzm/).
 
